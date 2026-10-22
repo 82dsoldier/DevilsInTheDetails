@@ -60,7 +60,7 @@ Fayetteville as a skyline past the playable edge.
   was). The checkpoint sits at the map edge on Yadkin, and the stretch of Yadkin between post and
   town is condensed out.
 - **The area (decided):** a four-sided outline taking in the end of Yadkin (the way in), a stretch
-  of the All-American Freeway (an elevated highway, like Boston's), and part of Bragg Blvd:
+  of the All-American Freeway (a freeway, like Boston's), and part of Bragg Blvd:
   - 35°04'56.60"N 78°58'10.73"W
   - 35°04'16.34"N 78°56'19.69"W
   - 35°04'54.31"N 78°55'58.65"W
