@@ -134,11 +134,16 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
      up, the green haze thinning).
   2. Wakes the automated defenses, which still follow 2077 orders and don't know who anyone is.
   3. Restores light and power through the complex (doors, elevators, terminals).
-- **The choice at the reactor: vent now, or fix the filters first.** The exhaust vents come out
-  topside where people live (the settlers' farms or the Devils' barracks; to decide). The filters
-  that should scrub the air failed long ago. At the reactor the player decides:
-  - **Turn it on now.** The hot zone clears at once, and the poisoned air pours out over the people
-    above. A lot of them die, and that faction turns hostile for good.
+  4. **Powers the post.** The reactor was the post's power plant, so the lights come back on in the
+     barracks area too. The Devils gain from it whoever turns it on. (Real precedent: the Army ran
+     small reactors at posts and remote sites; SM-1 at Fort Belvoir fed the post's grid from 1957.)
+- **The choice at the reactor: vent now, or fix the filters first.** **Decided:** the exhaust vents
+  come out **on post, among the Devils' barracks**, disguised as something ordinary (a boiler plant
+  stack or a building's ventilation). The filters that should scrub the air failed long ago. At the
+  reactor the player decides:
+  - **Turn it on now.** The hot zone clears at once, and the poisoned air pours out over the
+    barracks. A lot of Devils die, and the Devils turn hostile for good. A player siding with the
+    settlers might do it on purpose, as a weapon: the darkest way to win.
   - **Fix the filters first.** Find the materials to repair them (a scavenging run through the
     tunnels, or a trade with one of the factions), then start the reactor. Slower, and nobody dies.
 - **Ending Top's story: Nate relieves the post.** Once the way is clear, Nate, the only officer
@@ -217,9 +222,10 @@ about airborne operations have heard of. It's the second worldspace.
 - Where do the settlers live?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get onto the plane, and back to Boston afterwards?
-- Who is Top, and do the Devils know the original garrison is still alive underground? Nate
-  relieves Top's squad; could he relieve the Devils too, and would they accept it?
-- Whose home do the vents come out under: the settlers' or the Devils'?
+- Who is Top, and do the Devils know the original garrison is still alive underground?
+- **Decided: Nate does not relieve the Devils.** Relieving the post happens once, with Top. The
+  Devils have made a life at the post over two hundred years; it's their home now, not just a
+  mission, and they have nowhere else to go.
 - Does the reactor quest come before or after the player picks a side? (Leaning: either, so
   the player can do it while still neutral.)
 
