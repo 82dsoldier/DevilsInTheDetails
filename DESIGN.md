@@ -59,9 +59,20 @@ Fayetteville as a skyline past the playable edge.
   Bragg Blvd and never meets it; Yadkin meets Bragg Blvd at a Y intersection (where the McDonald's
   was). The checkpoint sits at the map edge on Yadkin, and the stretch of Yadkin between post and
   town is condensed out.
-- **Size:** the first outline, along Bragg Blvd from the Yadkin Y, was about 6.7 x 2.3 km
-  (12.7 km², about 3,700 cells): nearly four times the barracks map. Too much. Cut it down to the
-  Y and a few blocks of the strip, about 1 x 1.5 km, with Yadkin coming in from the edge.
+- **The area (decided):** a four-sided outline taking in the end of Yadkin (the way in), a stretch
+  of the All-American Freeway (an elevated highway, like Boston's), and part of Bragg Blvd:
+  - 35°04'56.60"N 78°58'10.73"W
+  - 35°04'16.34"N 78°56'19.69"W
+  - 35°04'54.31"N 78°55'58.65"W
+  - 35°05'42.02"N 78°57'10.86"W
+
+  About 3.1 x 2.1 km at its longest, **4.4 km² (about 1,280 cells)**, a little bigger than the
+  barracks map. The worldspace grid runs north-south, so the box around it is 58 x 45 cells; the
+  corners outside the outline are non-playable margin. (The first outline, 12.7 km² along Bragg
+  Blvd, was nearly four times the barracks map and was dropped.)
+- **Detail where it counts:** the strip around the Y gets the work. The freeway is mostly road
+  pieces and wrecks, and the **wooded areas become the settlers' fields**: visible from the
+  street and the freeway, but not built for exploring.
 - **Two ways in:** the road through the Devils' checkpoint (a map-edge transition to the barracks
   area), and a storm drain branch of the underground that comes up in town. The drains are how the
   settlers smuggle around the tithe, and how the raiders get in.
@@ -248,7 +259,7 @@ about airborne operations have heard of. It's the second worldspace.
 - Should the soldiers lean sympathetic, threatening, or truly balanced? (Leaning: balanced, with
   the raids making the soldiers' case for them.)
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
-- Which few blocks around the Yadkin Y make the cut for Bragg Boulevard?
+- Where exactly on Bragg Blvd are the market and the storm drain exit?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get onto the plane, and back to Boston afterwards?
 - Who is Top, and do the Devils know the original garrison is still alive underground?
