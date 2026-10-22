@@ -123,7 +123,10 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 
 ### Getting to Bragg: the jump
 
-The player arrives the way the 82nd does: **by parachute, onto a Bragg drop zone.**
+The player arrives the way the 82nd does: **by parachute, onto Sicily Drop Zone.**
+
+**Decided: Sicily DZ.** The biggest drop zone on Bragg, and the one even people who know nothing
+about airborne operations have heard of. It's the second worldspace.
 
 - **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight:
   a **C-130** or **C-141** (what the 82nd jumped in the early 90s; the C-17 was only being tested
@@ -132,8 +135,7 @@ The player arrives the way the 82nd does: **by parachute, onto a Bragg drop zone
 - **The jump commands as a scripted scene** with the jumpmaster: "Get ready... Stand up...
   Hook up... Check equipment... Sound off for equipment check... Stand in the door... GO!" Red
   light, then green light.
-- **Out the door** is a teleport to a marker about **1,000 ft above a drop zone** (Sicily DZ,
-  for instance). The loading screen in between can be its own art.
+- **Out the door** is a teleport to a marker about **1,000 ft above Sicily DZ**. The loading screen in between can be its own art.
 - **Power armor only.** Power armor takes no fall damage in Fallout 4, so it's the one way to
   survive. The jump only works in power armor: the jumpmaster refuses anyone without it ("You're
   not going out my door without a rig") or, for comedy, lets them go.
@@ -160,12 +162,11 @@ The player arrives the way the 82nd does: **by parachute, onto a Bragg drop zone
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
 - Where do the settlers live?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
-- Which drop zone? (It decides where the second worldspace is.)
 - How does the player get onto the plane, and back to Boston afterwards?
 
 ## Scope (to keep it finishable)
 
-- **Two small worldspaces:** the barracks area (the map below) and a drop zone, plus one settler
+- **Two small worldspaces:** the barracks area (the map below) and Sicily DZ, plus one settler
   settlement in one of them.
 - **Interiors:** the aircraft, the headquarters building, the company barracks, and the
   underground complex (a few connected cells). Every other barracks has a locked or sealed door.
@@ -175,7 +176,7 @@ The player arrives the way the 82nd does: **by parachute, onto a Bragg drop zone
 **Build order**, so there's something playable at every step:
 1. The barracks area terrain in the Creation Kit, walkable.
 2. One barracks shell, placed on the 1993 layout.
-3. The drop zone worldspace and the jump (aircraft, scene, power armor check). It's a complete
+3. The Sicily DZ worldspace and the jump (aircraft, scene, power armor check). It's a complete
    moment on its own, and the most fun thing to show people.
 4. The underground, joining the two.
 5. Factions, then quests.
