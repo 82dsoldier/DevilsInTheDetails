@@ -77,8 +77,10 @@ part without knowing what it is.
   - **With the settlers:** the player takes the key from the Devils' commander. To the Devils
     that's about the worst insult there is.
   - **Peace:** both leaders bring their halves to the armory door together. The final scene.
-- **Optional third lock: power.** The complex is dead. Restarting its reactor, deep in the tunnels,
-  is a dungeon objective of its own, and it's why the automated defenses suddenly wake up.
+- **The way in is its own problem.** Even with the ID, the key and the codebook, nobody can reach
+  the armory door: it sits in a radiation hot zone swarming with feral ghouls. Getting there means
+  restarting the reactor (see "The hot zone and the reactor" below), a separate quest that can be
+  done before or after the player picks a side.
 
 ### The underground
 
@@ -91,14 +93,66 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
   munitions storage. Terminals and holotapes reveal what it really was.
 - **It explains the raids:** the raiders and mutants get past the Devils' patrols through the
   tunnels. Sealing them, or leaving them open, can be part of the ending.
-- **Who's down there:** feral ghouls who were the pre-war garrison; automated defenses still
-  following 2077 orders; perhaps settlers using it to smuggle goods around the tithe.
+- **Who's down there:** feral ghouls who were the pre-war garrison, and a few who never went
+  feral (see below); automated defenses still following 2077 orders; perhaps settlers using it to
+  smuggle goods around the tithe.
 - **Shape:**
   1. The drop zone entrance.
   2. Utility tunnels: pipes, steam, flooded sections, raider camps.
-  3. The central complex: the reactor and the armory, where the credentials and the MacGuffin
-     matter.
-  4. The way out into the barracks area.
+  3. The reactor, down a branch of its own.
+  4. The central complex: the ghouls' enclave, the hot zone, and the armory at its heart.
+  5. The way out into the barracks area.
+
+### The hot zone and the reactor
+
+**The armory sits behind a wall of radiation, and the radiation is full of feral ghouls.**
+
+- **Why it's hot:** when the bombs fell, the reactor scrammed and the exhaust fans stopped. Whatever
+  leaked in the deep levels in 2077 has hung in the dead air ever since. (Could the source be in the
+  armory itself? That would hint at what's inside.)
+- **The ferals** are what's left of the pre-war garrison: the soldiers who stayed at their posts
+  as the air went bad. They still crowd the corridors around the armory door, which is why nobody
+  has looted it in two hundred years.
+- **The ghouls who didn't turn.** Living at the edge of the hot zone, among and behind the ferals,
+  is a small squad of non-feral ghouls: **the original 2077 garrison**, the soldiers the Devils are
+  descended from, or their comrades. They got the same order: hold the post until relieved.
+  - **Their leader** is a pre-war NCO (a first sergeant, "Top", fits: the one who kept the unit
+    together). He tells the player plainly: **nobody gets to that armory until the power's back on.
+    The fans have to run to vent the air.**
+  - **Why they can't do it themselves:** they're too few, the way to the reactor runs through
+    raider-held tunnels, and the reactor controls want an officer's authorization (Nate again).
+    Perhaps also: Top believes the hot air is what turned his people feral, and every year he stays
+    by the armory he loses another one.
+  - **How they treat the ferals:** as their own soldiers. Top doesn't want them killed for sport,
+    but once the air clears, "put them down clean" is the last order he gives about them, and his
+    squad fights beside the player.
+  - **What they think of the Devils and the settlers:** a third view on the mod's question. They
+    remember the post before the Devils became what they are. They may never have gone up to see.
+- **Restarting the reactor** is a dungeon of its own: down the reactor branch, past raiders and
+  dormant defenses, to bring the reactor online. Doing so:
+  1. Starts the exhaust fans. The hot zone clears over a short timed sequence (sirens, fans spinning
+     up, the green haze thinning).
+  2. Wakes the automated defenses, which still follow 2077 orders and don't know who anyone is.
+  3. Restores light and power through the complex (doors, elevators, terminals).
+- **The choice at the reactor: vent now, or fix the filters first.** The exhaust vents come out
+  topside where people live (the settlers' farms or the Devils' barracks; to decide). The filters
+  that should scrub the air failed long ago. At the reactor the player decides:
+  - **Turn it on now.** The hot zone clears at once, and the poisoned air pours out over the people
+    above. A lot of them die, and that faction turns hostile for good.
+  - **Fix the filters first.** Find the materials to repair them (a scavenging run through the
+    tunnels, or a trade with one of the factions), then start the reactor. Slower, and nobody dies.
+- **Ending Top's story: Nate relieves the post.** Once the way is clear, Nate, the only officer
+  with valid credentials, formally relieves Top and his squad. Two hundred years after the order,
+  someone finally came. This ends the hot zone quest and opens the way to the armory.
+
+**Technical notes:**
+- **The player always has power armor** (it's required for the jump), and power armor resists
+  radiation. Rads alone won't stop them. The block needs to be a hard one: a **radiation interlock**
+  on the blast door into the hot zone that won't open until the air reading is safe, with the
+  radiation high enough that a player who gets past it some other way still can't survive.
+- Radiation as hazard trigger volumes in the hot zone, disabled by a script on the quest stage that
+  starts the fans. Fans as animated activators, switched on by the same stage.
+- The ferals stay after the air clears; only the radiation goes.
 
 ### Story shape
 
@@ -163,6 +217,11 @@ about airborne operations have heard of. It's the second worldspace.
 - Where do the settlers live?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get onto the plane, and back to Boston afterwards?
+- Who is Top, and do the Devils know the original garrison is still alive underground? Nate
+  relieves Top's squad; could he relieve the Devils too, and would they accept it?
+- Whose home do the vents come out under: the settlers' or the Devils'?
+- Does the reactor quest come before or after the player picks a side? (Leaning: either, so
+  the player can do it while still neutral.)
 
 ## Scope (to keep it finishable)
 
