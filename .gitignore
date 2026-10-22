@@ -1,0 +1,5 @@
+# Downloads and generated files: rebuilt by the scripts (see README.md)
+data/
+out/
+__pycache__/
+*.pyc
