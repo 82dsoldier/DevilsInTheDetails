@@ -58,7 +58,14 @@ Fayetteville as a skyline past the playable edge.
     just people the Devils tax; they're the region's market.
   - **The other storefronts** get whatever names and uses the town needs (a clothier, an armor
     maker, the settler leaders' office). Any we don't want to build collapse into rubble.
-  - Still to do: check the mall's 1990s footprint in an aerial photo of the area.
+  - **What it looks like** (from a recent street photo, kept locally in `data/reference/`, not in
+    the repo since it isn't ours): a long, one-story brown brick building across the back of the
+    lot, with a **covered walkway of round brick arches** along the storefronts; brick wings on the
+    sides; a huge flat lot in front; pines behind; and **two tall lattice radio masts** rising
+    behind it. The arches make a good modular kit piece, and the masts are a landmark you can see
+    from the freeway and the checkpoint (and maybe where a signal comes from).
+  - Still to do: check the mall's 1990s footprint in an aerial photo of the area. The photo is
+    from today, so the details may have changed since the 90s.
 - **A handful of enterable interiors**, the rest sealed, as on post. The settler leaders live and
   work here, and the codebook is kept here.
 - **The Devils' checkpoint.** Bragg was an open post in the 90s, with no gates. The Devils built a
