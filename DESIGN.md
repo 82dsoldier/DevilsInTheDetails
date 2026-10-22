@@ -48,7 +48,8 @@ condensed the way Fallout 4 condenses Boston: one stretch of the boulevard, with
 Fayetteville as a skyline past the playable edge.
 
 - **The heart of town: the Cue and Ale strip mall.** The Cue and Ale was a strip club in a
-  U-shaped strip mall with a huge parking lot, on (probably) the east side of Bragg Blvd. **It has
+  U-shaped strip mall with a huge parking lot: **Sycamore Square Shopping Center**, which also
+  had a Food Lion. Today's listings give 3308-3450 Bragg Blvd, around 35.0780 N, 78.9348 W. **It has
   to be in the mod.** The settlers' town grows out of it:
   - **The Cue and Ale itself** is the settlers' bar and gathering place, its sign still up two
     hundred years on. It's where the player meets people, hears rumors and picks up work.
@@ -57,8 +58,7 @@ Fayetteville as a skyline past the playable edge.
     just people the Devils tax; they're the region's market.
   - **The other storefronts** get whatever names and uses the town needs (a clothier, an armor
     maker, the settler leaders' office). Any we don't want to build collapse into rubble.
-  - Still to do: find the exact spot. The U shape and the big lot should stand out in a 1990s
-    aerial photo of the area.
+  - Still to do: check the mall's 1990s footprint in an aerial photo of the area.
 - **A handful of enterable interiors**, the rest sealed, as on post. The settler leaders live and
   work here, and the codebook is kept here.
 - **The Devils' checkpoint.** Bragg was an open post in the 90s, with no gates. The Devils built a
@@ -71,12 +71,14 @@ Fayetteville as a skyline past the playable edge.
 - **The area (decided):** a four-sided outline taking in the end of Yadkin (the way in), a stretch
   of the All-American Freeway (a freeway, like Boston's), and part of Bragg Blvd:
   - 35°04'56.60"N 78°58'10.73"W
-  - 35°04'16.34"N 78°56'19.69"W
-  - 35°04'54.31"N 78°55'58.65"W
+  - 35°04'11.10"N 78°56'05.25"W
+  - 35°04'46.18"N 78°55'46.34"W
   - 35°05'42.02"N 78°57'10.86"W
 
-  About 3.1 x 2.1 km at its longest, **4.4 km² (about 1,280 cells)**, a little bigger than the
-  barracks map. The worldspace grid runs north-south, so the box around it is 58 x 45 cells; the
+  The southeast edge was moved out 400 m from the first draft, which put Sycamore Square right on
+  the edge. About 3.5 x 2.1 km at its longest, **4.9 km² (about 1,420 cells)**, a little bigger
+  than the barracks map. The worldspace grid runs north-south, so the box around it is 63 x 48
+  cells; the
   corners outside the outline are non-playable margin. (The first outline, 12.7 km² along Bragg
   Blvd, was nearly four times the barracks map and was dropped.)
 - **Detail where it counts:** the strip around the Y gets the work. The freeway is mostly road
@@ -268,7 +270,7 @@ about airborne operations have heard of. It's the second worldspace.
 - Should the soldiers lean sympathetic, threatening, or truly balanced? (Leaning: balanced, with
   the raids making the soldiers' case for them.)
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
-- Where exactly is the Cue and Ale strip mall, and where does the storm drain come up?
+- Where does the storm drain come up?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get onto the plane, and back to Boston afterwards?
 - Who is Top, and do the Devils know the original garrison is still alive underground?
