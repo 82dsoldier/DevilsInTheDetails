@@ -55,10 +55,13 @@ Fayetteville as a skyline past the playable edge.
 - **The Devils' checkpoint.** Bragg was an open post in the 90s, with no gates. The Devils built a
   makeshift one: wrecked cars, sandbags, a guard shack across the road into town. That's where
   the tithe, the curfew and the checkpoints from the settlers' complaints become something the
-  player walks through. **Where:** the All-American Freeway or Yadkin Road. (Leaning: the
-  All-American, since a freeway is a natural chokepoint and adds nothing to build between the
-  checkpoint and the boulevard. Yadkin would mean building the part of town along Yadkin that
-  leads to Bragg Blvd.)
+  player walks through. **Decided: on Yadkin Road.** The All-American Freeway runs parallel to
+  Bragg Blvd and never meets it; Yadkin meets Bragg Blvd at a Y intersection (where the McDonald's
+  was). The checkpoint sits at the map edge on Yadkin, and the stretch of Yadkin between post and
+  town is condensed out.
+- **Size:** the first outline, along Bragg Blvd from the Yadkin Y, was about 6.7 x 2.3 km
+  (12.7 km², about 3,700 cells): nearly four times the barracks map. Too much. Cut it down to the
+  Y and a few blocks of the strip, about 1 x 1.5 km, with Yadkin coming in from the edge.
 - **Two ways in:** the road through the Devils' checkpoint (a map-edge transition to the barracks
   area), and a storm drain branch of the underground that comes up in town. The drains are how the
   settlers smuggle around the tithe, and how the raiders get in.
@@ -245,7 +248,7 @@ about airborne operations have heard of. It's the second worldspace.
 - Should the soldiers lean sympathetic, threatening, or truly balanced? (Leaning: balanced, with
   the raids making the soldiers' case for them.)
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
-- Where is the Devils' checkpoint: the All-American Freeway or Yadkin Road?
+- Which few blocks around the Yadkin Y make the cut for Bragg Boulevard?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get onto the plane, and back to Boston afterwards?
 - Who is Top, and do the Devils know the original garrison is still alive underground?
