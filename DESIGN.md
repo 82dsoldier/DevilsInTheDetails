@@ -47,9 +47,18 @@ shops, tattoo parlors, used-car lots, bars, strip malls. It's a **third small wo
 condensed the way Fallout 4 condenses Boston: one stretch of the boulevard, with downtown
 Fayetteville as a skyline past the playable edge.
 
-- **The market:** booths in a strip mall parking lot, and a couple of storefronts where the
-  settlers sell crops brought in from outside and things they make: light armor, clothes,
-  homemade goods. The settlers aren't just people the Devils tax; they're the region's market.
+- **The heart of town: the Cue and Ale strip mall.** The Cue and Ale was a strip club in a
+  U-shaped strip mall with a huge parking lot, on (probably) the east side of Bragg Blvd. **It has
+  to be in the mod.** The settlers' town grows out of it:
+  - **The Cue and Ale itself** is the settlers' bar and gathering place, its sign still up two
+    hundred years on. It's where the player meets people, hears rumors and picks up work.
+  - **The parking lot is the market:** booths and stalls inside the U, where the settlers sell crops
+    from the fields and things they make: light armor, clothes, homemade goods. The settlers aren't
+    just people the Devils tax; they're the region's market.
+  - **The other storefronts** get whatever names and uses the town needs (a clothier, an armor
+    maker, the settler leaders' office). Any we don't want to build collapse into rubble.
+  - Still to do: find the exact spot. The U shape and the big lot should stand out in a 1990s
+    aerial photo of the area.
 - **A handful of enterable interiors**, the rest sealed, as on post. The settler leaders live and
   work here, and the codebook is kept here.
 - **The Devils' checkpoint.** Bragg was an open post in the 90s, with no gates. The Devils built a
@@ -259,7 +268,7 @@ about airborne operations have heard of. It's the second worldspace.
 - Should the soldiers lean sympathetic, threatening, or truly balanced? (Leaning: balanced, with
   the raids making the soldiers' case for them.)
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
-- Where exactly on Bragg Blvd are the market and the storm drain exit?
+- Where exactly is the Cue and Ale strip mall, and where does the storm drain come up?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get onto the plane, and back to Boston afterwards?
 - Who is Top, and do the Devils know the original garrison is still alive underground?
