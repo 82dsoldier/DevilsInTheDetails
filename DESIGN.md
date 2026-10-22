@@ -49,23 +49,69 @@ the raids continue: whoever is left has to deal with them.
 
 **Nate is a pre-war Army veteran: the only living person with valid 2077 military credentials.**
 
-- Something on the post still recognizes an active-duty ID: the **armory**, a sealed bunker, or
-  the automated defenses (to decide). Suddenly both sides need the player.
+- The **armory**, deep in the underground complex, still recognizes an active-duty officer's ID.
+  Suddenly both sides need the player.
+- **But the ID is only half of it** (see "The MacGuffin" below): the armory works on the
+  two-person rule, and the other half is held by the factions themselves.
 - Unlocking it for the soldiers makes them unstoppable. Giving it to the settlers flips the
   balance. Or the player can destroy it.
 - **Why go to North Carolina:** a military radio signal or a recall order addressed to Nate's
   service number, picked up in Boston.
 
+### The MacGuffin: the Key to the Post and the codebook
+
+Real weapons storage used the **two-person rule**: nobody opens it alone. The armory needs
+**a valid officer's ID (Nate) plus a 2077 authenticator in two parts**, and each faction holds one
+part without knowing what it is.
+
+- **The Key to the Post (the Devils have it).** For two hundred years, every commander of the
+  Devils has worn a battered metal key on a chain as the badge of office, handed over at every
+  change of command. It's sacred to them, and nobody remembers what it opens.
+- **The codebook (the settlers have it).** A sealed authentication codebook: the day's code words,
+  like the real-world "cookie" authenticators. A scavenger pulled it out of a pre-war office
+  generations ago; the settlers keep it as a curiosity, or close to a holy text. Perhaps the
+  moderate settler leader is its keeper.
+- **How the player gets both is the choice:**
+  - **With the Devils:** they hand over the key; the codebook has to be traded for, stolen or
+    taken by force from the settlers.
+  - **With the settlers:** the player takes the key from the Devils' commander. To the Devils
+    that's about the worst insult there is.
+  - **Peace:** both leaders bring their halves to the armory door together. The final scene.
+- **Optional third lock: power.** The complex is dead. Restarting its reactor, deep in the tunnels,
+  is a dungeon objective of its own, and it's why the automated defenses suddenly wake up.
+
+### The underground
+
+Not realistic, and doesn't need to be: this is Fallout, and every pre-war base had a secret.
+
+- **A tunnel complex under the post**, with an entrance in each of the two exterior areas: one near
+  the drop zone (found early, since the player lands near it) and one in the barracks area (under
+  the headquarters building or a motor pool, perhaps).
+- **Its pre-war cover story:** officially a utility tunnel, an emergency command bunker or
+  munitions storage. Terminals and holotapes reveal what it really was.
+- **It explains the raids:** the raiders and mutants get past the Devils' patrols through the
+  tunnels. Sealing them, or leaving them open, can be part of the ending.
+- **Who's down there:** feral ghouls who were the pre-war garrison; automated defenses still
+  following 2077 orders; perhaps settlers using it to smuggle goods around the tithe.
+- **Shape:**
+  1. The drop zone entrance.
+  2. Utility tunnels: pipes, steam, flooded sections, raider camps.
+  3. The central complex: the reactor and the armory, where the credentials and the MacGuffin
+     matter.
+  4. The way out into the barracks area.
+
 ### Story shape
 
-1. **Arrival.** Both sides are neutral. Small jobs for each; learn how they see things.
-   Witness a raid, and see what the soldiers do (and what they charge for it).
+1. **Arrival.** The jump; the raid on the drop zone. Both sides are neutral. Small jobs for each;
+   learn how they see things. Witness a raid, and see what the soldiers do (and what they charge
+   for it).
 2. **Rising tension.** Something forces the issue: a tithe raid on a farm, an ambush on a patrol,
-   a missing recruit.
-3. **The choice.** Help one side; **the other becomes hostile**.
+   a missing recruit. The player learns what the armory is, and that it needs more than an ID.
+3. **The choice.** Help one side; **the other becomes hostile**. Get the key and the codebook.
 4. **The ending.** The armory decides who wins, or how it ends.
 5. **Optional third path.** Speech checks bring the reform officer and the moderate settler leader
-   together for a negotiated peace: a fairer tithe, volunteers instead of conscription.
+   together for a negotiated peace: a fairer tithe, volunteers instead of conscription, and both
+   halves of the authenticator brought to the door together.
 
 ### Consequences to show
 
@@ -97,8 +143,9 @@ The player arrives the way the 82nd does: **by parachute, onto a Bragg drop zone
   one, and it comes to Boston for the player after the recall signal.
 
 **Technical notes:**
-- The drop zones are miles from the barracks area, so the worldspace needs to reach them: a
-  detailed drop zone plus lower-detail ground in between, or the distances compressed.
+- The drop zones are miles from the barracks area. **Solved by the underground:** the drop zone
+  and the barracks area are two separate, small worldspaces joined by the tunnels, so nothing in
+  between has to be built.
 - At 1,000 ft the player sees the whole map and beyond, so the **LOD and the horizon** (distant
   terrain past the playable edge) have to look right from the air.
 - The fall from 1,000 ft (about 305 m, 21,000 game units) takes several seconds in game: long enough
@@ -112,16 +159,26 @@ The player arrives the way the 82nd does: **by parachute, onto a Bragg drop zone
   the raids making the soldiers' case for them.)
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
 - Where do the settlers live?
-- What exactly is locked behind the credentials?
+- What exactly is in the armory, and what does opening it do for whoever gets it?
+- Which drop zone? (It decides where the second worldspace is.)
 - How does the player get onto the plane, and back to Boston afterwards?
 
 ## Scope (to keep it finishable)
 
-- One post area (the map below) plus one settler settlement.
-- Two key interiors: the headquarters building and the company barracks. Every other barracks
-  has a locked or sealed door.
+- **Two small worldspaces:** the barracks area (the map below) and a drop zone, plus one settler
+  settlement in one of them.
+- **Interiors:** the aircraft, the headquarters building, the company barracks, and the
+  underground complex (a few connected cells). Every other barracks has a locked or sealed door.
 - Four or five quests.
 - More can be added later.
+
+**Build order**, so there's something playable at every step:
+1. The barracks area terrain in the Creation Kit, walkable.
+2. One barracks shell, placed on the 1993 layout.
+3. The drop zone worldspace and the jump (aircraft, scene, power armor check). It's a complete
+   moment on its own, and the most fun thing to show people.
+4. The underground, joining the two.
+5. Factions, then quests.
 
 ## Building it
 
