@@ -31,13 +31,38 @@ you ask.
 
 ### The settlers
 
-- Survivors from Fayetteville and the farms around it (exact home still to decide: Fayetteville,
-  the farms, or the old family housing on post).
+- Survivors from Fayetteville. **Decided: they live on Bragg Boulevard** (see "Bragg Boulevard"
+  below), not on farms: survivors gravitate toward what's left of a city, and farmland would be
+  boring to build and to walk. Any fields they work are off the map.
 - They resent the tithe, which keeps growing; conscription, which takes their children; and the
   curfew and checkpoints.
 - They're also raided constantly, and the soldiers are what stops the worst of it. Some know it.
 - They need: a **moderate leader** who wants a fairer deal, and a **hard core** who wants the
   soldiers gone whatever the cost.
+
+### Bragg Boulevard: the settlers' home
+
+The strip just outside post is the Fayetteville every soldier from the early 90s remembers: pawn
+shops, tattoo parlors, used-car lots, bars, strip malls. It's a **third small worldspace**,
+condensed the way Fallout 4 condenses Boston: one stretch of the boulevard, with downtown
+Fayetteville as a skyline past the playable edge.
+
+- **The market:** booths in a strip mall parking lot, and a couple of storefronts where the
+  settlers sell crops brought in from outside and things they make: light armor, clothes,
+  homemade goods. The settlers aren't just people the Devils tax; they're the region's market.
+- **A handful of enterable interiors**, the rest sealed, as on post. The settler leaders live and
+  work here, and the codebook is kept here.
+- **The Devils' checkpoint.** Bragg was an open post in the 90s, with no gates. The Devils built a
+  makeshift one: wrecked cars, sandbags, a guard shack across the road into town. That's where
+  the tithe, the curfew and the checkpoints from the settlers' complaints become something the
+  player walks through. **Where:** the All-American Freeway or Yadkin Road. (Leaning: the
+  All-American, since a freeway is a natural chokepoint and adds nothing to build between the
+  checkpoint and the boulevard. Yadkin would mean building the part of town along Yadkin that
+  leads to Bragg Blvd.)
+- **Two ways in:** the road through the Devils' checkpoint (a map-edge transition to the barracks
+  area), and a storm drain branch of the underground that comes up in town. The drains are how the
+  settlers smuggle around the tithe, and how the raiders get in.
+- **The vents are on post,** so venting the hot zone never touches the town.
 
 ### Raiders and super mutants
 
@@ -94,14 +119,15 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 - **It explains the raids:** the raiders and mutants get past the Devils' patrols through the
   tunnels. Sealing them, or leaving them open, can be part of the ending.
 - **Who's down there:** feral ghouls who were the pre-war garrison, and a few who never went
-  feral (see below); automated defenses still following 2077 orders; perhaps settlers using it to
-  smuggle goods around the tithe.
+  feral (see below); automated defenses still following 2077 orders; settlers using the storm
+  drain branch to Bragg Boulevard to smuggle goods around the tithe.
 - **Shape:**
   1. The drop zone entrance.
   2. Utility tunnels: pipes, steam, flooded sections, raider camps.
   3. The reactor, down a branch of its own.
   4. The central complex: the ghouls' enclave, the hot zone, and the armory at its heart.
   5. The way out into the barracks area.
+  6. A storm drain branch that comes up on Bragg Boulevard.
 
 ### The hot zone and the reactor
 
@@ -219,7 +245,7 @@ about airborne operations have heard of. It's the second worldspace.
 - Should the soldiers lean sympathetic, threatening, or truly balanced? (Leaning: balanced, with
   the raids making the soldiers' case for them.)
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
-- Where do the settlers live?
+- Where is the Devils' checkpoint: the All-American Freeway or Yadkin Road?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get onto the plane, and back to Boston afterwards?
 - Who is Top, and do the Devils know the original garrison is still alive underground?
@@ -231,10 +257,11 @@ about airborne operations have heard of. It's the second worldspace.
 
 ## Scope (to keep it finishable)
 
-- **Two small worldspaces:** the barracks area (the map below) and Sicily DZ, plus one settler
-  settlement in one of them.
-- **Interiors:** the aircraft, the headquarters building, the company barracks, and the
-  underground complex (a few connected cells). Every other barracks has a locked or sealed door.
+- **Three small worldspaces:** the barracks area (the map below), Sicily DZ, and Bragg Boulevard
+  (the settlers' home, condensed).
+- **Interiors:** the aircraft, the headquarters building, the company barracks, the underground
+  complex (a few connected cells), and a few storefronts on Bragg Boulevard. Every other barracks
+  and shop has a locked or sealed door.
 - Four or five quests.
 - More can be added later.
 
@@ -244,7 +271,8 @@ about airborne operations have heard of. It's the second worldspace.
 3. The Sicily DZ worldspace and the jump (aircraft, scene, power armor check). It's a complete
    moment on its own, and the most fun thing to show people.
 4. The underground, joining the two.
-5. Factions, then quests.
+5. Bragg Boulevard: the street, the market, the checkpoint, and the storm drain into the underground.
+6. Factions, then quests.
 
 ## Building it
 
