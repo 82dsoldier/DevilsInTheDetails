@@ -20,3 +20,14 @@ python scripts/make_overlay.py data/doq_raw/O3507956.SES.811019.tif
 `data/` (downloads) and `out/` (generated) aren't in git. The 1993 aerial photo is USGS DOQ
 `O3507956.SES` (Overhills SE quarter, NAPP 6136-187, 1993-02-23), from EarthExplorer
 (Aerial Imagery > DOQ); extract the `.tif` into `data/doq_raw/`.
+
+## License
+
+- **Code** (scripts, Papyrus, xEdit scripts and other tools): [MIT](LICENSE).
+- **Art and writing** (models, textures, sounds, the story, dialogue and design notes):
+  [Creative Commons Attribution-NonCommercial-ShareAlike 4.0](LICENSE-ART.txt) (CC BY-NC-SA 4.0).
+  You may use and change it, with credit, not for profit, and you must share your changes under
+  the same license.
+
+Fallout 4 and its assets belong to Bethesda Softworks. This repository contains only original
+work; the mod uses the game's own files rather than copying them.

@@ -75,6 +75,37 @@ the raids continue: whoever is left has to deal with them.
   player has to help them build defenses, or maybe some farms are lost.
 - **Negotiated peace:** the raids continue, but now the two sides face them together.
 
+### Getting to Bragg: the jump
+
+The player arrives the way the 82nd does: **by parachute, onto a Bragg drop zone.**
+
+- **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight:
+  a **C-130** or **C-141** (what the 82nd jumped in the early 90s; the C-17 was only being tested
+  then). Engine drone, vibration (camera shake), red and green jump lights, static lines and
+  anchor cables, jump seats.
+- **The jump commands as a scripted scene** with the jumpmaster: "Get ready... Stand up...
+  Hook up... Check equipment... Sound off for equipment check... Stand in the door... GO!" Red
+  light, then green light.
+- **Out the door** is a teleport to a marker about **1,000 ft above a drop zone** (Sicily DZ,
+  for instance). The loading screen in between can be its own art.
+- **Power armor only.** Power armor takes no fall damage in Fallout 4, so it's the one way to
+  survive. The jump only works in power armor: the jumpmaster refuses anyone without it ("You're
+  not going out my door without a rig") or, for comedy, lets them go.
+- **Landing** can open the story: a raid hits the drop zone as the player comes down, and the
+  Devils' reception party fights it off. First impression of both the threat and the protectors.
+- **Getting on the plane** (to decide): maybe the Devils still keep one airworthy aircraft, the last
+  one, and it comes to Boston for the player after the recall signal.
+
+**Technical notes:**
+- The drop zones are miles from the barracks area, so the worldspace needs to reach them: a
+  detailed drop zone plus lower-detail ground in between, or the distances compressed.
+- At 1,000 ft the player sees the whole map and beyond, so the **LOD and the horizon** (distant
+  terrain past the playable edge) have to look right from the air.
+- The fall from 1,000 ft (about 305 m, 21,000 game units) takes several seconds in game: long enough
+  to see the drop zone, short enough not to bore.
+- Script: the door is an activator that checks `IsInPowerArmor()` before moving the player to the
+  marker in the air.
+
 ### Open questions
 
 - Should the soldiers lean sympathetic, threatening, or truly balanced? (Leaning: balanced, with
@@ -82,7 +113,7 @@ the raids continue: whoever is left has to deal with them.
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
 - Where do the settlers live?
 - What exactly is locked behind the credentials?
-- How does the player travel between Boston and Bragg (vertibird, train, boat, a long walk)?
+- How does the player get onto the plane, and back to Boston afterwards?
 
 ## Scope (to keep it finishable)
 
