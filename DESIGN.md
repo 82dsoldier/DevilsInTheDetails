@@ -363,8 +363,9 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   - **He leaves the core in the frame** so the player can walk the armor to a settlement and hang
     it up: **"I'm not a monster."** Delivered with just the right amount of sarcasm (casting
     matters for this line).
-  - To decide: a player who drops cores on the DZ before talking to him and comes back for them
-    later. Does the patrol sweep the DZ, or is that a reward for being clever?
+  - **Decided: let the clever player be clever.** A player who drops cores on the DZ before talking
+    to him can come back for them later. Anyone set on cheating can spawn cores from the console
+    anyway; the shakedown sets the tone, it isn't a lock.
   - **Reporting him:** Nate can report the captain, best of all to the **hardline** leader, who
     has no patience for a soldier lining his own pockets. The captain goes to the stockade, but he
     won't say where the cores are. The player is told plainly: **"We don't have the location of
