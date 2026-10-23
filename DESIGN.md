@@ -337,6 +337,29 @@ about airborne operations have heard of. It's the second worldspace.
 - Does the reactor quest come before or after the player picks a side? (Leaning: either, so
   the player can do it while still neutral.)
 
+### Power armor and player settlements
+
+The player arrives in power armor (the jump requires it), but the mod shouldn't be played in it.
+**Fusion cores are rare here**, so the player ends up hanging the armor up and walking.
+
+- **Few cores to find:** none or almost none in containers and loot lists in these worldspaces.
+  The ones that exist matter.
+- **The Devils hoard them.** Their armory of a post runs on scarcity, and cores are part of the
+  tithe. That makes cores something to trade for, steal, or earn.
+- **The catch:** the player can bring a pack of cores from the Commonwealth. Ideas to deal with it,
+  to decide:
+  - The checkpoint on Yadkin confiscates them ("requisitioned for the defense of the post").
+  - The Devils buy them for a price too good to refuse.
+  - Places where power armor is a bad idea anyway: tight tunnels, places a frame won't fit.
+- **Two player settlements,** where the player can park the armor and draw settlers in:
+  - **One on post.** Where, to decide (an empty company area, a motor pool, the old family
+    housing?).
+  - **One on Bragg Boulevard,** apart from the settlers' market (the far end of the strip, or by
+    the fields?).
+  - Each is a normal Fallout 4 workshop settlement (workbench, build area, recruitment beacon).
+  - **Consequence:** when the player picks a side, the settlement on the other side's ground
+    becomes a target.
+
 ## Scope (to keep it finishable)
 
 - **Three small worldspaces:** the barracks area (the map below), Sicily DZ, and Bragg Boulevard
@@ -345,6 +368,7 @@ about airborne operations have heard of. It's the second worldspace.
   complex (a few connected cells), and a few storefronts on Bragg Boulevard. Every other barracks
   and shop has a locked or sealed door.
 - Four or five quests.
+- Two player settlements (one per side of the checkpoint).
 - More can be added later.
 
 **Build order**, so there's something playable at every step:
