@@ -59,6 +59,8 @@ words meant. Use these in dialogue and background barks.
 
 - **Sayings:**
   - "Ate up like a soup sandwich." (Nobody's seen a sandwich of any kind in generations.)
+  - "You look like a monkey trying to fuck a football." (A drill sergeant's line for a recruit
+    fumbling with gear. Fallout 4 is rated M and its raiders swear constantly, so it fits.)
 - **Fool's errands** the old hands send new recruits on, straight out of the motor pool:
   - Go to another shop for a **Yadkin extension**. (Yadkin is the road; there's no such part.)
   - Fetch a **bottle of blinker fluid**.
