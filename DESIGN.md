@@ -869,8 +869,8 @@ a modded receiver.)
 - **Main wing exterior:** `scripts/make_barracks.py` builds it from the photo's proportions:
   10 bays of about 8.5 m, paired strips at the bay lines, two windows per bay per floor (about
   1.9 x 1.2 m, a window's width apart), a **sill ledge** under each upper row of windows (out
-  from the wall just below the sills, a face about 3 ft deep, then a 45-degree slope back to the
-  wall; its shadowed underside is the dark stripe in photos), plain end walls, a
+  from the wall just below the sills, a face about 3 ft deep, then a steep slope back to the wall,
+  about 1.5 ft down; its shadowed underside is the dark stripe in photos), plain end walls, a
   parapet cap, and **double doors** in bays 3 and 8 on both sides, each with a landing and steps
   running **straight out** from the wall to the ground, with a railing down each side. The main floor is 0.5 m above the highest
   ground under the wing.

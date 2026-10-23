@@ -8,7 +8,7 @@ The main wing, from the 1993 photo and the photo in data/reference/barracks_exte
   - BAYS bays down each long side, split by paired vertical strips (the joints between the
     precast panels), with two windows per bay on each floor
   - a sill ledge under each upper row of windows: out from the wall just below the sills, a
-    face about 3 ft deep, then a 45-degree slope back to the wall; the end walls have the strips
+    face about 3 ft deep, then a steep slope back to the wall; the end walls have the strips
     and ledges, no windows
   - the main floor FLOOR_ABOVE m above the highest ground under the wing, so the low end
     stands taller on its foundation
@@ -46,6 +46,7 @@ WIN_DEPTH = 0.15               # glass set back from the wall face
 STRIP_W, STRIP_GAP, STRIP_OUT = 0.2, 0.15, 0.08
 BAND_H, BAND_OUT = 0.3, 0.05   # the band under the L's roofline
 LEDGE_OUT, LEDGE_FACE = 0.2, 0.9   # sill ledges: how far out, how deep the face before the slope
+LEDGE_DROP = 0.45                  # how far down the slope runs back to the wall (a steep slope)
 DOOR_BAYS = (2, 7)             # bays 3 and 8, counted from the south end, on both sides
 DOOR_W, DOOR_H, DOOR_DEPTH = 2.1, 2.2, 0.3   # double doors, closing straight together
 LANDING_OUT, LANDING_ALONG = 1.5, 2.6
@@ -148,20 +149,21 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
 
 def ledge(m, axis, side, face, h0, h1, z_top):
     """A sill ledge along a wall: a flat top LEDGE_OUT out from the wall at z_top, a face
-    LEDGE_FACE deep, then a 45-degree slope back into the wall."""
+    LEDGE_FACE deep, then a slope back into the wall over LEDGE_DROP."""
     def P(h, out, z):
         f = face + side * out
         return (f, h, z) if axis == "x" else (h, f, z)
 
-    o, zf = LEDGE_OUT, z_top - LEDGE_FACE
+    o, zf, zb = LEDGE_OUT, z_top - LEDGE_FACE, z_top - LEDGE_FACE - LEDGE_DROP
     n_out = (side, 0, 0) if axis == "x" else (0, side, 0)
-    n_slope = tuple(c / math.sqrt(2) for c in n_out[:2]) + (-1 / math.sqrt(2),)
+    k = math.hypot(LEDGE_DROP, o)
+    n_slope = tuple(c * LEDGE_DROP / k for c in n_out[:2]) + (-o / k,)
     m.quad("sandstone", [P(h0, 0, z_top), P(h1, 0, z_top), P(h1, o, z_top), P(h0, o, z_top)], (0, 0, 1))
     m.quad("sandstone", [P(h0, o, z_top), P(h1, o, z_top), P(h1, o, zf), P(h0, o, zf)], n_out)
-    m.quad("sandstone", [P(h0, o, zf), P(h1, o, zf), P(h1, 0, zf - o), P(h0, 0, zf - o)], n_slope)
+    m.quad("sandstone", [P(h0, o, zf), P(h1, o, zf), P(h1, 0, zb), P(h0, 0, zb)], n_slope)
     for h, sgn in ((h0, -1), (h1, 1)):
         n_end = (0, sgn, 0) if axis == "x" else (sgn, 0, 0)
-        m.quad("sandstone", [P(h, 0, z_top), P(h, o, z_top), P(h, o, zf), P(h, 0, zf - o)], n_end)
+        m.quad("sandstone", [P(h, 0, z_top), P(h, o, z_top), P(h, o, zf), P(h, 0, zb)], n_end)
 
 
 def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
