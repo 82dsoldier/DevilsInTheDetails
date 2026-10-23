@@ -368,15 +368,14 @@ the Devils.
 ### Side quests
 
 Each side needs side quests that tilt it toward Nate. Not every one has to cost him with the other
-side, but **some should**: helping one side often means taking from the other. (Seeds below; the
-conversations and details are still to write.)
+side, but **some should**: helping one side often means taking from the other. **No escort
+quests.** (Seeds below; the conversations and details are still to write.)
 
 **For the settlers:**
 - **Clear the raiders from the smuggling routes.** The storm drains are how the settlers move goods
   around the tithe, and raiders hold them. Clearing them helps the settlers, and costs the Devils
   their tithe: the Devils turn against Nate if they find out.
 - **Bring a conscript home** (below). Costs him with the Devils if done badly.
-- **Escort a harvest** in from the fields past raiders. Pure gain.
 
 **For the Devils:**
 - **Go out with a tithe patrol** to collect from the market. The Devils' mirror of the smuggling
