@@ -776,7 +776,9 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   each cell's Creation Kit coordinates.
   - Sicily: `O3507956.SWS` (Overhills SW, NAPP 6136-222, 1993-02-23) and `O3507955.SES` (Lobelia SE,
     NAPP 6139-132, 1993-02-24), in that order: `make_overlay.py --area sicily` with both.
-  - Bragg Boulevard: still to download.
+  - Bragg Boulevard: the four Fayetteville quarter quads, `O3507857.NWS` (NAPP 6139-030,
+    1993-02-24), `.NES` (6136-126, 1993-02-23), `.SWS` (6139-032, 1993-02-24) and `.SES`
+    (6136-124, 1993-02-23), in that order: `make_overlay.py --area bragg_blvd` with all four.
 - Importing: the Fallout 4 Creation Kit's heightmap editor (World menu) is now only an importer,
   and it reads a grayscale DDS of **one channel of 32-bit float** (DXGI R32_FLOAT); a normal DDS
   gives "The request is not supported". You give it the worldspace's cells and it says what image
