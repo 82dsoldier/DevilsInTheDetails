@@ -95,7 +95,8 @@ words meant. Use these in dialogue and background barks.
   curfew and checkpoints.
 - They're also raided constantly, and the soldiers are what stops the worst of it. Some know it.
 - They need: a **moderate leader** who wants a fairer deal, and a **hard core** who wants the
-  soldiers gone whatever the cost.
+  soldiers gone whatever the cost. The hard core's **leader** is the settlers' hardliner, the
+  mirror of the Devils' one: he's the one who suggests the vent (see the reactor choice).
 
 ### Bragg Boulevard: the settlers' home
 
@@ -292,15 +293,19 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
   - **Fix the filters first.** Slower, and nobody dies. An optional objective in the reactor quest:
     1. **Pull an old filter from one of the vent stacks on post.** The stacks are the super
        mutants' nest, so this means a fight.
-    2. **Take it to a tinker on Bragg Boulevard,** who can copy it: 3 or 4 new filters, one per
-       stack.
-    3. **What the tinker needs** (to decide). Fetch quests can feel like chores, but Nate needs
+    2. **Find someone who can copy it.** The quest leads Nate to the **settlers' hardliner**, who
+       knows the man for the job, and who uses the moment to plant the idea:
+       > "I hear you're trying to restart the reactor. It'd be a shame if the filters got left out
+       > and all those soldiers got killed."
+       He makes the introduction anyway. The choice stays Nate's.
+    3. **The tinker on Bragg Boulevard** copies it: 3 or 4 new filters, one per stack.
+    4. **What the tinker needs** (to decide). Fetch quests can feel like chores, but Nate needs
        reasons to explore. A middle way: common parts the player can buy or scrap from their own
        junk (Fallout 4 components like aluminum, adhesive, fiberglass), plus **one or two special
        parts that only come from places worth visiting anyway**, each with something to find
        there (a holotape, a character, a piece of the story). Candidates: the raider camp east in
        the tunnels, the motor pool, the drop zone.
-    4. Install them, then start the reactor. (Where: in a filter room near the reactor, so it's one
+    5. Install them, then start the reactor. (Where: in a filter room near the reactor, so it's one
        trip, or at each stack topside, which means more mutant fights. Leaning: near the reactor.)
     - **If the settlers are hostile,** the tinker won't help. **Decided:** the Devils' **armorer**
       can make the filters instead, at a price.
@@ -443,8 +448,10 @@ settlers**, so neither side is the only one the player can do the unthinkable to
   hostile for good.** The market and its booths are left in ruins. (Mind the player settlement on
   Bragg Boulevard: in the blast zone, or near enough to feel it.)
 - **The mirror of the vent:** both are dark acts the reactor makes possible, each one kills one
-  side. The vent can happen out of neglect or on purpose; the fire mission is always deliberate,
-  and it's the one place Nate's credentials are used to kill rather than to open a door.
+  side, and **each is suggested by the other side's hardliner**: the settlers' hardliner hints at
+  leaving the filters out, the Devils' hardliner asks for the fire mission. The vent can still
+  happen out of neglect; the fire mission is always deliberate, and it's the one place Nate's
+  credentials are used to kill rather than to open a door.
 - Slang tie-in (idea): "a box of grid squares" is what the Devils call a fire mission.
 - Technical: scripted explosions on markers around the market (vanilla Fallout 4 already does
   artillery strikes this way), then swap the market for a ruined version with an enable parent and
