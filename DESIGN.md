@@ -432,8 +432,8 @@ The choices have consequences; these are what Nate gets for them.
 - **Relieving Top: his pearl-handled 1911.** The pistol he's carried for two hundred years, a gift
   from his first commander, engraved to him and signed. He hands it to the officer who finally
   relieved him. (Who the commander was, and the exact inscription, to write.)
-  - Technical: Fallout 4 has no 1911. Options: a retextured, renamed vanilla pistol with pearl
-    grips (cheap), or a new model (a lot of work: mesh, textures, animations). Start cheap.
+  - Technical: Fallout 4 has no 1911. A new model on the 10mm pistol's animations (see
+    "Weapons"), or to start, a retextured, renamed vanilla pistol with pearl grips.
 - **Getting back to Boston, in every ending.** Only the peace ending gets the plane on demand, but
   every player needs a way home, or a player who sided with the settlers is stuck. **Decided: the
   C-130 aircrew stay out of the feud.** Pilots are too rare to risk, so they fly anyone who pays, even
@@ -687,6 +687,35 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   Creation Kit coordinates.
 - Still to do: find a heightmap importer that works with Fallout 4 and make the script write its
   format.
+
+### Weapons
+
+The Devils should carry what Bragg carried, and the base game doesn't have it: no M16A2, no 1911,
+no anti-materiel rifle, no M2. (.50 caliber ammo exists, but only the hunting rifle fires it, with
+a modded receiver.)
+
+- **Reuse vanilla animations; don't make new ones.** Most Fallout 4 weapon mods build a new model
+  and fit it to an existing vanilla weapon's skeleton, so the vanilla animations drive it. The work
+  in Blender is the model, the textures, and lining parts up with the vanilla bones (magazine to the
+  magazine bone, bolt to the bolt bone). Modelling, not animation, and a good job for community
+  help.
+
+  | Weapon | Borrows animations from | Notes |
+  |---|---|---|
+  | **Anti-materiel rifle** (M82-style Barrett), .50 cal | Hunting rifle | The big one. Scarce: in the early 90s the Army had very few, mostly with special operations. The Devils keep a handful in the arms room, signed out like gold. |
+  | **M16A2**, 5.56 | Combat rifle or assault rifle | The Devils' standard rifle. |
+  | **1911**, .45 | 10mm pistol | Top's pearl-handled one is a reward (see "Rewards"). |
+  | **M2 (Ma Deuce)**, .50 cal | None: a turret | A retextured vanilla machine-gun turret with .50 cal damage, on sandbagged positions like the Yadkin checkpoint. A carried or crewed version would need real animation work: later, if ever. |
+
+- **Start cheap.** Until the models exist, retextured and renamed vanilla weapons stand in, so
+  quests can be built and tested without waiting on art.
+- **No hard dependency on Weaponsmith** (or any big gun pack). Requiring it would push a large,
+  hard-to-deploy mod onto every player and tie this one to it. Instead:
+  - **The mod works on its own**, with its own weapons.
+  - **An optional patch** for players who already run Weaponsmith (or similar) swaps the Devils'
+    leveled lists to that mod's Barrett and M16A2.
+- **Bundling another author's standalone weapon** needs their permission, and their asset license
+  may not fit this mod's CC BY-NC-SA art license. Making our own avoids both problems.
 
 ### Buildings
 
