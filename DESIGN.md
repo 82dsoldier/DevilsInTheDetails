@@ -203,13 +203,17 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 - **Who's down there:** feral ghouls who were the pre-war garrison, and a few who never went
   feral (see below); automated defenses still following 2077 orders; settlers using the storm
   drain branch to Bragg Boulevard to smuggle goods around the tithe.
-- **Shape:**
-  1. The drop zone entrance.
-  2. Utility tunnels: pipes, steam, flooded sections, raider camps.
-  3. The reactor, down a branch of its own.
-  4. The central complex: the ghouls' enclave, the hot zone, and the armory at its heart.
-  5. The way out into the barracks area.
-  6. A storm drain branch that comes up on Bragg Boulevard.
+- **Shape: three ways from the drop zone entrance.** Past Vargas's patrol, the tunnels split:
+  - **East: the raiders.** A raider camp, with their own version of a guard gate across the
+    tunnel. This is the raiders' road onto the post.
+  - **West: the ghouls.** Top's squad, and past them the heavily irradiated hot zone and the
+    armory at its heart. The player can meet Top early, before ever reaching Bragg.
+  - **North: Bragg.** The way out into the barracks area, and the quest marker for division
+    headquarters.
+  - **Still to place:** the reactor, and the storm drain branch to Bragg Boulevard. Idea: both lie
+    **east, past the raider gate.** Top already says the way to the reactor runs through
+    raider-held tunnels, and a raider-held drain into town is how the raiders reach the settlers.
+  - All of it: utility tunnels, pipes, steam, flooded sections.
 
 ### The hot zone and the reactor
 
