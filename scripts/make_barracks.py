@@ -475,13 +475,16 @@ def main():
     tga_dir.mkdir(parents=True, exist_ok=True)
     # Each diffuse needs a normal and a specular map named to match: name_d, name_n, name_s.
     # Specular: red is shine, green is smoothness; concrete has little of either.
-    Image.new("RGB", (4, 4), (12, 20, 0)).save(tex_dir / "matte_s.dds", pixel_format="DXT1")
-    lod_files = {f"{t}_d": tex_dir / f"{t}.dds" for t in LOD_TEXTURES}
-    lod_files |= {f"{t}_n": tex_dir / "flat_n.dds" for t in LOD_TEXTURES}
-    lod_files |= {f"{t}_s": tex_dir / "matte_s.dds" for t in LOD_TEXTURES}
-    for name, src in lod_files.items():
-        shutil.copy2(src, lod_tex_dir / f"{name}.dds")
-        Image.open(src).convert("RGB").save(tga_dir / f"{name}.tga")
+    # All three the same size as the diffuse, or the atlas build fails.
+    lod_files = []
+    for t in LOD_TEXTURES:
+        d = Image.open(tex_dir / f"{t}.dds").convert("RGB")
+        for suffix, img in (("d", d), ("n", Image.new("RGB", d.size, (128, 128, 255))),
+                            ("s", Image.new("RGB", d.size, (12, 20, 0)))):
+            name = f"{t}_{suffix}"
+            img.save(lod_tex_dir / f"{name}.dds", pixel_format="DXT1")
+            img.save(tga_dir / f"{name}.tga")
+            lod_files.append(name)
     lod_tex = "textures\\" + LOD_PATH.replace("/", "\\")
     tex = "textures\\" + MOD_PATH.replace("/", "\\")
     lod_dir = mod / "Meshes" / LOD_PATH
