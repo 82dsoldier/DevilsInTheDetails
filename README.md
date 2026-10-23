@@ -12,6 +12,14 @@ python scripts/make_heightmap.py [--area bragg_blvd] [--exaggerate 1.5]
 python scripts/make_overlay.py [--area bragg_blvd] data/doq_raw/O3507956.SES.811019.tif
 ```
 
+```
+python scripts/make_photo_overlay.py [--area bragg_blvd] [--install "<Fallout 4>/Data"]
+```
+
+`make_photo_overlay.py` drapes the 1993 photo over the terrain as a reference mesh for the
+Creation Kit. It needs [PyNifly](https://github.com/BadDogSkyrim/PyNifly) (the `io_scene_nifly`
+release zip) unpacked to `data/tools/io_scene_nifly`; it runs without Blender.
+
 `--area` picks the worldspace (`barracks`, the default, `bragg_blvd` or `sicily`); each one's files go to `out/<area>/`.
 
 - `make_heightmap.py` downloads USGS 3DEP elevation for the area and writes a 16-bit heightmap
