@@ -312,8 +312,8 @@ resupply. Nate runs into them in the street. They tell him about the bird, and h
 - **The plane is at Boston Airport,** where the Brotherhood of Steel moors the Prydwen.
   **Decided: if the Brotherhood is there, the Devils trade with them.** Not common goods: nothing
   ordinary would stop the Brotherhood taking a working C-130. The Devils pay in **pre-war tech**
-  the Brotherhood wants, from the parts of Bragg they can reach. Ideas: technical manuals and field
-  manuals from the post, signal and radar equipment, avionics, weapon parts.
+  the Brotherhood wants, from the parts of Bragg they can reach: **technical manuals and
+  avionics.** The Brotherhood hoards pre-war knowledge, and avionics keep their vertibirds flying.
   - The irony: the Devils, who take a tithe from everyone, pay one of their own to keep flying.
   - A possible hook: the Brotherhood would very much like to know where the Devils' tech comes
     from, and what else is down there. (Mind the scope: a Brotherhood storyline is a lot to add.)
@@ -364,9 +364,8 @@ about airborne operations have heard of. It's the second worldspace.
 - Where does the storm drain come up?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get back to Boston afterwards? (The C-130 again?)
-- What exactly do the Devils trade the Brotherhood? (Technical risk to remember: editing the
-  vanilla airport cells can conflict with other mods. A plane parked out on the runway, with
-  minimal edits, is safer.)
+- Technical risk to remember: editing the vanilla airport cells can conflict with other mods. A
+  plane parked out on the runway, with minimal edits, is safer.
 - Who is Top, and do the Devils know the original garrison is still alive underground?
 - **Decided: Nate does not relieve the Devils.** Relieving the post happens once, with Top. The
   Devils have made a life at the post over two hundred years; it's their home now, not just a
