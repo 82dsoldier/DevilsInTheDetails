@@ -850,9 +850,12 @@ a modded receiver.)
   every company's building.)
 - **Four sets of main doors,** two on each long side, with short flights of steps and railings.
 - **The L is one story,** offices along the north end and the armory's short leg at the west end
-  pointing north, toward the road. The office wing (circled in
-  `data/reference/barracks_exterior_company_entrance.jpg`) runs a few metres past the main wing's
-  east wall, and the **company entrance** is in the south face of that step.
+  pointing north, toward the road. The **orderly room** (circled in
+  `data/reference/barracks_exterior_company_entrance.jpg`) stands east of the main wing's east
+  wall, about 10 x 11 m, with the **company entrance** in its south face. Inside: the arms room
+  door directly on the left, the **CQ desk** directly on the right, and behind the desk a short
+  hall north with the **company commander's** and **First Sergeant's** offices across it from each
+  other.
 - **Block-out:** `scripts/make_barracks_blockout.py` builds plain boxes at the measured size
   (main wing 85 x 17 x 11 m; the L's size is a guess, low buildings barely show in the photo),
   with collision, and prints where to place it: X -5339, Y 36039, Z 2202, rotation 349.1.

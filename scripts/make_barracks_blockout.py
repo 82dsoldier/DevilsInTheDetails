@@ -5,9 +5,12 @@
 The building, in its own coordinates (metres; +y runs along the main wing toward its north
 end, +x across it to the east, the origin at the centre of the main wing, ground level 0):
   main wing     three floors, WING_W x WING_L
-  office wing   one floor, across the north end, from the armory to OFFICE_PAST beyond the
-                wing's east wall; the company entrance is in the south face of that step
-  armory        one floor, the short leg of the L at the west end, pointing north
+  cross-wing    one floor, across the north end, the armory: from its west end to the main
+                wing's east wall
+  orderly room  one floor, east of the main wing's east wall: the company entrance in its south
+                face; inside, the armory door on the left, the CQ desk on the right, and a hall
+                north between the CO's and the First Sergeant's offices
+  west leg      one floor, at the cross-wing's west end, pointing north (from the photo)
 Walls run FOOTING m below 0 so sloping ground never shows a gap.
 
 Placement comes from the 1993 photo (cells (-2, 9) and (-2, 8)) and the heightmap. It writes
@@ -36,10 +39,11 @@ from make_photo_overlay import load_pynifly                                 # no
 # Size, metres.
 WING_L, WING_W, WING_H = 85.0, 17.0, 11.0     # three floors and a parapet
 LOW_H = 4.5                                   # the one-story L
-OFFICE_DEPTH = 10.0                           # office wing, north of the main wing
-OFFICE_WEST = -26.0                           # its west end (the armory's west wall)
-OFFICE_PAST = 4.0                             # its east end, this far out past the wing's east wall
-ARMORY_W, ARMORY_DEPTH = 12.0, 8.0            # the short leg, beyond the office wing
+CROSS_DEPTH = 10.0                            # cross-wing, north of the main wing
+CROSS_WEST = -26.0                            # its west end
+ORDERLY_W = 10.0                              # office, 2 m hall, office
+ORDERLY_DEPTH = 11.0                          # entrance and CQ desk, then the two offices
+LEG_W, LEG_DEPTH = 12.0, 8.0                  # the west leg, beyond the cross-wing
 FOOTING = 2.0
 
 # Placement, read off the 1993 photo: the main wing's centre, in metres from the photo's
@@ -56,8 +60,9 @@ def boxes():
     n = WING_L / 2
     return [
         (-WING_W / 2, -n, WING_W / 2, n, WING_H),
-        (OFFICE_WEST, n, WING_W / 2 + OFFICE_PAST, n + OFFICE_DEPTH, LOW_H),
-        (OFFICE_WEST, n + OFFICE_DEPTH, OFFICE_WEST + ARMORY_W, n + OFFICE_DEPTH + ARMORY_DEPTH, LOW_H),
+        (CROSS_WEST, n, WING_W / 2, n + CROSS_DEPTH, LOW_H),
+        (WING_W / 2, n, WING_W / 2 + ORDERLY_W, n + ORDERLY_DEPTH, LOW_H),
+        (CROSS_WEST, n + CROSS_DEPTH, CROSS_WEST + LEG_W, n + CROSS_DEPTH + LEG_DEPTH, LOW_H),
     ]
 
 
