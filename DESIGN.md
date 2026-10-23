@@ -792,6 +792,9 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   Editing → **Heightmap Import** (Heightmap Autopaint is for texturing later) at cells x -13 to 12,
   y -19 to 18, min 0, max 4020, and walked in game (`cow DevilsBarracksWorld 0 0`): gently rolling
   ground, not stretched or flattened.
+  Heights come through exactly: at the centre of cell 0, 0 (`cow` lands you at a cell's centre,
+  not its corner) the game said z 2760, the heightmap 2765. So the import puts the lowest point at
+  z 0, and anything built from the heightmap lines up with the ground.
 - **The photo on the ground:** `scripts/make_photo_overlay.py` drapes the 1993 photo over the
   terrain as a reference mesh (one NIF, 16 units above the ground point for point, no collision),
   for finding your way and placing buildings. Placed once at 0, 0, 0 as a persistent, full-LOD
