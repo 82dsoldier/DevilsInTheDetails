@@ -396,6 +396,17 @@ The choices have consequences; these are what Nate gets for them.
   every player needs a way home, or a player who sided with the settlers is stuck. **Decided: the
   C-130 aircrew stay out of the feud.** Pilots are too rare to risk, so they fly anyone who pays, even
   someone the Devils want dead. Peace makes it free and whenever Nate likes.
+- **Where the plane lives: the assault strip on Sicily DZ.** Sicily has a dirt landing strip
+  built for C-130s, so the bird is based there, and that's where Nate finds it to fly home (or,
+  in the peace ending, whenever he likes). It's also part of why Vargas's patrol is on Sicily:
+  they guard the strip and the last plane, not just the tunnel.
+  - **The catch:** a player at war with the Devils has to get past that patrol to reach the
+    plane. Idea: **the strip is neutral ground.** Nobody fires near the last airworthy plane, since
+    one stray round could ground it for good. Inside the strip's boundary, even hostile Devils hold
+    their fire, and the player had better hold theirs.
+  - Technical: the strip is just flat dirt in the Sicily DZ worldspace, cheap to build. The plane
+    is a static model on the ground, with an activator for the flight (the aircraft interior, then
+    a teleport to Boston).
 
 ### The recall: how it starts
 
