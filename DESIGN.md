@@ -857,6 +857,10 @@ a modded receiver.)
   a hall running **east-west**: the **company commander's** office north of it, the **First
   Sergeant's** south of it (east of the CQ desk), and north of the hall at its west end two more
   rooms, a **bathroom** and a **supply closet**.
+- **No way through inside.** The company entrance opens to the outside, just east of the main
+  wing's east wall, and the orderly room and arms room don't connect to the main wing at all: you
+  go outside one to get into the other. In the mod that makes them separate interior cells, each
+  with its own door from outside.
 - **Block-out:** `scripts/make_barracks_blockout.py` builds plain boxes at the measured size
   (main wing 85 x 17 x 11 m; the L's size is a guess, low buildings barely show in the photo),
   with collision, and prints where to place it: X -5339, Y 36039, Z 2202, rotation 349.1.
