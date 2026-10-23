@@ -143,6 +143,8 @@ begin
     SetElementEditValues(ref, 'DATA\Rotation\X', '0');
     SetElementEditValues(ref, 'DATA\Rotation\Y', '0');
     SetElementEditValues(ref, 'DATA\Rotation\Z', row[5]);
+    // Draw the full model at any distance until the buildings have distant LOD of their own.
+    SetElementEditValues(ref, 'Record Header\Record Flags\Is Full LOD', '1');
   end;
   AddMessage(Format('Barracks: %d placed, %d moved.', [made, moved]));
   csv.Free;
