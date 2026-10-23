@@ -749,7 +749,10 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   differ, the terrain follows the 1993 photo and gets smoothed by hand in the Creation Kit.
 - Layout: USGS DOQ from **NAPP photo of 1993-02-23**, 1 m, in `data/doq_raw/`.
   `scripts/make_overlay.py` lines it up with the cell grid; `out/barracks/aerial_grid.png` shows
-  each cell's Creation Kit coordinates. Bragg Boulevard and Sicily need their own DOQ quarter quads.
+  each cell's Creation Kit coordinates.
+  - Sicily: `O3507956.SWS` (Overhills SW, NAPP 6136-222, 1993-02-23) and `O3507955.SES` (Lobelia SE,
+    NAPP 6139-132, 1993-02-24), in that order: `make_overlay.py --area sicily` with both.
+  - Bragg Boulevard: still to download.
 - Importing: the Fallout 4 Creation Kit's heightmap editor (World menu) is now only an importer,
   and it reads a grayscale DDS of **one channel of 32-bit float** (DXGI R32_FLOAT); a normal DDS
   gives "The request is not supported". You give it the worldspace's cells and it says what image
