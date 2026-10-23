@@ -585,6 +585,10 @@ about airborne operations have heard of. It's the second worldspace.
   About 220 x 300 m. A road comes in from the west through the trees. Here the plane parks off the
   strip, the aircrew keeps its camp, and Vargas's patrol holds the ground; the bleachers, where
   families once watched the jumps, make a ready-made firing line in the raider fight.
+- **The tunnel entrance:** in the trees behind the bleachers, on the side away from the field (the
+  west side of the lot, around cells (-17, -3) to (-16, -1); the exact spot is set when the
+  bleachers are placed). The patrol guards it from the lot, and the bleachers screen it from the
+  field, so a player who lands out on the drop zone can't see it until the fight leads them there.
 
 - **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight:
   a **C-130** or **C-141** (what the 82nd jumped in the early 90s; the C-17 was only being tested
