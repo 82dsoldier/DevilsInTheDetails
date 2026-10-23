@@ -318,6 +318,15 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
   defenders. And the Devils' reaction is a scene in itself: ghouls who served with their
   ancestors, walking out of the ground. Saints of RonMike, or monsters?
 
+**Technical notes:**
+- **The player always has power armor** (it's required for the jump), and power armor resists
+  radiation. Rads alone won't stop them. The block needs to be a hard one: a **radiation interlock**
+  on the blast door into the hot zone that won't open until the air reading is safe, with the
+  radiation high enough that a player who gets past it some other way still can't survive.
+- Radiation as hazard trigger volumes in the hot zone, disabled by a script on the quest stage that
+  starts the fans. Fans as animated activators, switched on by the same stage.
+- The ferals stay after the air clears; only the radiation goes.
+
 ### The numbers station quest
 
 When Nate climbs out of the tunnels with the reactor running, the Pip-Boy picks up the transmitter
@@ -356,7 +365,30 @@ the Devils.
   Cue and Ale has to be sought out. That's deliberate: the Devils hold the power, and the
   settlers have to be earned.
 
-### Side quest: bringing a conscript home
+### Side quests
+
+Each side needs side quests that tilt it toward Nate. Not every one has to cost him with the other
+side, but **some should**: helping one side often means taking from the other. (Seeds below; the
+conversations and details are still to write.)
+
+**For the settlers:**
+- **Clear the raiders from the smuggling routes.** The storm drains are how the settlers move goods
+  around the tithe, and raiders hold them. Clearing them helps the settlers, and costs the Devils
+  their tithe: the Devils turn against Nate if they find out.
+- **Bring a conscript home** (below). Costs him with the Devils if done badly.
+- **Escort a harvest** in from the fields past raiders. Pure gain.
+
+**For the Devils:**
+- **Go out with a tithe patrol** to collect from the market. The Devils' mirror of the smuggling
+  quest: the Devils approve, the settlers remember who came with the soldiers.
+- **Clear the super mutant nest at the vents.** The nest the Devils have never been able to clear.
+  Pure gain (and easier once the filters are in).
+- **Find a missing patrol** in the tunnels, toward the raider camp in the east. Pure gain.
+- **Report Vargas** (see the shakedown). The hardliner approves.
+- **A fool's errand:** a sergeant sends Nate for blinker fluid (see the slang). Small and funny,
+  and the settlers sell him a bottle.
+
+#### Bringing a conscript home
 
 A settler family's son was taken in the conscription. As an officer, Nate can sign a discharge.
 
@@ -367,14 +399,6 @@ A settler family's son was taken in the conscription. As an officer, Nate can si
   (volunteers instead of conscription), and nobody loses face.
 - Either way, the family and the settlers warm to Nate.
 
-**Technical notes:**
-- **The player always has power armor** (it's required for the jump), and power armor resists
-  radiation. Rads alone won't stop them. The block needs to be a hard one: a **radiation interlock**
-  on the blast door into the hot zone that won't open until the air reading is safe, with the
-  radiation high enough that a player who gets past it some other way still can't survive.
-- Radiation as hazard trigger volumes in the hot zone, disabled by a script on the quest stage that
-  starts the fans. Fans as animated activators, switched on by the same stage.
-- The ferals stay after the air clears; only the radiation goes.
 
 ### Story shape
 
