@@ -407,6 +407,20 @@ The choices have consequences; these are what Nate gets for them.
   - Technical: the strip is just flat dirt in the Sicily DZ worldspace, cheap to build. The plane
     is a static model on the ground, with an activator for the flight (the aircraft interior, then
     a teleport to Boston).
+- **Arriving in Boston: two choices on board.**
+  1. **Land at Boston Airport** (the default, no jump). Where the plane goes anyway, and the way
+     home for a player who left the power armor hanging at Bragg. A player at war with the
+     Brotherhood lands in their territory, and that's their problem.
+  2. **Jump into Sanctuary Hills** (power armor only). Nate comes home by parachute, over his old
+     neighborhood, where the story started. It mirrors the jump onto Sicily. Sanctuary works
+     because every player has been there, almost every player has made it a settlement (a
+     workbench and a power armor station to land beside), and the bridge and the river make a
+     clear target from 1,000 ft.
+  - Technical: no edits to Boston's cells. The script moves the player to a point high above an
+    existing vanilla reference (Sanctuary's map marker) instead of placing a new marker in a vanilla
+    cell, which is what would conflict with other mods.
+  - Considered and dropped: jumping onto any settlement the player owns. Every settlement would
+    need checking for a safe landing, and it would feel like fast travel instead of coming home.
 
 ### The recall: how it starts
 
