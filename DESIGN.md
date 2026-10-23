@@ -394,7 +394,7 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
     - **Heavy losses:** "Well, that was a clusterfuck, and you were the biggest useless fuck in it.
       What are you doing here?"
     - **An overwhelming win:** "Nice shootin', Tex. Now what are you doing in my AO?"
-    - **In between:** a middle line, still to write.
+    - **In between:** "Could've been worse. Could've been a lot better. Start talking."
     - Technical: count the player's raider kills (death events on the raiders, checking the killer)
       and the patrol's deaths (only the non-essential members can die), then pick the greeting by
       a quest variable.
