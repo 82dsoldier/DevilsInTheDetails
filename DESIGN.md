@@ -895,5 +895,8 @@ a modded receiver.)
 - **Collision needs the BSX "Havok" flag.** A mesh with collision but no `BSXFlags` on its root
   (or one without the Havok bit, 2) is walked straight through. Vanilla statics carry BSX 130
   (162 with an editor marker) and collision-object flags 128; the block-out script copies that.
+- **Stairs need ramp collision.** Collision built as a stack of step boxes stops the player at the
+  first edge. Like vanilla stairs, the visible steps get no collision of their own; a smooth ramp
+  under them, from the landing to the ground, is what the player walks on.
 - Tools: **PyNifly** for Blender (version 28.1.0 or later fixed Fallout 4 collision export; re-export
   anything made with earlier versions). Look for the old barracks NIF on the other drives.

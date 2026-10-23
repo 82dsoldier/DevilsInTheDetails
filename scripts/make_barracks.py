@@ -68,7 +68,8 @@ class Mesh:
 
     def __init__(self):
         self.parts = {m: ([], [], [], []) for m in COLOURS}
-        self.solids = []        # boxes for collision: (x0, y0, z0, x1, y1, z1)
+        self.solids = []        # collision: boxes (x0, y0, z0, x1, y1, z1), and ramps
+                                # (x0, y0, z0, x1, y1, (top at x0y0, x1y0, x1y1, x0y1))
 
     def quad(self, mat, pts, normal):
         pts = [np.array(p, float) for p in pts]
@@ -97,13 +98,12 @@ class Mesh:
             self.solids.append((x0, y0, z0, x1, y1, z1))
 
     def beam(self, mat, p0, p1, t):
-        """A square beam of side t from p0 to p1, running t/2 past each end, with a block at each
-        end, so beams meeting at a corner close it with no notch."""
+        """A square beam of side t from p0 to p1, with a block at each end, so beams meeting
+        at a corner close it with no notch."""
         p0, p1 = np.array(p0, float), np.array(p1, float)
         d = (p1 - p0) / np.linalg.norm(p1 - p0)
         for c in (p0, p1):
             self.box(mat, *(c - t / 2), *(c + t / 2), bottom=True)
-        p0, p1 = p0 - d * t / 2, p1 + d * t / 2
         a = np.cross(d, (0, 0, 1)) if abs(d[2]) < 0.99 else np.array((1.0, 0, 0))
         a = a / np.linalg.norm(a) * t / 2
         b = np.cross(d, a)
@@ -254,8 +254,13 @@ def main():
             rise = (floor_z - g) / steps
             for i in range(1, steps):
                 x0, x1 = sorted((out0 + side * (i - 1) * TREAD, out0 + side * i * TREAD))
-                m.box("concrete", x0, ly0, -FOOTING, x1, ly1, floor_z - i * rise, solid=True)
+                m.box("concrete", x0, ly0, -FOOTING, x1, ly1, floor_z - i * rise)
             foot_x = out0 + side * (steps - 1) * TREAD
+            # Walking on steps of boxes stops the player at the first edge: like Bethesda's own
+            # stairs, the collision is a smooth ramp from the landing down to the ground.
+            zx = {out0: floor_z, foot_x: g - 0.02}
+            rx0, rx1 = sorted((out0, foot_x))
+            m.solids.append((rx0, ly0, -FOOTING, rx1, ly1, (zx[rx0], zx[rx1], zx[rx1], zx[rx0])))
             foot_z = floor_z - (steps - 1) * rise
             for ry in (ly0 + RAIL_T, ly1 - RAIL_T):
                 for px, pz in ((xf + side * RAIL_T, floor_z), (out0, floor_z), (foot_x, foot_z)):
@@ -313,8 +318,10 @@ def main():
         m.box("band", x0, y0, l_top - 0.9, x1, y1, l_top - 0.6)
         m.box("band", x0, y0, l_top - 0.1, x1, y1, l_top + 0.1)
     # The entrance step: a pad the width of the door, one riser up from the ground.
-    m.box("concrete", door_x - DOOR_W / 2 - 0.3, oy0 - 1.2, -FOOTING, door_x + DOOR_W / 2 + 0.3, oy0,
-          l_floor, solid=True)
+    px0, px1 = door_x - DOOR_W / 2 - 0.3, door_x + DOOR_W / 2 + 0.3
+    m.box("concrete", px0, oy0 - 1.2, -FOOTING, px1, oy0, l_floor)
+    g_pad = l_floor - RISER - 0.02
+    m.solids.append((px0, oy0 - 1.2, -FOOTING, px1, oy0, (g_pad, g_pad, l_floor, l_floor)))
 
     # Textures: each colour with a little grain, so the walls aren't flat paint.
     mod = out / "mod"
@@ -349,8 +356,11 @@ def main():
     coll_verts, coll_tris = [], []
     s = 1 / UNIT_M / HAVOC_SCALE_FACTOR
     for x0, y0, z0, x1, y1, z1 in m.solids:
+        tops = z1 if isinstance(z1, tuple) else (z1,) * 4
+        foot = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
         b = len(coll_verts)
-        coll_verts += [(x * s, y * s, z * s) for z in (z0, z1) for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1))]
+        coll_verts += [(x * s, y * s, z0 * s) for x, y in foot]
+        coll_verts += [(x * s, y * s, zt * s) for (x, y), zt in zip(foot, tops)]
         for q in ((4, 5, 6, 7), (0, 3, 2, 1), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)):
             coll_tris += [[b + q[0], b + q[1], b + q[2]], [b + q[0], b + q[2], b + q[3]]]
     physics = PhysicsProps(is_dynamic=False,
