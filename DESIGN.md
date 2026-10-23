@@ -853,9 +853,9 @@ a modded receiver.)
   pointing north, toward the road. The **orderly room** (circled in
   `data/reference/barracks_exterior_company_entrance.jpg`) stands east of the main wing's east
   wall, about 10 x 11 m, with the **company entrance** in its south face. Inside: the arms room
-  door directly on the left, the **CQ desk** directly on the right, and behind the desk a short
-  hall north with the **company commander's** and **First Sergeant's** offices across it from each
-  other.
+  door directly on the left, the **CQ desk** directly on the right, and behind (north of) the desk
+  a hall running **east-west**, with the **company commander's** and **First Sergeant's** offices
+  across it from each other. North of the hall, west end: a **bathroom and a supply closet**.
 - **Block-out:** `scripts/make_barracks_blockout.py` builds plain boxes at the measured size
   (main wing 85 x 17 x 11 m; the L's size is a guess, low buildings barely show in the photo),
   with collision, and prints where to place it: X -5339, Y 36039, Z 2202, rotation 349.1.
