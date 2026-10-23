@@ -8,12 +8,14 @@ The story and plan are in [DESIGN.md](DESIGN.md).
 Need Python 3.12 with `rasterio numpy pillow requests pyproj`.
 
 ```
-python scripts/make_heightmap.py [--exaggerate 1.5]
-python scripts/make_overlay.py data/doq_raw/O3507956.SES.811019.tif
+python scripts/make_heightmap.py [--area bragg_blvd] [--exaggerate 1.5]
+python scripts/make_overlay.py [--area bragg_blvd] data/doq_raw/O3507956.SES.811019.tif
 ```
 
+`--area` picks the worldspace (`barracks` is the default); each one's files go to `out/<area>/`.
+
 - `make_heightmap.py` downloads USGS 3DEP elevation for the area and writes a 16-bit heightmap
-  sized to whole Fallout cells, with a shaded preview, to `out/`. It also writes
+  sized to whole Fallout cells, with a shaded preview, to `out/<area>/`. It also writes
   `heightmap.dds` (32-bit float, one channel) for the Creation Kit's heightmap import, and prints
   the min and max heights to enter there.
 - `make_overlay.py` lines aerial photos up with the cell grid and labels each cell with its

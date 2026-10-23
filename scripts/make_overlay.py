@@ -1,17 +1,19 @@
 """Line up aerial photos with the heightmap's cell grid, for placing buildings.
 
     python scripts/make_overlay.py data/doq_raw/O3507956.SES.811019.tif [more.tif ...]
+    python scripts/make_overlay.py --area bragg_blvd photo.tif [more.tif ...]
 
-Run make_heightmap.py first (this reads out/heightmap.json for the grid).
+Run make_heightmap.py for the same area first (this reads out/<area>/heightmap.json for the grid).
 Several photos are combined, the first one listed winning where they overlap.
 
-Writes to out/:
+Writes to out/<area>/:
   aerial_grid.tif     the photo(s) on the heightmap's area, 1 m pixels, georeferenced (UTM 17N)
   aerial_grid.png     the same with the cell grid, cell numbers and the area outline drawn on
   cells.json          what the cell numbers mean
 Cell numbers: cell (0, 0) is the one just south-east of the grid's centre; x grows
 east and y grows north, as in the Creation Kit.
 """
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -24,15 +26,18 @@ from rasterio.warp import reproject
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from make_heightmap import corners_utm, OUT, UTM   # noqa: E402
+from make_heightmap import AREAS, corners_utm, out_dir, UTM   # noqa: E402
 
 PX_M = 1.0   # output pixel size
 
 
 def main():
-    if len(sys.argv) < 2:
-        raise SystemExit(__doc__)
-    meta = json.loads((OUT / "heightmap.json").read_text())
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--area", default="barracks", choices=sorted(AREAS))
+    ap.add_argument("photos", nargs="+")
+    args = ap.parse_args()
+    out = out_dir(args.area)
+    meta = json.loads((out / "heightmap.json").read_text())
     cells_x, cells_y = meta["cells"]
     cell_m = meta["cell_size_m"]
     west, north = meta["north_west_corner_utm"]
@@ -42,7 +47,7 @@ def main():
 
     mosaic = np.zeros((h, w), dtype=np.uint8)
     have = np.zeros((h, w), dtype=bool)
-    for path in sys.argv[1:]:
+    for path in args.photos:
         img = np.zeros((h, w), dtype=np.uint8)
         with rasterio.open(path) as src:
             reproject(source=rasterio.band(src, 1), destination=img, dst_transform=transform,
@@ -57,7 +62,7 @@ def main():
         mosaic[take] = img[take]
         have |= take
 
-    with rasterio.open(OUT / "aerial_grid.tif", "w", driver="GTiff", width=w, height=h, count=1,
+    with rasterio.open(out / "aerial_grid.tif", "w", driver="GTiff", width=w, height=h, count=1,
                        dtype="uint8", crs=UTM, transform=transform, nodata=None) as dst:
         dst.write(mosaic, 1)
 
@@ -80,11 +85,11 @@ def main():
         for j in range(cells_y):
             draw.text((i * cell_m / PX_M + 3, j * cell_m / PX_M + 2), f"{x0 + i},{y_top - j}",
                       fill=(255, 220, 0), font=font)
-    outline = [((x - west) / PX_M, (north - y) / PX_M) for x, y in corners_utm()]
+    outline = [((x - west) / PX_M, (north - y) / PX_M) for x, y in corners_utm(args.area)]
     draw.polygon(outline, outline=(255, 50, 50), width=3)
-    img.save(OUT / "aerial_grid.png")
+    img.save(out / "aerial_grid.png")
 
-    (OUT / "cells.json").write_text(json.dumps({
+    (out / "cells.json").write_text(json.dumps({
         "cells": [cells_x, cells_y],
         "x_range": [x0, x0 + cells_x - 1],
         "y_range": [y_top - cells_y + 1, y_top],
@@ -92,7 +97,7 @@ def main():
         "north_west_corner_utm": [west, north],
         "note": "cell (x, y) covers UTM east west + (x - x_min) * cell_size_m, "
                 "north edge at north - (y_max - y) * cell_size_m",
-        "photos": sys.argv[1:],
+        "photos": args.photos,
         "coverage_percent": round(100 * have.mean(), 1),
     }, indent=2))
     print(f"{w} x {h} px, {100 * have.mean():.1f}% covered by photos; "

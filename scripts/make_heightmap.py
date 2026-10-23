@@ -1,17 +1,18 @@
-"""Download 3DEP elevation for the area and turn it into a Fallout 4 heightmap.
+"""Download 3DEP elevation for an area and turn it into a Fallout 4 heightmap.
 
-    python scripts/make_heightmap.py                     # true scale, no exaggeration
+    python scripts/make_heightmap.py                     # the barracks area, true scale
+    python scripts/make_heightmap.py --area bragg_blvd   # another worldspace (see AREAS)
     python scripts/make_heightmap.py --exaggerate 2      # hills twice as tall
     python scripts/make_heightmap.py --dds-size 832x1216 # if the Creation Kit asks for another size
 
-The area is the four corners in AREA (lat, lon), plus MARGIN_M on every side,
+Each area is its corners in AREAS (lat, lon), plus MARGIN_M on every side,
 squared off to north and rounded out to whole Fallout cells.
 
 Fallout 4 scale: 128 game units = 6 ft, so one unit is 0.0142875 m. A cell is
 4096 units (58.52 m) with 33 x 33 height points (one every 128 units, 1.8288 m);
 neighbouring cells share their edge points, so N cells need N*32 + 1 points.
 
-Writes to out/:
+Writes to out/<area>/:
   dem_utm.tif          the downloaded elevation, metres, UTM 17N, 1 m pixels
   heightmap16.png      16-bit grayscale, one pixel per height point, north up
   heightmap16.raw      the same, little-endian 16-bit, no header
@@ -38,13 +39,21 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "out"
 
-# The corners as given: degrees, minutes, seconds (N, W).
-AREA_DMS = [
-    ((35, 8, 20.44), (79, 2, 14.69)),
-    ((35, 8, 28.71), (79, 1, 38.60)),
-    ((35, 8, 5.81), (79, 1, 26.89)),
-    ((35, 7, 28.13), (79, 1, 48.33)),
-]
+# Each worldspace's outline, corners as given: degrees, minutes, seconds (N, W).
+AREAS = {
+    "barracks": [   # the 1-504 barracks area
+        ((35, 8, 20.44), (79, 2, 14.69)),
+        ((35, 8, 28.71), (79, 1, 38.60)),
+        ((35, 8, 5.81), (79, 1, 26.89)),
+        ((35, 7, 28.13), (79, 1, 48.33)),
+    ],
+    "bragg_blvd": [   # the end of Yadkin, the All-American and Bragg Blvd to Sycamore Square
+        ((35, 4, 56.60), (78, 58, 10.73)),
+        ((35, 4, 11.10), (78, 56, 5.25)),
+        ((35, 4, 46.18), (78, 55, 46.34)),
+        ((35, 5, 42.02), (78, 57, 10.86)),
+    ],
+}
 MARGIN_M = 150                 # extra ground around the area, so its edges aren't the world's edges
 UNIT_M = 0.0142875             # one Fallout 4 game unit in metres
 CELL_UNITS = 4096
@@ -59,13 +68,44 @@ def dms(d, m, s):
     return d + m / 60 + s / 3600
 
 
-def corners_utm():
+def corners_utm(area="barracks"):
     to_utm = Transformer.from_crs("EPSG:4326", UTM, always_xy=True)
-    return [to_utm.transform(-dms(*lon), dms(*lat)) for lat, lon in AREA_DMS]
+    return [to_utm.transform(-dms(*lon), dms(*lat)) for lat, lon in AREAS[area]]
+
+
+def out_dir(area):
+    return OUT / area
+
+
+TILE_M = 2000   # the elevation service limits image size, so big areas come down in tiles
 
 
 def download_dem(bounds, path):
     """3DEP's best available elevation (1 m lidar here) for the bounds, in UTM, 1 m pixels."""
+    minx, miny, maxx, maxy = bounds
+    if maxx - minx <= TILE_M and maxy - miny <= TILE_M:
+        download_tile(bounds, path)
+        return
+    from rasterio.merge import merge
+    tiles = []
+    for x in range(minx, maxx, TILE_M):
+        for y in range(miny, maxy, TILE_M):
+            t = path.with_name(f"{path.stem}_{x}_{y}.tif")
+            download_tile((x, y, min(x + TILE_M, maxx), min(y + TILE_M, maxy)), t)
+            tiles.append(t)
+    srcs = [rasterio.open(t) for t in tiles]
+    data, transform = merge(srcs, nodata=-9999)
+    profile = srcs[0].profile
+    for s in srcs:
+        s.close()
+    profile.update(width=data.shape[2], height=data.shape[1], transform=transform)
+    with rasterio.open(path, "w", **profile) as dst:
+        dst.write(data)
+    for t in tiles:
+        t.unlink()
+
+
+def download_tile(bounds, path):
     minx, miny, maxx, maxy = bounds
     width, height = int(round(maxx - minx)), int(round(maxy - miny))
     params = {
@@ -100,14 +140,16 @@ def write_dds_r32f(path, data):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--area", default="barracks", choices=sorted(AREAS))
     ap.add_argument("--exaggerate", type=float, default=1.0, help="vertical scale (1 = true)")
     ap.add_argument("--redownload", action="store_true")
     ap.add_argument("--dds-size", help="WxH for heightmap.dds, if the Creation Kit wants a size "
                     "other than one pixel per height point")
     args = ap.parse_args()
-    OUT.mkdir(exist_ok=True)
+    out = out_dir(args.area)
+    out.mkdir(parents=True, exist_ok=True)
 
-    pts = corners_utm()
+    pts = corners_utm(args.area)
     xs, ys = [p[0] for p in pts], [p[1] for p in pts]
     # Whole cells, centred on the area plus margin.
     w_m = max(xs) - min(xs) + 2 * MARGIN_M
@@ -122,7 +164,7 @@ def main():
     pad = 10
     dl_bounds = (math.floor(west - pad), math.floor(north - cells_y * CELL_M - pad),
                  math.ceil(west + cells_x * CELL_M + pad), math.ceil(north + pad))
-    dem_path = OUT / "dem_utm.tif"
+    dem_path = out / "dem_utm.tif"
     if args.redownload or not dem_path.exists():
         print("Downloading 3DEP elevation...")
         download_dem(dl_bounds, dem_path)
@@ -150,17 +192,18 @@ def main():
     scale = 65535 / top_units if top_units > 0 else 1
     h16 = np.round(rel_units * scale).astype(np.uint16)
 
-    Image.fromarray(h16).save(OUT / "heightmap16.png")
-    h16.astype("<u2").tofile(OUT / "heightmap16.raw")
+    Image.fromarray(h16).save(out / "heightmap16.png")
+    h16.astype("<u2").tofile(out / "heightmap16.raw")
 
     norm = (rel_units / top_units if top_units > 0 else rel_units).astype(np.float32)
     dds_size = (nx, ny)
     if args.dds_size:
         dds_size = tuple(int(v) for v in args.dds_size.lower().split("x"))
         norm = np.asarray(Image.fromarray(norm, mode="F").resize(dds_size, Image.BILINEAR))
-    write_dds_r32f(OUT / "heightmap.dds", norm)
+    write_dds_r32f(out / "heightmap.dds", norm)
 
     meta = {
+        "area": args.area,
         "cells": [cells_x, cells_y],
         "points": [nx, ny],
         "point_spacing_m": POINT_M,
@@ -179,7 +222,7 @@ def main():
         "ck_import_max_height": round(top_units),
         "source_resolution_m": list(src_res),
     }
-    (OUT / "heightmap.json").write_text(json.dumps(meta, indent=2))
+    (out / "heightmap.json").write_text(json.dumps(meta, indent=2))
 
     # Shaded relief preview (light from the north-west), with the area outlined.
     dzdy, dzdx = np.gradient(rel_m, POINT_M)
@@ -199,7 +242,7 @@ def main():
         draw.line([(i * 32, 0), (i * 32, ny)], fill=(0, 0, 0, 40))
     for j in range(1, cells_y):
         draw.line([(0, j * 32), (nx, j * 32)], fill=(0, 0, 0, 40))
-    img.save(OUT / "preview.png")
+    img.save(out / "preview.png")
 
     print(f"{cells_x} x {cells_y} cells ({cells_x * CELL_M:.0f} x {cells_y * CELL_M:.0f} m), "
           f"{nx} x {ny} height points")

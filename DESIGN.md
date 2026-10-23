@@ -143,9 +143,10 @@ Fayetteville as a skyline past the playable edge.
 
   The southeast edge was moved out 400 m from the first draft, which put Sycamore Square right on
   the edge. About 3.5 x 2.1 km at its longest, **4.9 km² (about 1,420 cells)**, a little bigger
-  than the barracks map. The worldspace grid runs north-south, so the box around it is 63 x 48
-  cells; the
-  corners outside the outline are non-playable margin. (The first outline, 12.7 km² along Bragg
+  than the barracks map. The worldspace grid runs north-south, so the box around it, with the same
+  150 m margin as the barracks map, is **68 x 53 cells**; the corners outside the outline are
+  non-playable margin. Heightmap: `make_heightmap.py --area bragg_blvd` (43 to 76 m, 32 m of
+  relief, 2261 game units top to bottom). (The first outline, 12.7 km² along Bragg
   Blvd, was nearly four times the barracks map and was dropped.)
 - **Detail where it counts:** the strip around the Y gets the work. The freeway is mostly road
   pieces and wrecks, and the **wooded areas become the settlers' fields**: visible from the
@@ -729,9 +730,13 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   **26 x 38 cells** (x -13 to 12, y -19 to 18), true scale.
 - Terrain: USGS 3DEP 1 m lidar, 70 to 128 m elevation (57 m of relief).
   `scripts/make_heightmap.py` makes the 16-bit heightmap (`--exaggerate` for taller hills).
+  Each worldspace's outline is in its `AREAS` list (`--area barracks`, the default, or
+  `--area bragg_blvd`; Sicily DZ once its outline is decided), and its files go to `out/<area>/`.
+- The lidar is recent (2010s), so it shows today's roads and grading, not 1993's. Where they
+  differ, the terrain follows the 1993 photo and gets smoothed by hand in the Creation Kit.
 - Layout: USGS DOQ from **NAPP photo of 1993-02-23**, 1 m, in `data/doq_raw/`.
-  `scripts/make_overlay.py` lines it up with the cell grid; `out/aerial_grid.png` shows each cell's
-  Creation Kit coordinates.
+  `scripts/make_overlay.py` lines it up with the cell grid; `out/barracks/aerial_grid.png` shows
+  each cell's Creation Kit coordinates. Bragg Boulevard needs its own DOQ quarter quads.
 - Importing: the Fallout 4 Creation Kit's heightmap editor (World menu) is now only an importer,
   and it reads a grayscale DDS of **one channel of 32-bit float** (DXGI R32_FLOAT); a normal DDS
   gives "The request is not supported". You give it the worldspace's cells and it says what image
