@@ -386,8 +386,19 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   captain at the drop zone takes them.**
   - The Devils on Sicily DZ are a patrol guarding the underground entrance from raiders. The player
     lands in the middle of a raid, and since raiders are always hostile, the player all but has to
-    help the Devils beat them back.
-  - Then the shakedown. The patrol's **captain** has decided he isn't paid enough, so he takes a
+    help the Devils beat them back. Some of the patrol are essential, so **the Devils always win**;
+    the question is how well.
+  - **Captain Vargas** commands the patrol. When the shooting stops, he comes over to talk, and
+    **his mood depends on the fight**: how many raiders the player killed, and how many of his
+    patrol he lost.
+    - **Heavy losses:** "Well, that was a clusterfuck, and you were the biggest useless fuck in it.
+      What are you doing here?"
+    - **An overwhelming win:** "Nice shootin', Tex. Now what are you doing in my AO?"
+    - **In between:** a middle line, still to write.
+    - Technical: count the player's raider kills (death events on the raiders, checking the killer)
+      and the patrol's deaths (only the non-essential members can die), then pick the greeting by
+      a quest variable.
+  - Then the shakedown. Vargas has decided he isn't paid enough, so he takes a
     "fee" from anyone who wants into the underground: whatever is worth the most, which for Nate
     means his fusion cores. This is the captain's own racket, not Devils policy; a first, small look
     at what the tithe can turn into.
