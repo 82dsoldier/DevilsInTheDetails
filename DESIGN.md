@@ -369,6 +369,34 @@ how to decode it.**
   the player. Each side wanted it; the player took it from both. The raids continue, with no side
   holding the advantage, and the player is on their own.
 
+### Rewards
+
+The choices have consequences; these are what Nate gets for them.
+
+- **Every ending: the armory's contents.** Pre-war 82nd gear: weapons, ammo, and **fusion cores**
+  (which finally matter, since cores are scarce); woodland BDUs, a maroon beret, jump wings. And an
+  **"Airborne" perk**: reduced fall damage outside power armor.
+- **One signature reward per ending:**
+  - **The Devils: artillery on call.** Throw a smoke grenade and the Devils' battery fires, like
+    the Minutemen's artillery in vanilla. The guns Nate could have turned on the settlers now work
+    for him.
+  - **The settlers: the market opens up.** Better prices, rare stock, and a unique armor the
+    tinker makes for him.
+  - **Peace: the C-130 is his ride.** Travel between Boston and Bragg whenever he wants. The
+    hardest ending gets the best reward.
+  - **Destroy: loot it all first, then blow it.** The biggest haul of any ending: no friends left,
+    but the most raw power. If the vault still holds nukes, that includes one **small atomic
+    demolition munition**: a backpack nuke, a unique Fat Man variant.
+- **Relieving Top: his pearl-handled 1911.** The pistol he's carried for two hundred years, a gift
+  from his first commander, engraved to him and signed. He hands it to the officer who finally
+  relieved him. (Who the commander was, and the exact inscription, to write.)
+  - Technical: Fallout 4 has no 1911. Options: a retextured, renamed vanilla pistol with pearl
+    grips (cheap), or a new model (a lot of work: mesh, textures, animations). Start cheap.
+- **Getting back to Boston, in every ending.** Only the peace ending gets the plane on demand, but
+  every player needs a way home, or a player who sided with the settlers is stuck. Idea: the **C-130
+  aircrew stay out of the feud.** Pilots are too rare to risk, so they fly anyone who pays, even
+  someone the Devils want dead. Peace makes it free and whenever Nate likes.
+
 ### The recall: how it starts
 
 **The broadcast.** Wandering toward the south end of Boston, Nate picks up a radio signal, a
@@ -446,7 +474,8 @@ about airborne operations have heard of. It's the second worldspace.
 - What exactly is in the armory, and what does opening it do for whoever gets it? **Does the vault
   still hold nukes,** and does whoever opens the armory get them? That would raise the stakes of the
   ending a lot.
-- How does the player get back to Boston afterwards? (The C-130 again?)
+- How does the player get back to Boston afterwards? (See "Rewards": the C-130, with a neutral
+  aircrew, is the idea.)
 - Technical risk to remember: editing the vanilla airport cells can conflict with other mods. A
   plane parked out on the runway, with minimal edits, is safer.
 - Who is Top, and do the Devils know the original garrison is still alive underground?

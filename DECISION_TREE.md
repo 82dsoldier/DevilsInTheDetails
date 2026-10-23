@@ -65,7 +65,7 @@ flowchart TD
     X1 --> P1["Reactor on: fans clear the hot zone, elevators run, defenses and the artillery wake, the post has power"]
     F8 --> P1
     P1 --> P2["Clear the ferals beside Top's squad: 'Put them down clean'"]
-    P2 --> P3["Nate relieves Top and his squad. They become the first settlers of the player's settlement on post"]
+    P2 --> P3["Nate relieves Top and his squad. They become the first settlers of the player's settlement on post. Reward: Top's pearl-handled 1911"]
     P1 --> P4["The transmitter behind RonMike comes alive: a numbers station (part 3)"]
     P2 -.-> P5["Optional: the vault at the bottom, still hot. Does it still hold nukes?"]:::open
 
@@ -90,11 +90,11 @@ flowchart TD
     FM1 --> A0
     S2 --> A0
     PC --> A0
-    A0["The armory door: Nate's ID + the Key to the Post + the code from the broadcast + the codebook to find it"] --> A1{"What does Nate do?"}
-    A1 -->|"Open it (Devils' path)"| END1["The settlers are safe from raids and live under the Devils for good. Hardliner or reformer decides how that feels"]
-    A1 -->|"Open it (settlers' path)"| END2["The settlers are free, and the raids get worse. Can they hold?"]
-    A1 -->|"Open it (peace)"| END3["The raids continue, but the two sides face them together"]
-    A1 -->|Destroy it| END4["Nobody gets it. Both sides turn hostile; Nate is on his own"]:::hostile
+    A0["The armory door: Nate's ID + the Key to the Post + the code from the broadcast + the codebook to find it. Every ending: the armory's gear and the Airborne perk"] --> A1{"What does Nate do?"}
+    A1 -->|"Open it (Devils' path)"| END1["The settlers are safe from raids and live under the Devils for good. Hardliner or reformer decides how that feels. Reward: artillery on call"]
+    A1 -->|"Open it (settlers' path)"| END2["The settlers are free, and the raids get worse. Can they hold? Reward: the market opens up, and a unique armor"]
+    A1 -->|"Open it (peace)"| END3["The raids continue, but the two sides face them together. Reward: the C-130 between Boston and Bragg, on demand"]
+    A1 -->|Destroy it| END4["Nobody gets it. Both sides turn hostile; Nate is on his own. Reward: loot it all first (a backpack nuke, if the vault has them)"]:::hostile
     A1 -.-> NK["What's inside, and do nukes come with it?"]:::open
 
     classDef hostile fill:#f8d7da,stroke:#b02a37,color:#000
@@ -106,4 +106,4 @@ flowchart TD
 - What's in the armory, and whether the vault still holds nukes.
 - Where the reactor and the storm drain sit (leaning: east, past the raider gate).
 - What the tinker needs for the filters.
-- How Nate gets back to Boston.
+- How Nate gets back to Boston in every ending (idea: a neutral C-130 aircrew who fly anyone who pays).
