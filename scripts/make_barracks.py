@@ -9,8 +9,8 @@ The main wing, from the 1993 photo and the photo in data/reference/barracks_exte
   - a darker band at each floor line; the end walls have the strips and bands, no windows
   - the main floor FLOOR_ABOVE m above the highest ground under the wing, so the low end
     stands taller on its foundation
-  - four sets of doors, two on each long side (DOOR_BAYS), each with a landing and steps
-    running along the wall down to the ground in front of it, and railings
+  - four sets of double doors, two on each long side (DOOR_BAYS), each with a landing and steps
+    running straight out from the wall down to the ground, railings on both sides
 Placement, size and the L come from make_barracks_blockout.py.
 
 Writes to out/barracks/mod/ (the layout of the game's Data folder):
@@ -43,9 +43,9 @@ WIN_DEPTH = 0.15               # glass set back from the wall face
 STRIP_W, STRIP_GAP, STRIP_OUT = 0.2, 0.15, 0.08
 BAND_H, BAND_OUT = 0.3, 0.05
 DOOR_BAYS = (2, 7)             # bays 3 and 8, counted from the south end, on both sides
-DOOR_W, DOOR_H, DOOR_DEPTH = 1.1, 2.2, 0.3
-LANDING_OUT, LANDING_ALONG = 1.8, 2.4
-STAIR_W, RISER, TREAD = 1.2, 0.18, 0.28
+DOOR_W, DOOR_H, DOOR_DEPTH = 1.8, 2.2, 0.3   # double doors
+LANDING_OUT, LANDING_ALONG = 1.5, 2.6
+RISER, TREAD = 0.18, 0.28   # the stair is as wide as the landing
 RAIL_H, RAIL_T = 0.95, 0.05
 
 COLOURS = {
@@ -130,6 +130,8 @@ def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
             m.box("frame", min(xi, xi + side * 0.04), ym - 0.03, za, max(xi, xi + side * 0.04), ym + 0.03, zb)
         else:
             m.quad("door", [(xi, ya, za), (xi, yb, za), (xi, yb, zb), (xi, ya, zb)], (side, 0, 0))
+            ym = (ya + yb) / 2   # where the two leaves meet
+            m.box("frame", min(xi, xi + side * 0.05), ym - 0.03, za, max(xi, xi + side * 0.05), ym + 0.03, zb)
 
 
 def main():
@@ -199,29 +201,27 @@ def main():
             x0, x1 = sorted((xf, xf + side * BAND_OUT))
             m.box("band", x0, -hl, z, x1, hl, z + BAND_H)
 
-        # Doors: a landing at floor level, steps along the wall toward the south, railings.
+        # Doors: a landing at floor level, then steps straight out from the wall to the ground,
+        # with a railing down each side.
         for b in DOOR_BAYS:
             yc = -hl + (b + 0.5) * bay
-            lx0, lx1 = sorted((xf, xf + side * LANDING_OUT))
             ly0, ly1 = yc - LANDING_ALONG / 2, yc + LANDING_ALONG / 2
+            lx0, lx1 = sorted((xf, xf + side * LANDING_OUT))
             m.box("concrete", lx0, ly0, -FOOTING, lx1, ly1, floor_z, solid=True)
-            sx0, sx1 = sorted((xf, xf + side * STAIR_W))
-            g = ground(xf + side * STAIR_W / 2, ly0 - 1.0)
+            out0 = xf + side * LANDING_OUT
+            g = ground(out0 + side * 1.0, yc)
             steps = max(1, math.ceil((floor_z - g) / RISER))
             rise = (floor_z - g) / steps
             for i in range(1, steps):
-                m.box("concrete", sx0, ly0 - i * TREAD, -FOOTING, sx1, ly0 - (i - 1) * TREAD,
-                      floor_z - i * rise, solid=True)
-            # Railings: along the landing's outer edge and down the stair's outer side.
-            ox = xf + side * (LANDING_OUT - RAIL_T)
-            sxo = xf + side * (STAIR_W - RAIL_T)
-            for p in ((ox, ly0, floor_z), (ox, ly1, floor_z), (sxo, ly0, floor_z),
-                      (sxo, ly0 - (steps - 1) * TREAD, floor_z - (steps - 1) * rise)):
-                m.beam("rail", p, (p[0], p[1], p[2] + RAIL_H), RAIL_T)
-            m.beam("rail", (ox, ly0, floor_z + RAIL_H), (ox, ly1, floor_z + RAIL_H), RAIL_T)
-            m.beam("rail", (xf, ly1, floor_z + RAIL_H), (ox, ly1, floor_z + RAIL_H), RAIL_T)
-            m.beam("rail", (sxo, ly0, floor_z + RAIL_H),
-                   (sxo, ly0 - (steps - 1) * TREAD, floor_z - (steps - 1) * rise + RAIL_H), RAIL_T)
+                x0, x1 = sorted((out0 + side * (i - 1) * TREAD, out0 + side * i * TREAD))
+                m.box("concrete", x0, ly0, -FOOTING, x1, ly1, floor_z - i * rise, solid=True)
+            foot_x = out0 + side * (steps - 1) * TREAD
+            foot_z = floor_z - (steps - 1) * rise
+            for ry in (ly0 + RAIL_T, ly1 - RAIL_T):
+                for px, pz in ((xf + side * RAIL_T, floor_z), (out0, floor_z), (foot_x, foot_z)):
+                    m.beam("rail", (px, ry, pz), (px, ry, pz + RAIL_H), RAIL_T)
+                m.beam("rail", (xf + side * RAIL_T, ry, floor_z + RAIL_H), (out0, ry, floor_z + RAIL_H), RAIL_T)
+                m.beam("rail", (out0, ry, floor_z + RAIL_H), (foot_x, ry, foot_z + RAIL_H), RAIL_T)
 
     # End walls: strips and bands, no windows.
     for end in (1, -1):

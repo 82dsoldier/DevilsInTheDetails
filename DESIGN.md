@@ -867,8 +867,8 @@ a modded receiver.)
 - **Main wing exterior:** `scripts/make_barracks.py` builds it from the photo's proportions:
   10 bays of about 8.5 m, paired strips at the bay lines, two windows per bay per floor (about
   1.9 x 1.2 m, a window's width apart), darker bands at the floor lines, plain end walls, a
-  parapet cap, and doors in bays 3 and 8 on both sides, each with a landing and steps along the
-  wall to the ground in front of it, and railings. The main floor is 0.5 m above the highest
+  parapet cap, and **double doors** in bays 3 and 8 on both sides, each with a landing and steps
+  running **straight out** from the wall to the ground, with a railing down each side. The main floor is 0.5 m above the highest
   ground under the wing. The L is still plain boxes.
 - Every hammerhead on the map is this one model, placed again and again.
 - **Easter egg: room 305** (third floor, third door from the end of the hall) has a big boulder
