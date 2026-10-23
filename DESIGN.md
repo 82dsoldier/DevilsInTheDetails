@@ -393,8 +393,8 @@ The choices have consequences; these are what Nate gets for them.
   - Technical: Fallout 4 has no 1911. Options: a retextured, renamed vanilla pistol with pearl
     grips (cheap), or a new model (a lot of work: mesh, textures, animations). Start cheap.
 - **Getting back to Boston, in every ending.** Only the peace ending gets the plane on demand, but
-  every player needs a way home, or a player who sided with the settlers is stuck. Idea: the **C-130
-  aircrew stay out of the feud.** Pilots are too rare to risk, so they fly anyone who pays, even
+  every player needs a way home, or a player who sided with the settlers is stuck. **Decided: the
+  C-130 aircrew stay out of the feud.** Pilots are too rare to risk, so they fly anyone who pays, even
   someone the Devils want dead. Peace makes it free and whenever Nate likes.
 
 ### The recall: how it starts
@@ -474,8 +474,7 @@ about airborne operations have heard of. It's the second worldspace.
 - What exactly is in the armory, and what does opening it do for whoever gets it? **Does the vault
   still hold nukes,** and does whoever opens the armory get them? That would raise the stakes of the
   ending a lot.
-- How does the player get back to Boston afterwards? (See "Rewards": the C-130, with a neutral
-  aircrew, is the idea.)
+- **Decided: getting back to Boston** is the C-130, flown by a neutral aircrew (see "Rewards").
 - Technical risk to remember: editing the vanilla airport cells can conflict with other mods. A
   plane parked out on the runway, with minimal edits, is safer.
 - Who is Top, and do the Devils know the original garrison is still alive underground?

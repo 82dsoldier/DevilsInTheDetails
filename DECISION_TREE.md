@@ -106,4 +106,3 @@ flowchart TD
 - What's in the armory, and whether the vault still holds nukes.
 - Where the reactor and the storm drain sit (leaning: east, past the raider gate).
 - What the tinker needs for the filters.
-- How Nate gets back to Boston in every ending (idea: a neutral C-130 aircrew who fly anyone who pays).
