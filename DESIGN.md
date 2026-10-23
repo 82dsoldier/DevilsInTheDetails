@@ -63,7 +63,7 @@ words meant. Use these in dialogue and background barks.
     fumbling with gear. Fallout 4 is rated M and its raiders swear constantly, so it fits.)
   - "Beat your face, private!" and "Hold down my ground." Both mean: drop and do push-ups.
 - **The greeting:** an enlisted soldier passing an officer salutes and says **"All the way, sir!"**
-  (the 82nd's motto). The officer returns it, usually with "Airborne!"
+  (the 82nd's motto). The officer returns it with "Airborne!"
   - **A hook for Nate:** once the Devils know he's a commissioned officer, enlisted Devils salute
     him with "All the way, sir!" as he passes: a small, constant reminder of what his credentials
     mean to them. The hardliner's loyal soldiers might pointedly not salute. If the Devils turn
