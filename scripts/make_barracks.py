@@ -316,6 +316,7 @@ def build(ground, mirror=False):
 
 LOD_PATH = "LOD/" + MOD_PATH
 LOD_BELOW = 2.0                # the facade texture starts this far below the main floor
+LOD_TEXTURES = ("sandstone", "roof", "lod_facade", "flat_n")
 
 
 def facade_texture(path):
@@ -465,6 +466,16 @@ def main():
         Image.fromarray(img).save(tex_dir / f"{name}.dds", pixel_format="DXT1")
     Image.new("RGB", (4, 4), (128, 128, 255)).save(tex_dir / "flat_n.dds", pixel_format="DXT1")
     facade_texture(tex_dir / "lod_facade.dds")
+    # The Creation Kit's LOD generator wants every texture a LOD model uses under Textures\LOD,
+    # and builds its atlas from uncompressed TGA copies under <game>\Source\TGATextures.
+    lod_tex_dir = mod / "Textures" / LOD_PATH
+    tga_dir = out / "source" / "TGATextures" / LOD_PATH
+    lod_tex_dir.mkdir(parents=True, exist_ok=True)
+    tga_dir.mkdir(parents=True, exist_ok=True)
+    for t in LOD_TEXTURES:
+        shutil.copy2(tex_dir / f"{t}.dds", lod_tex_dir / f"{t}.dds")
+        Image.open(tex_dir / f"{t}.dds").convert("RGB").save(tga_dir / f"{t}.tga")
+    lod_tex = "textures\\" + LOD_PATH.replace("/", "\\")
     tex = "textures\\" + MOD_PATH.replace("/", "\\")
     lod_dir = mod / "Meshes" / LOD_PATH
     lod_dir.mkdir(parents=True, exist_ok=True)
@@ -488,7 +499,7 @@ def main():
         name = f"Barracks{site['n']:02d}"
         nif_path = mesh_dir / f"{name}.nif"
         write_nif(m, nif_path, name, tex, pyn)
-        write_lod(build_lod(floor_z, top, l_top, sx < 0), lod_dir / f"{name}_lod.nif", f"{name}_lod", tex, pyn)
+        write_lod(build_lod(floor_z, top, l_top, sx < 0), lod_dir / f"{name}_lod.nif", f"{name}_lod", lod_tex, pyn)
         gx = cells["x_range"][0] * CELL_UNITS + cx / UNIT_M
         gy = (cells["y_range"][1] + 1) * CELL_UNITS - cy / UNIT_M
         v = np.array([p for part in m.parts.values() for p in part[0]])   # object bounds, game units
@@ -511,10 +522,15 @@ def main():
         files = [mesh_dir / f"Barracks{r[0]:02d}.nif" for r in rows]
         files += [lod_dir / f"Barracks{r[0]:02d}_lod.nif" for r in rows]
         files += [tex_dir / "flat_n.dds", tex_dir / "lod_facade.dds"] + [tex_dir / f"{n}.dds" for n in COLOURS]
+        files += [lod_tex_dir / f"{t}.dds" for t in LOD_TEXTURES]
         for f in files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
+        for t in LOD_TEXTURES:                       # beside Data: <game>\Source\TGATextures\...
+            dest = data.parent / "Source" / "TGATextures" / LOD_PATH / f"{t}.tga"
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(tga_dir / f"{t}.tga", dest)
         print(f"  installed {len(files)} files under {data}")
 
 

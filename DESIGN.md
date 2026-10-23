@@ -912,6 +912,8 @@ a modded receiver.)
   from afar). Each barracks has a stand-in, `Meshes\LOD\DevilsInTheDetails\Buildings\BarracksNN_lod.nif`
   (boxes, with the facade painted on `lod_facade.dds`), named in its static's Distant LOD (MNAM)
   with Has Distant LOD set, by the placement script; then the Creation Kit's World LOD generates the
-  map's object LOD.
+  map's object LOD. **LOD models may only use textures under `Textures\LOD\`** (the atlas build
+  fails otherwise), and the atlas is built from TGA copies under `<game>\Source\TGATextures\LOD\`;
+  `make_barracks.py --install` puts both there.
 - Tools: **PyNifly** for Blender (version 28.1.0 or later fixed Fallout 4 collision export; re-export
   anything made with earlier versions). Look for the old barracks NIF on the other drives.
