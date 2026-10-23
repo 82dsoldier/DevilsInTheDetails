@@ -907,10 +907,11 @@ a modded receiver.)
 - **Stairs need ramp collision.** Collision built as a stack of step boxes stops the player at the
   first edge. Like vanilla stairs, the visible steps get no collision of their own; a smooth ramp
   under them, from the landing to the ground, is what the player walks on.
-- **Distant LOD (to do before release).** Beyond the loaded cells (about 120 m) the game draws
-  only LOD, so the barracks pop in up close. For now the placement script flags each reference
-  **Is Full LOD**, so the full model draws from anywhere (fine for 42 buildings on a small map).
-  Before release: a simple distant model per building (the block-out boxes are most of it), named
-  in each static's LOD fields, and the map's object LOD generated with xLODGen or the Creation Kit.
+- **Distant LOD.** Beyond the loaded cells (about 120 m) the game draws only LOD. Flagging the
+  references Is Full LOD was tried and only half worked (pop-in, and some buildings never showing
+  from afar). Each barracks has a stand-in, `Meshes\LOD\DevilsInTheDetails\Buildings\BarracksNN_lod.nif`
+  (boxes, with the facade painted on `lod_facade.dds`), named in its static's Distant LOD (MNAM)
+  with Has Distant LOD set, by the placement script; then the Creation Kit's World LOD generates the
+  map's object LOD.
 - Tools: **PyNifly** for Blender (version 28.1.0 or later fixed Fallout 4 collision export; re-export
   anything made with earlier versions). Look for the old barracks NIF on the other drives.

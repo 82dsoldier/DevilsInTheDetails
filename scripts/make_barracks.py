@@ -28,7 +28,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from make_heightmap import CELL_UNITS, POINT_UNITS, ROOT, UNIT_M, out_dir     # noqa: E402
@@ -69,11 +69,13 @@ class Mesh:
 
     def __init__(self, mirror=False):
         self.mirror = mirror    # flip across the long axis (x -> -x) as quads are written
-        self.parts = {m: ([], [], [], []) for m in COLOURS}
+        self.parts = {m: ([], [], [], []) for m in [*COLOURS, "lod_facade"]}
         self.solids = []        # collision: boxes (x0, y0, z0, x1, y1, z1), and ramps
                                 # (x0, y0, z0, x1, y1, (top at x0y0, x1y0, x1y1, x0y1))
 
-    def quad(self, mat, pts, normal):
+    def quad(self, mat, pts, normal, uv=None):
+        """uv: optional (u, v) per point, v counted up from the bottom; otherwise the texture is
+        projected from the world, 3 m per tile."""
         pts = [np.array(p, float) for p in pts]
         n = np.array(normal, float)
         if self.mirror:
@@ -82,14 +84,15 @@ class Mesh:
             n[0] = -n[0]
         if np.dot(np.cross(pts[1] - pts[0], pts[2] - pts[0]), n) < 0:
             pts = pts[::-1]     # counter-clockwise seen from outside
+            uv = uv[::-1] if uv else uv
         verts, norms, uvs, tris = self.parts[mat]
         b = len(verts)
         ax = int(np.argmax(np.abs(n)))
         u_ax, v_ax = [(1, 2), (0, 2), (0, 1)][ax]
-        for p in pts:
+        for i, p in enumerate(pts):
             verts.append(tuple(p / UNIT_M))
             norms.append(tuple(n))
-            uvs.append((p[u_ax] / 3.0, p[v_ax] / 3.0))   # world-projected, 3 m per tile
+            uvs.append(uv[i] if uv else (p[u_ax] / 3.0, p[v_ax] / 3.0))
         tris += [(b, b + 1, b + 2), (b, b + 2, b + 3)]
 
     def box(self, mat, x0, y0, z0, x1, y1, z1, bottom=False, solid=False):
@@ -308,7 +311,79 @@ def build(ground, mirror=False):
     g_pad = l_floor - RISER * pad_len / 1.2
     m.solids.append((px0, oy0 - pad_len, -FOOTING, px1, oy0, (g_pad, g_pad, l_floor, l_floor)))
 
-    return m, floor_z, top
+    return m, floor_z, top, l_top
+
+
+LOD_PATH = "LOD/" + MOD_PATH
+LOD_BELOW = 2.0                # the facade texture starts this far below the main floor
+
+
+def facade_texture(path):
+    """One long wall of the main wing, painted for distant LOD: windows, ledges and doors on
+    sandstone. Covers the wall's whole length, and from LOD_BELOW under the main floor to the top.
+    The same for every site, since the texture is laid out from the main floor."""
+    W, H = 1024, 256
+    span = LOD_BELOW + 3 * FLOOR_H + PARAPET
+    px = lambda y: (y + WING_L / 2) / WING_L * W
+    py = lambda z: (span - (z + LOD_BELOW)) / span * H        # z from the main floor
+    img = Image.new("RGB", (W, H), COLOURS["sandstone"])
+    d = ImageDraw.Draw(img)
+    bay = WING_L / BAYS
+    for f in (1, 2):                                          # the ledges' shadowed undersides
+        zt = f * FLOOR_H + WIN_SILL - 0.05 - LEDGE_FACE
+        d.rectangle([0, py(zt), W, py(zt - LEDGE_DROP)], fill=COLOURS["band"])
+    for b in range(BAYS):
+        yc = -WING_L / 2 + (b + 0.5) * bay
+        for f in range(3):
+            fz = f * FLOOR_H
+            if f == 0 and b in DOOR_BAYS:
+                d.rectangle([px(yc - DOOR_W / 2), py(fz + DOOR_H), px(yc + DOOR_W / 2), py(fz)], fill=COLOURS["door"])
+                continue
+            for k in (-1, 1):
+                wy = yc + k * WIN_OFFSET
+                d.rectangle([px(wy - WIN_W / 2), py(fz + WIN_SILL + WIN_H), px(wy + WIN_W / 2), py(fz + WIN_SILL)],
+                            fill=COLOURS["glass"], outline=COLOURS["frame"])
+    img.save(path, pixel_format="DXT1")
+
+
+def build_lod(floor_z, top, l_top, mirror):
+    """The distant stand-in: the main wing and the L as plain boxes, the long walls carrying the
+    painted facade."""
+    m = Mesh(mirror)
+    hw, hl = WING_W / 2, WING_L / 2
+    zb, span = floor_z - LOD_BELOW, LOD_BELOW + 3 * FLOOR_H + PARAPET
+    for side in (1, -1):
+        x = side * hw
+        m.quad("sandstone", [(x, -hl, -FOOTING), (x, hl, -FOOTING), (x, hl, zb), (x, -hl, zb)], (side, 0, 0))
+        m.quad("lod_facade", [(x, -hl, zb), (x, hl, zb), (x, hl, top), (x, -hl, top)], (side, 0, 0),
+               uv=[(0, 0), (1, 0), (1, (top - zb) / span), (0, (top - zb) / span)])
+    for end in (1, -1):
+        y = end * hl
+        m.quad("sandstone", [(-hw, y, -FOOTING), (hw, y, -FOOTING), (hw, y, top), (-hw, y, top)], (0, end, 0))
+    m.quad("roof", [(-hw, -hl, top), (hw, -hl, top), (hw, hl, top), (-hw, hl, top)], (0, 0, 1))
+    for x0, y0, x1, y1, _ in bo.boxes()[1:]:
+        m.box("sandstone", x0, y0, -FOOTING, x1, y1, l_top)
+    return m
+
+
+def write_lod(m, nif_path, name, tex, pyn):
+    NifFile, NiShapeBuf, PynBufferTypes = pyn[:3]
+    nif = NifFile()
+    nif.initialize("FO4", str(nif_path), root_type="NiNode", root_name=name)
+    for mat, (verts, norms, uvs, tris) in m.parts.items():
+        if not verts:
+            continue
+        props = NiShapeBuf()
+        props.bufType = PynBufferTypes.BSTriShapeBufType
+        props.hasFullPrecision = 1
+        shape = nif.createShapeFromData(mat, verts, tris, uvs, norms, props=props, parent=nif.root)
+        shape.shader._checked_for_materials = True
+        shape.shader._materials = None
+        shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
+        shape.set_texture("Diffuse", f"{tex}\\{mat}.dds")
+        shape.set_texture("Normal", f"{tex}\\flat_n.dds")
+        shape.save_shader_attributes()
+    nif.save()
 
 
 def write_nif(m, nif_path, name, tex, pyn):
@@ -389,7 +464,10 @@ def main():
         img = np.clip(np.array(rgb, float) + grain, 0, 255).astype(np.uint8)
         Image.fromarray(img).save(tex_dir / f"{name}.dds", pixel_format="DXT1")
     Image.new("RGB", (4, 4), (128, 128, 255)).save(tex_dir / "flat_n.dds", pixel_format="DXT1")
+    facade_texture(tex_dir / "lod_facade.dds")
     tex = "textures\\" + MOD_PATH.replace("/", "\\")
+    lod_dir = mod / "Meshes" / LOD_PATH
+    lod_dir.mkdir(parents=True, exist_ok=True)
 
     # One model per site, its main floor, steps and entrance fitted to the ground there; each is
     # placed with its origin on the lowest ground under its footprint.
@@ -406,30 +484,33 @@ def main():
 
         corners = [(x, y) for b in bo.boxes() for x in (b[0], b[2]) for y in (b[1], b[3])]
         ref_z = min(ground_units(x, y) for x, y in corners)
-        m, floor_z, top = build(lambda x, y: (ground_units(x, y) - ref_z) * UNIT_M, sx < 0)
+        m, floor_z, top, l_top = build(lambda x, y: (ground_units(x, y) - ref_z) * UNIT_M, sx < 0)
         name = f"Barracks{site['n']:02d}"
         nif_path = mesh_dir / f"{name}.nif"
         write_nif(m, nif_path, name, tex, pyn)
+        write_lod(build_lod(floor_z, top, l_top, sx < 0), lod_dir / f"{name}_lod.nif", f"{name}_lod", tex, pyn)
         gx = cells["x_range"][0] * CELL_UNITS + cx / UNIT_M
         gy = (cells["y_range"][1] + 1) * CELL_UNITS - cy / UNIT_M
         v = np.array([p for part in m.parts.values() for p in part[0]])   # object bounds, game units
         lo, hi = np.floor(v.min(0)).astype(int), np.ceil(v.max(0)).astype(int)
         rows.append((site["n"], f"{MOD_PATH}/{name}.nif".replace("/", "\\"), round(gx), round(gy), round(ref_z),
-                     site["heading"], math.floor(gx / CELL_UNITS), math.floor(gy / CELL_UNITS), *lo, *hi))
+                     site["heading"], math.floor(gx / CELL_UNITS), math.floor(gy / CELL_UNITS), *lo, *hi,
+                     f"{LOD_PATH}/{name}_lod.nif".replace("/", "\\")))
         print(f"{name}: X {gx:.0f} Y {gy:.0f} Z {ref_z:.0f} rot {site['heading']:.1f}; "
               f"main floor {floor_z:.2f} m up")
 
     # The placement list for the FO4Edit script.
     if not args.site:
         with open(out / "barracks_placements.csv", "w", newline="") as f:
-            f.write("n,model,x,y,z,rot_z,cell_x,cell_y,bound_x1,bound_y1,bound_z1,bound_x2,bound_y2,bound_z2\n")
+            f.write("n,model,x,y,z,rot_z,cell_x,cell_y,bound_x1,bound_y1,bound_z1,bound_x2,bound_y2,bound_z2,lod_model\n")
             for r in rows:
                 f.write(",".join(str(v) for v in r) + "\n")
         print(f"{len(rows)} sites; placements in {(out / 'barracks_placements.csv').relative_to(ROOT)}")
     if args.install:
         data = Path(args.install)
         files = [mesh_dir / f"Barracks{r[0]:02d}.nif" for r in rows]
-        files += [tex_dir / "flat_n.dds"] + [tex_dir / f"{n}.dds" for n in COLOURS]
+        files += [lod_dir / f"Barracks{r[0]:02d}_lod.nif" for r in rows]
+        files += [tex_dir / "flat_n.dds", tex_dir / "lod_facade.dds"] + [tex_dir / f"{n}.dds" for n in COLOURS]
         for f in files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)

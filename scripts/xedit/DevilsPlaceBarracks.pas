@@ -58,7 +58,7 @@ end;
 
 function Initialize: integer;
 var
-  f, g, wrld, stat, cell, ref: IInterface;
+  f, g, wrld, stat, cell, ref, lod, e: IInterface;
   i, k, made, moved: integer;
   csv, row: TStringList;
   path, edid: string;
@@ -102,7 +102,7 @@ begin
   if not Assigned(g) then g := Add(f, 'STAT', True);
   made := 0;
   moved := 0;
-  // Columns: n,model,x,y,z,rot_z,cell_x,cell_y,bound_x1,bound_y1,bound_z1,bound_x2,bound_y2,bound_z2
+  // Columns: n,model,x,y,z,rot_z,cell_x,cell_y,bound_x1,bound_y1,bound_z1,bound_x2,bound_y2,bound_z2,lod_model
   for i := 1 to csv.Count - 1 do begin
     if Trim(csv[i]) = '' then Continue;
     row.DelimitedText := csv[i];
@@ -122,6 +122,15 @@ begin
     SetElementNativeValues(stat, 'OBND\Z2', StrToInt(row[13]));
     Add(stat, 'Model', True);
     SetElementEditValues(stat, 'Model\MODL', row[1]);
+    // Distant LOD: the same stand-in model at every LOD level, and the flag that tells the
+    // Creation Kit's LOD generator to use it.
+    lod := Add(stat, 'MNAM', True);
+    for k := 0 to ElementCount(lod) - 1 do begin
+      e := ElementByIndex(lod, k);
+      if ElementCount(e) > 0 then e := ElementByIndex(e, 0);
+      SetEditValue(e, row[14]);
+    end;
+    SetElementEditValues(stat, 'Record Header\Record Flags\Has Distant LOD', '1');
 
     ref := FindRef(f, stat);
     if Assigned(ref) then
@@ -143,8 +152,8 @@ begin
     SetElementEditValues(ref, 'DATA\Rotation\X', '0');
     SetElementEditValues(ref, 'DATA\Rotation\Y', '0');
     SetElementEditValues(ref, 'DATA\Rotation\Z', row[5]);
-    // Draw the full model at any distance until the buildings have distant LOD of their own.
-    SetElementEditValues(ref, 'Record Header\Record Flags\Is Full LOD', '1');
+    // Distant LOD draws them far off now, so no Is Full LOD (set by an earlier version).
+    SetElementEditValues(ref, 'Record Header\Record Flags\Is Full LOD', '0');
   end;
   AddMessage(Format('Barracks: %d placed, %d moved.', [made, moved]));
   csv.Free;
