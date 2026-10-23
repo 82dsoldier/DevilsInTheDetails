@@ -1,0 +1,383 @@
+{
+ "about": "Hammerhead barracks on the barracks map, from the 1993 photo (out/barracks/aerial_grid.tif): photo_x/photo_y is the main wing's centre in metres from the photo's north-west corner; heading is the compass direction of the end with the one-story L; mirrored flips the model across its long axis: the south-facing rows keep the arms room on the west and the orderly room on the east, with the company entrance on its north face. Found by matching building 1 (the one measured by hand) against the photo, then checked and corrected by eye. The photo can't show which end the L is on (the wing looks the same from both): the rows alternate, the top row's L at the south end, the next row's at the north, and so on down.",
+ "sites": [
+  {
+   "n": 1,
+   "photo_x": 683.8,
+   "photo_y": 596.9,
+   "heading": 349.0,
+   "mirrored": false,
+   "match": 0.998,
+   "row": 2
+  },
+  {
+   "n": 2,
+   "photo_x": 791.8,
+   "photo_y": 568.9,
+   "heading": 349.0,
+   "mirrored": false,
+   "match": 0.912,
+   "row": 2
+  },
+  {
+   "n": 3,
+   "photo_x": 737.8,
+   "photo_y": 582.9,
+   "heading": 349.0,
+   "mirrored": false,
+   "match": 0.899,
+   "row": 2
+  },
+  {
+   "n": 4,
+   "photo_x": 797.0,
+   "photo_y": 921.1,
+   "heading": 342.0,
+   "mirrored": false,
+   "match": 0.888,
+   "row": 4
+  },
+  {
+   "n": 5,
+   "photo_x": 632.6,
+   "photo_y": 609.9,
+   "heading": 349.0,
+   "mirrored": false,
+   "match": 0.887,
+   "row": 2
+  },
+  {
+   "n": 6,
+   "photo_x": 900.7,
+   "photo_y": 880.2,
+   "heading": 341.5,
+   "mirrored": false,
+   "match": 0.881,
+   "row": 4
+  },
+  {
+   "n": 7,
+   "photo_x": 951.7,
+   "photo_y": 859.2,
+   "heading": 341.5,
+   "mirrored": false,
+   "match": 0.865,
+   "row": 4
+  },
+  {
+   "n": 8,
+   "photo_x": 848.7,
+   "photo_y": 900.2,
+   "heading": 341.5,
+   "mirrored": false,
+   "match": 0.859,
+   "row": 4
+  },
+  {
+   "n": 9,
+   "photo_x": 747.7,
+   "photo_y": 941.2,
+   "heading": 342.0,
+   "mirrored": false,
+   "match": 0.846,
+   "row": 4
+  },
+  {
+   "n": 10,
+   "photo_x": 1056.6,
+   "photo_y": 1168.3,
+   "heading": 333.0,
+   "mirrored": false,
+   "match": 0.842,
+   "row": 6
+  },
+  {
+   "n": 11,
+   "photo_x": 1009.6,
+   "photo_y": 1196.3,
+   "heading": 332.0,
+   "mirrored": false,
+   "match": 0.812,
+   "row": 6
+  },
+  {
+   "n": 12,
+   "photo_x": 961.6,
+   "photo_y": 1224.3,
+   "heading": 332.0,
+   "mirrored": false,
+   "match": 0.812,
+   "row": 6
+  },
+  {
+   "n": 13,
+   "photo_x": 915.6,
+   "photo_y": 1251.3,
+   "heading": 332.0,
+   "mirrored": false,
+   "match": 0.805,
+   "row": 6
+  },
+  {
+   "n": 14,
+   "photo_x": 1127.7,
+   "photo_y": 1531.4,
+   "heading": 323.5,
+   "mirrored": false,
+   "match": 0.802,
+   "row": 8
+  },
+  {
+   "n": 15,
+   "photo_x": 1167.8,
+   "photo_y": 1498.0,
+   "heading": 324.0,
+   "mirrored": false,
+   "match": 0.8,
+   "row": 8
+  },
+  {
+   "n": 16,
+   "photo_x": 1254.2,
+   "photo_y": 1427.2,
+   "heading": 325.0,
+   "mirrored": false,
+   "match": 0.783,
+   "row": 8
+  },
+  {
+   "n": 17,
+   "photo_x": 1453.4,
+   "photo_y": 1695.9,
+   "heading": 315.0,
+   "mirrored": false,
+   "match": 0.763,
+   "row": 10
+  },
+  {
+   "n": 18,
+   "photo_x": 1380.2,
+   "photo_y": 1776.9,
+   "heading": 315.0,
+   "mirrored": false,
+   "match": 0.733,
+   "row": 10
+  },
+  {
+   "n": 19,
+   "photo_x": 1066.8,
+   "photo_y": 1373.0,
+   "heading": 143.5,
+   "mirrored": true,
+   "match": 0.716,
+   "row": 7
+  },
+  {
+   "n": 20,
+   "photo_x": 755.2,
+   "photo_y": 422.8,
+   "heading": 169.5,
+   "mirrored": true,
+   "match": 0.715,
+   "row": 1
+  },
+  {
+   "n": 21,
+   "photo_x": 838.8,
+   "photo_y": 1121.6,
+   "heading": 151.0,
+   "mirrored": true,
+   "match": 0.702,
+   "row": 5
+  },
+  {
+   "n": 22,
+   "photo_x": 692.0,
+   "photo_y": 800.1,
+   "heading": 160.5,
+   "mirrored": true,
+   "match": 0.69,
+   "row": 3
+  },
+  {
+   "n": 23,
+   "photo_x": 843.5,
+   "photo_y": 735.8,
+   "heading": 160.5,
+   "mirrored": true,
+   "match": 0.686,
+   "row": 3
+  },
+  {
+   "n": 24,
+   "photo_x": 884.6,
+   "photo_y": 1093.3,
+   "heading": 154.0,
+   "mirrored": true,
+   "match": 0.686,
+   "row": 5
+  },
+  {
+   "n": 25,
+   "photo_x": 592.9,
+   "photo_y": 452.8,
+   "heading": 168.0,
+   "mirrored": true,
+   "match": 0.683,
+   "row": 1
+  },
+  {
+   "n": 26,
+   "photo_x": 806.3,
+   "photo_y": 397.4,
+   "heading": 167.5,
+   "mirrored": true,
+   "match": 0.676,
+   "row": 1
+  },
+  {
+   "n": 27,
+   "photo_x": 642.7,
+   "photo_y": 437.0,
+   "heading": 168.0,
+   "mirrored": true,
+   "match": 0.671,
+   "row": 1
+  },
+  {
+   "n": 28,
+   "photo_x": 696.5,
+   "photo_y": 423.1,
+   "heading": 168.0,
+   "mirrored": true,
+   "match": 0.67,
+   "row": 1
+  },
+  {
+   "n": 29,
+   "photo_x": 793.9,
+   "photo_y": 761.5,
+   "heading": 161.5,
+   "mirrored": true,
+   "match": 0.668,
+   "row": 3
+  },
+  {
+   "n": 30,
+   "photo_x": 979.2,
+   "photo_y": 1036.4,
+   "heading": 153.0,
+   "mirrored": true,
+   "match": 0.661,
+   "row": 5
+  },
+  {
+   "n": 31,
+   "photo_x": 1106.9,
+   "photo_y": 1335.1,
+   "heading": 141.0,
+   "mirrored": true,
+   "match": 0.651,
+   "row": 7
+  },
+  {
+   "n": 32,
+   "photo_x": 1330.0,
+   "photo_y": 1583.7,
+   "heading": 127.0,
+   "mirrored": true,
+   "match": 0.6,
+   "row": 9
+  },
+  {
+   "n": 33,
+   "photo_x": 931.4,
+   "photo_y": 1063.3,
+   "heading": 150.0,
+   "mirrored": true,
+   "match": 0.595,
+   "row": 5
+  },
+  {
+   "n": 34,
+   "photo_x": 1257.2,
+   "photo_y": 1665.6,
+   "heading": 125.5,
+   "mirrored": true,
+   "match": 0.594,
+   "row": 9
+  },
+  {
+   "n": 35,
+   "photo_x": 1417.7,
+   "photo_y": 1736.7,
+   "heading": 314.0,
+   "mirrored": false,
+   "match": 0.742,
+   "row": 10
+  },
+  {
+   "n": 36,
+   "photo_x": 1367.0,
+   "photo_y": 1543.1,
+   "heading": 127.0,
+   "mirrored": true,
+   "match": 0.589,
+   "row": 9
+  },
+  {
+   "n": 37,
+   "photo_x": 1293.5,
+   "photo_y": 1626.2,
+   "heading": 125.0,
+   "mirrored": true,
+   "match": 0.579,
+   "row": 9
+  },
+  {
+   "n": 38,
+   "photo_x": 1155.9,
+   "photo_y": 1305.0,
+   "heading": 135.0,
+   "mirrored": true,
+   "match": 0.543,
+   "row": 7
+  },
+  {
+   "n": 39,
+   "photo_x": 741.8,
+   "photo_y": 776.6,
+   "heading": 160.5,
+   "mirrored": true,
+   "match": 0.523,
+   "row": 3
+  },
+  {
+   "n": 40,
+   "photo_x": 1211.5,
+   "photo_y": 1462.9,
+   "heading": 323.5,
+   "mirrored": false,
+   "match": 0.812,
+   "row": 8
+  },
+  {
+   "n": 41,
+   "photo_x": 1489.9,
+   "photo_y": 1654.9,
+   "heading": 316.0,
+   "mirrored": false,
+   "match": 0.687,
+   "row": 10
+  },
+  {
+   "n": 42,
+   "photo_x": 1024.1,
+   "photo_y": 1405.4,
+   "heading": 144.5,
+   "mirrored": true,
+   "match": 0.708,
+   "row": 7
+  }
+ ]
+}

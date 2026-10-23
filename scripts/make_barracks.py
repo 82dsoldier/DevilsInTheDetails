@@ -67,7 +67,8 @@ FOOTING = bo.FOOTING
 class Mesh:
     """Flat-shaded quads, one list per material, in metres."""
 
-    def __init__(self):
+    def __init__(self, mirror=False):
+        self.mirror = mirror    # flip across the long axis (x -> -x) as quads are written
         self.parts = {m: ([], [], [], []) for m in COLOURS}
         self.solids = []        # collision: boxes (x0, y0, z0, x1, y1, z1), and ramps
                                 # (x0, y0, z0, x1, y1, (top at x0y0, x1y0, x1y1, x0y1))
@@ -75,6 +76,10 @@ class Mesh:
     def quad(self, mat, pts, normal):
         pts = [np.array(p, float) for p in pts]
         n = np.array(normal, float)
+        if self.mirror:
+            for p in pts:
+                p[0] = -p[0]
+            n[0] = -n[0]
         if np.dot(np.cross(pts[1] - pts[0], pts[2] - pts[0]), n) < 0:
             pts = pts[::-1]     # counter-clockwise seen from outside
         verts, norms, uvs, tris = self.parts[mat]
@@ -177,42 +182,16 @@ def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
          [(a, b, za, zb, "door2" if k == "door" else k) for a, b, za, zb, k in openings])
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--install", help="the game's Data folder, to copy the files into")
-    args = ap.parse_args()
-    NifFile, NiShapeBuf, PynBufferTypes, _ = load_pynifly()
-    from pyn.pynifly import BSXFlags, bhkPhysicsSystem
-    from pyn.bhk_autounpack import CollisionShape, PhysicsProps
-    from pyn.bhk_autopack import pack_shapes
-    from pyn.nifconstants import HAVOC_SCALE_FACTOR
-
-    # Ground under the building, in metres above the reference's Z (the lowest point).
-    out = out_dir("barracks")
-    meta = json.loads((out / "heightmap.json").read_text())
-    cells = json.loads((out / "cells.json").read_text())
-    nx, ny = meta["points"]
-    zmap = np.fromfile(out / "heightmap16.raw", dtype="<u2").reshape(ny, nx) * meta["game_units_per_pixel_step"]
-    cx, cy = bo.CENTRE_PX
-    pt_m = POINT_UNITS * UNIT_M
-
-    def ground_units(x, y):
-        e, n = bo.to_world(x, y)
-        return zmap[int(round((cy - n) / pt_m)), int(round((cx + e) / pt_m))]
-
-    corners = [(x, y) for b in bo.boxes() for x in (b[0], b[2]) for y in (b[1], b[3])]
-    ref_z = min(ground_units(x, y) for x, y in corners)
-
-    def ground(x, y):
-        return (ground_units(x, y) - ref_z) * UNIT_M
-
+def build(ground, mirror=False):
+    """The mesh for one site; ground(x, y) is the ground in metres above the reference's Z, in
+    the building's own coordinates before any mirroring."""
     hw, hl = WING_W / 2, WING_L / 2
     wing_ground = [ground(x, y) for x in np.linspace(-hw, hw, 5) for y in np.linspace(-hl, hl, 20)]
     floor_z = max(wing_ground) + FLOOR_ABOVE
     top = floor_z + 3 * FLOOR_H + PARAPET
     bay = WING_L / BAYS
 
-    m = Mesh()
+    m = Mesh(mirror)
     m.solids.append((-hw, -hl, -FOOTING, hw, hl, top))
 
     # Long sides.
@@ -329,22 +308,14 @@ def main():
     g_pad = l_floor - RISER * pad_len / 1.2
     m.solids.append((px0, oy0 - pad_len, -FOOTING, px1, oy0, (g_pad, g_pad, l_floor, l_floor)))
 
-    # Textures: each colour with a little grain, so the walls aren't flat paint.
-    mod = out / "mod"
-    mesh_dir, tex_dir = mod / "Meshes" / MOD_PATH, mod / "Textures" / MOD_PATH
-    mesh_dir.mkdir(parents=True, exist_ok=True)
-    tex_dir.mkdir(parents=True, exist_ok=True)
-    rng = np.random.default_rng(1993)
-    for name, rgb in COLOURS.items():
-        grain = rng.normal(0, 5 if name in ("sandstone", "band", "concrete", "roof") else 1.5, (128, 128, 1))
-        img = np.clip(np.array(rgb, float) + grain, 0, 255).astype(np.uint8)
-        Image.fromarray(img).save(tex_dir / f"{name}.dds", pixel_format="DXT1")
-    Image.new("RGB", (4, 4), (128, 128, 255)).save(tex_dir / "flat_n.dds", pixel_format="DXT1")
-    tex = "textures\\" + MOD_PATH.replace("/", "\\")
+    return m, floor_z, top
 
-    nif_path = mesh_dir / "Barracks.nif"
+
+def write_nif(m, nif_path, name, tex, pyn):
+    NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, PhysicsProps, \
+        pack_shapes, HAVOC_SCALE_FACTOR = pyn
     nif = NifFile()
-    nif.initialize("FO4", str(nif_path), root_type="BSFadeNode", root_name="Barracks")
+    nif.initialize("FO4", str(nif_path), root_type="BSFadeNode", root_name=name)
     for name, (verts, norms, uvs, tris) in m.parts.items():
         if not verts:
             continue
@@ -363,6 +334,8 @@ def main():
     s = 1 / UNIT_M / HAVOC_SCALE_FACTOR
     for x0, y0, z0, x1, y1, z1 in m.solids:
         tops = z1 if isinstance(z1, tuple) else (z1,) * 4
+        if m.mirror:
+            x0, x1, tops = -x1, -x0, (tops[1], tops[0], tops[3], tops[2])
         foot = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
         b = len(coll_verts)
         coll_verts += [(x * s, y * s, z0 * s) for x, y in foot]
@@ -381,15 +354,82 @@ def main():
     bhkPhysicsSystem.New(nif, data=packed, parent=coll)
     nif.save()
 
-    gx = cells["x_range"][0] * CELL_UNITS + cx / UNIT_M
-    gy = (cells["y_range"][1] + 1) * CELL_UNITS - cy / UNIT_M
-    nverts = sum(len(p[0]) for p in m.parts.values())
-    print(f"{nif_path.relative_to(ROOT)}: {nverts} vertices, {len(m.solids)} collision boxes; "
-          f"main floor {floor_z:.2f} m up, roof {top:.2f} m")
-    print(f"Place at X {gx:.0f}  Y {gy:.0f}  Z {ref_z:.0f}, rotation Z {bo.HEADING_DEG % 360:.1f}")
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--install", help="the game's Data folder, to copy the files into")
+    ap.add_argument("--site", type=int, help="build only this site (see barracks_sites.json)")
+    args = ap.parse_args()
+    NifFile, NiShapeBuf, PynBufferTypes, _ = load_pynifly()
+    from pyn.pynifly import BSXFlags, bhkPhysicsSystem
+    from pyn.bhk_autounpack import CollisionShape, PhysicsProps
+    from pyn.bhk_autopack import pack_shapes
+    from pyn.nifconstants import HAVOC_SCALE_FACTOR
+    pyn = (NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, PhysicsProps,
+           pack_shapes, HAVOC_SCALE_FACTOR)
+
+    out = out_dir("barracks")
+    meta = json.loads((out / "heightmap.json").read_text())
+    cells = json.loads((out / "cells.json").read_text())
+    nx, ny = meta["points"]
+    zmap = np.fromfile(out / "heightmap16.raw", dtype="<u2").reshape(ny, nx) * meta["game_units_per_pixel_step"]
+    pt_m = POINT_UNITS * UNIT_M
+    sites = json.loads((Path(__file__).parent / "barracks_sites.json").read_text())["sites"]
+    if args.site:
+        sites = [s for s in sites if s["n"] == args.site]
+
+    # Textures: each colour with a little grain, so the walls aren't flat paint. Shared by all.
+    mod = out / "mod"
+    mesh_dir, tex_dir = mod / "Meshes" / MOD_PATH, mod / "Textures" / MOD_PATH
+    mesh_dir.mkdir(parents=True, exist_ok=True)
+    tex_dir.mkdir(parents=True, exist_ok=True)
+    rng = np.random.default_rng(1993)
+    for name, rgb in COLOURS.items():
+        grain = rng.normal(0, 5 if name in ("sandstone", "band", "concrete", "roof") else 1.5, (128, 128, 1))
+        img = np.clip(np.array(rgb, float) + grain, 0, 255).astype(np.uint8)
+        Image.fromarray(img).save(tex_dir / f"{name}.dds", pixel_format="DXT1")
+    Image.new("RGB", (4, 4), (128, 128, 255)).save(tex_dir / "flat_n.dds", pixel_format="DXT1")
+    tex = "textures\\" + MOD_PATH.replace("/", "\\")
+
+    # One model per site, its main floor, steps and entrance fitted to the ground there; each is
+    # placed with its origin on the lowest ground under its footprint.
+    rows = []
+    for site in sites:
+        cx, cy, hd = site["photo_x"], site["photo_y"], math.radians(site["heading"])
+
+        sx = -1 if site.get("mirrored") else 1
+
+        def ground_units(x, y):
+            x = sx * x
+            e, n = x * math.cos(hd) + y * math.sin(hd), -x * math.sin(hd) + y * math.cos(hd)
+            return zmap[int(round((cy - n) / pt_m)), int(round((cx + e) / pt_m))]
+
+        corners = [(x, y) for b in bo.boxes() for x in (b[0], b[2]) for y in (b[1], b[3])]
+        ref_z = min(ground_units(x, y) for x, y in corners)
+        m, floor_z, top = build(lambda x, y: (ground_units(x, y) - ref_z) * UNIT_M, sx < 0)
+        name = f"Barracks{site['n']:02d}"
+        nif_path = mesh_dir / f"{name}.nif"
+        write_nif(m, nif_path, name, tex, pyn)
+        gx = cells["x_range"][0] * CELL_UNITS + cx / UNIT_M
+        gy = (cells["y_range"][1] + 1) * CELL_UNITS - cy / UNIT_M
+        v = np.array([p for part in m.parts.values() for p in part[0]])   # object bounds, game units
+        lo, hi = np.floor(v.min(0)).astype(int), np.ceil(v.max(0)).astype(int)
+        rows.append((site["n"], f"{MOD_PATH}/{name}.nif".replace("/", "\\"), round(gx), round(gy), round(ref_z),
+                     site["heading"], math.floor(gx / CELL_UNITS), math.floor(gy / CELL_UNITS), *lo, *hi))
+        print(f"{name}: X {gx:.0f} Y {gy:.0f} Z {ref_z:.0f} rot {site['heading']:.1f}; "
+              f"main floor {floor_z:.2f} m up")
+
+    # The placement list for the FO4Edit script.
+    if not args.site:
+        with open(out / "barracks_placements.csv", "w", newline="") as f:
+            f.write("n,model,x,y,z,rot_z,cell_x,cell_y,bound_x1,bound_y1,bound_z1,bound_x2,bound_y2,bound_z2\n")
+            for r in rows:
+                f.write(",".join(str(v) for v in r) + "\n")
+        print(f"{len(rows)} sites; placements in {(out / 'barracks_placements.csv').relative_to(ROOT)}")
     if args.install:
         data = Path(args.install)
-        files = [nif_path, tex_dir / "flat_n.dds"] + [tex_dir / f"{n}.dds" for n in COLOURS]
+        files = [mesh_dir / f"Barracks{r[0]:02d}.nif" for r in rows]
+        files += [tex_dir / "flat_n.dds"] + [tex_dir / f"{n}.dds" for n in COLOURS]
         for f in files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)

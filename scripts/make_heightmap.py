@@ -61,6 +61,9 @@ AREAS = {
     ],
 }
 MARGIN_M = 150                 # extra ground around the area, so its edges aren't the world's edges
+# Whole columns of cells added on the east after the grid is centred, so the grid and every
+# coordinate already placed on it stay put. The barracks map gets one, for barracks 41.
+EXTRA_EAST = {"barracks": 1}
 UNIT_M = 0.0142875             # one Fallout 4 game unit in metres
 CELL_UNITS = 4096
 POINT_UNITS = 128
@@ -164,6 +167,7 @@ def main():
     cx, cy = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
     west = cx - cells_x * CELL_M / 2
     north = cy + cells_y * CELL_M / 2
+    cells_x += EXTRA_EAST.get(args.area, 0)
     nx, ny = cells_x * 32 + 1, cells_y * 32 + 1
 
     # Download a little beyond the grid so resampling has data at the edges.

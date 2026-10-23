@@ -763,8 +763,9 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
 
 ### The map
 
-- Area: the 1-504 barracks area as outlined, about 1.2 x 1.9 km, plus 150 m margin:
-  **26 x 38 cells** (x -13 to 12, y -19 to 18), true scale.
+- Area: the 1-504 barracks area as outlined, about 1.2 x 1.9 km, plus 150 m margin, plus one
+  more column on the east for barracks 41: **27 x 38 cells** (x -13 to 13, y -19 to 18), true
+  scale.
 - Terrain: USGS 3DEP 1 m lidar, 70 to 128 m elevation (57 m of relief).
   `scripts/make_heightmap.py` makes the 16-bit heightmap (`--exaggerate` for taller hills).
   Each worldspace's outline is in its `AREAS` list (`--area barracks`, the default, or
@@ -790,7 +791,7 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   with an xEdit script. More work, but exact.
 - **Tested 2026-10-23: it works.** The barracks heightmap went in through World → Heightmap
   Editing → **Heightmap Import** (Heightmap Autopaint is for texturing later) at cells x -13 to 12,
-  y -19 to 18, min 0, max 4020, and walked in game (`cow DevilsBarracksWorld 0 0`): gently rolling
+  y -19 to 18 (now x -13 to 13), min 0, max 4020, and walked in game (`cow DevilsBarracksWorld 0 0`): gently rolling
   ground, not stretched or flattened.
   Heights come through exactly: at the centre of cell 0, 0 (`cow` lands you at a cell's centre,
   not its corner) the game said z 2760, the heightmap 2765. So the import puts the lowest point at
@@ -878,7 +879,15 @@ a modded receiver.)
   orderly room's south face; windows for the First Sergeant (south and east), the CO (east and
   north) and a small high one for the bathroom; none for the supply closet. The **arms room has no
   windows and no outside door.** A band and a parapet cap match the main wing.
-- Every hammerhead on the map is this one model, placed again and again.
+- **42 hammerheads** on the barracks map (`scripts/barracks_sites.json`), found by matching the
+  first one against the 1993 photo and corrected by eye. They stand in **10 rows that alternate**:
+  the top row's L at the south end, the next row's at the north, and so on down, so each pair of
+  rows faces across a company street. The south-facing ones are **mirror images** (arms room still
+  on the west, orderly room on the east, its entrance on the north face).
+- **One model per building** (`Barracks01.nif` to `Barracks42.nif`, `make_barracks.py`), each
+  with its main floor, steps and entrance fitted to the ground at its own site; they share
+  textures. `out/barracks/barracks_placements.csv` lists where each goes, and
+  `scripts/xedit/DevilsPlaceBarracks.pas` (an FO4Edit script) places them all in the plugin.
 - **Easter egg: room 305** (third floor, third door from the end of the hall) has a big boulder
   in the middle of the floor. It belonged to a soldier everyone called **Rock**: in basic, his
   drill sergeant made him carry a rock so he could tell his left from his right on the march, and
