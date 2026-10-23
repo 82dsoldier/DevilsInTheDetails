@@ -850,6 +850,11 @@ a modded receiver.)
   every company's building.)
 - **Four sets of main doors,** two on each long side, with short flights of steps and railings.
 - Every hammerhead on the map is this one model, placed again and again.
+- **Easter egg: room 305** (third floor, third door from the end of the hall) has a big boulder
+  in the middle of the floor. It belonged to a soldier everyone called **Rock**: in basic, his
+  drill sergeant made him carry a rock so he could tell his left from his right on the march, and
+  the name stuck. Maybe a note on the rock, or a footlocker stencilled "ROCK". (Nickname only; no
+  real names in the mod.)
 
 - **Exterior:** a NIF shell (walls and roof, simple box collision), reused for every identical
   barracks. Split large buildings into a few pieces for occlusion and precombines. A simple LOD
