@@ -360,12 +360,17 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
     makes life much harder before the story starts and cuts off two story lines (siding with the
     Devils, and the negotiated peace).
   - **It can't be skipped:** the underground entrance is the only way off the drop zone.
-  - To decide: does he leave the core in the frame so the player can walk the armor somewhere
-    ("I'm not a monster")? And what about a player who drops cores on the DZ before talking to him
-    and comes back for them later: does the patrol sweep the DZ, or is that a reward for being
-    clever?
-  - **Payoff later:** the cores can come back. The reform officer might punish the captain when
-    told about it, or the player might steal them back from the post.
+  - **He leaves the core in the frame** so the player can walk the armor to a settlement and hang
+    it up: **"I'm not a monster."** Delivered with just the right amount of sarcasm (casting
+    matters for this line).
+  - To decide: a player who drops cores on the DZ before talking to him and comes back for them
+    later. Does the patrol sweep the DZ, or is that a reward for being clever?
+  - **Reporting him:** Nate can report the captain, best of all to the **hardline** leader, who
+    has no patience for a soldier lining his own pockets. The captain goes to the stockade, but he
+    won't say where the cores are. The player is told plainly: **"We don't have the location of
+    your stolen items... yet."** He gives it up near the end of the mod, and the player gets the
+    cores back.
+  - Or the player can find and steal them back from the post on their own.
   - Also: places where power armor is a bad idea anyway, like tight tunnels a frame won't fit.
 - **Two player settlements,** where the player can park the armor and draw settlers in:
   - **One on post.** Where, to decide (an empty company area, a motor pool, the old family
