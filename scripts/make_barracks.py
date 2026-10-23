@@ -51,6 +51,7 @@ DOOR_BAYS = (2, 7)             # bays 3 and 8, counted from the south end, on bo
 DOOR_W, DOOR_H, DOOR_DEPTH = 2.1, 2.2, 0.3   # double doors, closing straight together
 LANDING_OUT, LANDING_ALONG = 1.5, 2.6
 RISER, TREAD = 0.18, 0.28   # the stair is as wide as the landing
+RAMP_PAST = 1.0             # the collision ramp runs this far past the bottom step, underground
 RAIL_H, RAIL_T = 0.95, 0.05
 L_HEIGHT = 3.6                 # the one-story L, floor to roof
 
@@ -257,9 +258,13 @@ def main():
                 m.box("concrete", x0, ly0, -FOOTING, x1, ly1, floor_z - i * rise)
             foot_x = out0 + side * (steps - 1) * TREAD
             # Walking on steps of boxes stops the player at the first edge: like Bethesda's own
-            # stairs, the collision is a smooth ramp from the landing down to the ground.
-            zx = {out0: floor_z, foot_x: g - 0.02}
-            rx0, rx1 = sorted((out0, foot_x))
+            # stairs, the collision is a smooth ramp from the landing down to the ground. It runs
+            # RAMP_PAST beyond the bottom step at the same slope, so it ends underground and
+            # rises out of the terrain wherever the ground really is, with no lip to trip on.
+            slope = rise / TREAD
+            end_x = foot_x + side * RAMP_PAST
+            zx = {out0: floor_z, end_x: g - slope * RAMP_PAST}
+            rx0, rx1 = sorted((out0, end_x))
             m.solids.append((rx0, ly0, -FOOTING, rx1, ly1, (zx[rx0], zx[rx1], zx[rx1], zx[rx0])))
             foot_z = floor_z - (steps - 1) * rise
             for ry in (ly0 + RAIL_T, ly1 - RAIL_T):
@@ -320,8 +325,9 @@ def main():
     # The entrance step: a pad the width of the door, one riser up from the ground.
     px0, px1 = door_x - DOOR_W / 2 - 0.3, door_x + DOOR_W / 2 + 0.3
     m.box("concrete", px0, oy0 - 1.2, -FOOTING, px1, oy0, l_floor)
-    g_pad = l_floor - RISER - 0.02
-    m.solids.append((px0, oy0 - 1.2, -FOOTING, px1, oy0, (g_pad, g_pad, l_floor, l_floor)))
+    pad_len = 1.2 + RAMP_PAST
+    g_pad = l_floor - RISER * pad_len / 1.2
+    m.solids.append((px0, oy0 - pad_len, -FOOTING, px1, oy0, (g_pad, g_pad, l_floor, l_floor)))
 
     # Textures: each colour with a little grain, so the walls aren't flat paint.
     mod = out / "mod"
