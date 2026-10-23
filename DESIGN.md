@@ -837,6 +837,20 @@ a modded receiver.)
 
 ### Buildings
 
+**The company barracks** (the 1950s "hammerhead" design; the first one to build is in cells
+(-2, 9) and (-2, 8), and its twin stands just west of it):
+
+- **Three floors**, flat roof, walls of precast concrete in a sandstone color. Outside, the walls
+  are divided into bays by plain vertical pilasters, with a band at each floor line and two windows
+  per bay on each floor (see `data/reference/barracks_exterior.jpg`, not in git).
+- **The main wing** runs roughly north-south, leaning about 15° (the south end further east): about
+  85 to 90 m long and 15 to 20 m wide, from the 1993 photo.
+- **The cross-wing at the north end is an L:** the company offices in the east side, the **arms
+  room** in the short west end of the L. (The Devils' arms room in the story can be this room in
+  every company's building.)
+- **Four sets of main doors,** two on each long side, with short flights of steps and railings.
+- Every hammerhead on the map is this one model, placed again and again.
+
 - **Exterior:** a NIF shell (walls and roof, simple box collision), reused for every identical
   barracks. Split large buildings into a few pieces for occlusion and precombines. A simple LOD
   version for distance (xLODGen).
