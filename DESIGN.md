@@ -219,9 +219,17 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 
 **The armory sits behind a wall of radiation, and the radiation is full of feral ghouls.**
 
-- **Why it's hot:** when the bombs fell, the reactor scrammed and the exhaust fans stopped. Whatever
-  leaked in the deep levels in 2077 has hung in the dead air ever since. (Could the source be in the
-  armory itself? That would hint at what's inside.)
+- **The armory complex goes down several stories**, with a **nuclear weapons storage vault at the
+  bottom.** (Real precedent: in the Cold War, airborne engineers and special forces trained with
+  small atomic demolition munitions, nukes light enough to jump with.)
+- **Why it's hot:** when the bombs fell, the vault's containment failed, the reactor scrammed and the
+  exhaust fans stopped. What leaked from the vault has hung in the dead air ever since, hottest at
+  the bottom and rising up through the levels.
+- **Going down:** the levels are joined by elevators and stairwells. The elevators are dead until
+  the reactor is back on (restoring them is already one of the things the reactor does).
+- **Venting clears the air, not the source.** After the fans run, the upper levels are safe, but
+  the vault at the bottom is still dangerous: a last, optional descent for anyone who wants to see
+  what's down there.
 - **The ferals** are what's left of the pre-war garrison: the soldiers who stayed at their posts
   as the air went bad. They still crowd the corridors around the armory door, which is why nobody
   has looted it in two hundred years.
@@ -366,7 +374,9 @@ about airborne operations have heard of. It's the second worldspace.
   the raids making the soldiers' case for them.)
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
 - Where does the storm drain come up?
-- What exactly is in the armory, and what does opening it do for whoever gets it?
+- What exactly is in the armory, and what does opening it do for whoever gets it? **Does the vault
+  still hold nukes,** and does whoever opens the armory get them? That would raise the stakes of the
+  ending a lot.
 - How does the player get back to Boston afterwards? (The C-130 again?)
 - Technical risk to remember: editing the vanilla airport cells can conflict with other mods. A
   plane parked out on the runway, with minimal edits, is safer.
