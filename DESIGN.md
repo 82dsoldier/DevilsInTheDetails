@@ -376,6 +376,14 @@ quests.** (Seeds below; the conversations and details are still to write.)
   around the tithe, and raiders hold them. Clearing them helps the settlers, and costs the Devils
   their tithe: the Devils turn against Nate if they find out.
 - **Bring a conscript home** (below). Costs him with the Devils if done badly.
+- **The market thief.** Someone has been stealing from the booths at the Cue and Ale. The trail
+  leads into the storm drains, to **a Devils deserter** hiding there and stealing to stay alive.
+  (Idea for who it is; to settle.) What Nate does with him:
+  - **Hand him to the settlers.** They get justice, and their goods back. Settlers approve.
+  - **Turn him over to the Devils.** Desertion is about the worst crime there is to them. Devils
+    approve; the settlers got their thief caught, so they're satisfied too.
+  - **Help him disappear.** He's out of the market for good and the settlers are happy, but if
+    the Devils find out Nate hid a deserter, they turn on him.
 
 **For the Devils:**
 - **Go out with a tithe patrol** to collect from the market. The Devils' mirror of the smuggling
