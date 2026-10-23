@@ -565,6 +565,16 @@ about airborne operations have heard of. It's the second worldspace.
   3817 game units top to bottom). Mostly open ground, so cheaper to dress than the other two. (A
   first outline, 12.4 km² and 75 x 96 cells, was more than the other two maps together and was
   cut down.)
+- **The assault strip:** along the northwest side of the field, running southwest to northeast
+  (heading about 45°), cells about (-16, -10) to (4, 4):
+  - 35°09'03.38"N 79°08'38.80"W
+  - 35°09'33.48"N 79°08'01.32"W
+  - 35°09'29.27"N 79°07'51.55"W
+  - 35°08'55.66"N 79°08'30.04"W
+
+  About 1,370 m long (4,500 ft) and 300 m across, counting the cleared ground on each side; the
+  dirt runway itself is a narrower band down the middle, darker in the 1993 photo. It falls about
+  11 m from the southwest end to the northeast (under 1%), so it can follow the ground as it is.
 
 - **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight:
   a **C-130** or **C-141** (what the 82nd jumped in the early 90s; the C-17 was only being tested
