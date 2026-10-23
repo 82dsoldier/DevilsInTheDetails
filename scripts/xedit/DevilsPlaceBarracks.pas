@@ -8,14 +8,15 @@
   more.
 
   To use: copy this file into FO4Edit's "Edit Scripts" folder, start FO4Edit with
-  DevilsInTheDetails.esp, right-click the plugin, Apply Script, pick DevilsPlaceBarracks.
+  DevilsInTheDetails.esp, right-click the plugin, Apply Script, pick DevilsPlaceBarracks. It reads
+  the list from DefaultCsv below.
 }
 unit DevilsPlaceBarracks;
 
 const
   PluginName = 'DevilsInTheDetails.esp';
   WorldName = 'DevilsBarracksWorld';
-  DefaultCsv = 'C:\source\repos\BraggMap\out\barracks\barracks_placements.csv';
+  DefaultCsv = 'C:sourceeposBraggMapoutbarracksbarracks_placements.csv';   // where make_barracks.py writes it
 
 var
   Cells: TStringList;     // 'x,y' -> index into CellRecs
@@ -83,8 +84,14 @@ begin
   CollectCells(ChildGroup(wrld));
   AddMessage(IntToStr(Cells.Count) + ' cells in ' + WorldName + '.');
 
+  // No dialog: FO4Edit's InputQuery shows its default text as garbage (Chinese characters).
   path := DefaultCsv;
-  if not InputQuery('Place barracks', 'Placement list (CSV):', path) then Exit;
+  if not FileExists(path) then begin
+    AddMessage('No placement list at ' + path + ' (change DefaultCsv at the top of the script).');
+    Result := 1;
+    Exit;
+  end;
+  AddMessage('Reading ' + path);
   csv := TStringList.Create;
   row := TStringList.Create;
   row.Delimiter := ',';
