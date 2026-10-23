@@ -850,7 +850,9 @@ a modded receiver.)
   every company's building.)
 - **Four sets of main doors,** two on each long side, with short flights of steps and railings.
 - **The L is one story,** offices along the north end and the armory's short leg at the west end
-  pointing north, toward the road.
+  pointing north, toward the road. The office wing stops short of the main wing's east wall, so
+  the corner between them has room for the **company entrance** (circled in
+  `data/reference/barracks_exterior_company_entrance.jpg`).
 - **Block-out:** `scripts/make_barracks_blockout.py` builds plain boxes at the measured size
   (main wing 85 x 17 x 11 m; the L's size is a guess, low buildings barely show in the photo),
   with collision, and prints where to place it: X -5339, Y 36039, Z 2202, rotation 349.1.
@@ -868,5 +870,8 @@ a modded receiver.)
   Room bounds and portals in the Creation Kit are only for occlusion inside big interiors; they don't
   load anything.
 - Textures through `.bgsm` material files.
+- **Collision needs the BSX "Havok" flag.** A mesh with collision but no `BSXFlags` on its root
+  (or one without the Havok bit, 2) is walked straight through. Vanilla statics carry BSX 130
+  (162 with an editor marker) and collision-object flags 128; the block-out script copies that.
 - Tools: **PyNifly** for Blender (version 28.1.0 or later fixed Fallout 4 collision export; re-export
   anything made with earlier versions). Look for the old barracks NIF on the other drives.
