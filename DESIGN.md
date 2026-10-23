@@ -384,6 +384,22 @@ quests.** (Seeds below; the conversations and details are still to write.)
     approve; the settlers got their thief caught, so they're satisfied too.
   - **Help him disappear.** He's out of the market for good and the settlers are happy, but if
     the Devils find out Nate hid a deserter, they turn on him.
+- **The poisoned water.** The settlers' water has gone bad, and everyone blames the Devils.
+  **A mystery, not a repair job** (so it doesn't play like the Food Lion generator): Nate follows
+  the clues to find out what happened.
+  - **The water:** purifiers on the **Cape Fear River**, piped into town. The river is about 5 km
+    east of the Bragg Boulevard map, so it stays off the map: the quest happens at the **pump house**
+    where the pipe comes in, plus a small separate cell for the **intake on the river**. (There are
+    no creeks in the area to use instead.)
+  - **The truth: the settlers' hardliner sabotaged the purifiers himself, to frame the Devils.** He
+    wants a revolt, and nothing starts one like believing the soldiers poisoned your water. The
+    mirror of the Devils' hardliner asking for the fire mission.
+  - **The choice:**
+    - **Expose him.** The hard core loses its grip, the Devils are cleared, and peace gets closer.
+      Settlers and Devils both approve, though the hardliner's people won't forget.
+    - **Keep quiet.** The water gets fixed, the anger at the Devils stays, and it works for a
+      player siding with the settlers. The Devils lean against Nate if they ever learn he knew.
+  - Either way, Nate gets the purifiers running again, and the settlers have clean water.
 
 **For the Devils:**
 - **Go out with a tithe patrol** to collect from the market. The Devils' mirror of the smuggling
