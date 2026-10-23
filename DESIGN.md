@@ -196,7 +196,7 @@ part without knowing what it is.
   moderate settler leader is its keeper.
 - **The numbers station (Devils' transmitter).** Once the reactor is on, the transmitter behind
   RonMike broadcasts groups of four-digit numbers, and one group is the code that opens the
-  armory along with the key. **Proposed:** the codebook is how you know *which* group. Without it,
+  armory along with the key. **Decided:** the codebook is how you know *which* group. Without it,
   the broadcast is just numbers. That's how real numbers stations worked (useless without the
   matching codebook), and it keeps the settlers' half of the two-person rule. So the armory needs
   four things: **Nate's ID, the Key to the Post, the code from the broadcast, and the codebook to
