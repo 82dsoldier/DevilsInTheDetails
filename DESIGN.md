@@ -61,6 +61,13 @@ words meant. Use these in dialogue and background barks.
   - "Ate up like a soup sandwich." (Nobody's seen a sandwich of any kind in generations.)
   - "You look like a monkey trying to fuck a football." (A drill sergeant's line for a recruit
     fumbling with gear. Fallout 4 is rated M and its raiders swear constantly, so it fits.)
+  - "Beat your face, private!" and "Hold down my ground." Both mean: drop and do push-ups.
+- **The greeting:** an enlisted soldier passing an officer salutes and says **"All the way, sir!"**
+  (the 82nd's motto). The officer returns it, usually with "Airborne!"
+  - **A hook for Nate:** once the Devils know he's a commissioned officer, enlisted Devils salute
+    him with "All the way, sir!" as he passes: a small, constant reminder of what his credentials
+    mean to them. The hardliner's loyal soldiers might pointedly not salute. If the Devils turn
+    hostile, the salutes stop.
 - **Fool's errands** the old hands send new recruits on, straight out of the motor pool:
   - Go to another shop for a **Yadkin extension**. (Yadkin is the road; there's no such part.)
   - Fetch a **bottle of blinker fluid**.
