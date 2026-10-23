@@ -346,11 +346,27 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   The ones that exist matter.
 - **The Devils hoard them.** They live on scarcity, and cores are part of the
   tithe. That makes cores something to trade for, steal, or earn.
-- **The catch:** the player can bring a pack of cores from the Commonwealth. Ideas to deal with it,
-  to decide:
-  - The checkpoint on Yadkin confiscates them ("requisitioned for the defense of the post").
-  - The Devils buy them for a price too good to refuse.
-  - Places where power armor is a bad idea anyway: tight tunnels, places a frame won't fit.
+- **The catch:** the player can bring a pack of cores from the Commonwealth. **Decided: the
+  captain at the drop zone takes them.**
+  - The Devils on Sicily DZ are a patrol guarding the underground entrance from raiders. The player
+    lands in the middle of a raid, and since raiders are always hostile, the player all but has to
+    help the Devils beat them back.
+  - Then the shakedown. The patrol's **captain** has decided he isn't paid enough, so he takes a
+    "fee" from anyone who wants into the underground: whatever is worth the most, which for Nate
+    means his fusion cores. This is the captain's own racket, not Devils policy; a first, small look
+    at what the tithe can turn into.
+  - **The player can fight, but it's a bad idea.** Some or all of the patrol are essential NPCs
+    (they go down but can't be killed), and attacking them makes the Devils hostile at once. That
+    makes life much harder before the story starts and cuts off two story lines (siding with the
+    Devils, and the negotiated peace).
+  - **It can't be skipped:** the underground entrance is the only way off the drop zone.
+  - To decide: does he leave the core in the frame so the player can walk the armor somewhere
+    ("I'm not a monster")? And what about a player who drops cores on the DZ before talking to him
+    and comes back for them later: does the patrol sweep the DZ, or is that a reward for being
+    clever?
+  - **Payoff later:** the cores can come back. The reform officer might punish the captain when
+    told about it, or the player might steal them back from the post.
+  - Also: places where power armor is a bad idea anyway, like tight tunnels a frame won't fit.
 - **Two player settlements,** where the player can park the armor and draw settlers in:
   - **One on post.** Where, to decide (an empty company area, a motor pool, the old family
     housing?).
