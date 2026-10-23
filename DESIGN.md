@@ -300,8 +300,8 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
        the tunnels, the motor pool, the drop zone.
     4. Install them, then start the reactor. (Where: in a filter room near the reactor, so it's one
        trip, or at each stack topside, which means more mutant fights. Leaning: near the reactor.)
-    - **If the settlers are hostile,** the tinker won't help. Fallback, to decide: a Devils mechanic
-      in the motor pool, at a price.
+    - **If the settlers are hostile,** the tinker won't help. **Decided:** the Devils' **armorer**
+      can make the filters instead, at a price.
 - **Ending Top's story: Nate relieves the post.** Once the way is clear, Nate, the only officer
   with valid credentials, formally relieves Top and his squad. Two hundred years after the order,
   someone finally came. This ends the hot zone quest and opens the way to the armory.
