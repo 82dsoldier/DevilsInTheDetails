@@ -46,9 +46,10 @@ Airborne Corps headquarters. It's in the mod for atmosphere, not for a quest.
   other as the soldier who protects.
 - **Top knows better.** The pre-war ghouls remember a statue. "Ron Mike? It's *Iron* Mike, son."
   Whether the player tells the Devils is up to them.
-- **Where he stands:** the real traffic circle isn't on either map. Either the barracks map stretches
-  to take it in, or (more Fallout) the Devils moved him, all 3,235 pounds, to a place of honor in
-  front of their headquarters. (He was moved for real in 1979, so there's precedent.)
+- **Where he stands (decided):** in front of the **82nd Airborne Division headquarters**, in the
+  southwest corner of the barracks map. The real traffic circle isn't on the map, so the Devils
+  moved him there, all 3,235 pounds, as the centerpiece of their own headquarters. (He was moved
+  for real in 1979, so there's precedent.)
 - **The plaque text** will be written for the mod; the real inscription doesn't need to be copied.
 
 ### The settlers
