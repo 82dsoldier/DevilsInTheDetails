@@ -398,18 +398,31 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
     - Technical: count the player's raider kills (death events on the raiders, checking the killer)
       and the patrol's deaths (only the non-essential members can die), then pick the greeting by
       a quest variable.
-  - Then the shakedown. Vargas has decided he isn't paid enough, so he takes a
-    "fee" from anyone who wants into the underground: whatever is worth the most, which for Nate
-    means his fusion cores. This is the captain's own racket, not Devils policy; a first, small look
-    at what the tithe can turn into.
-  - **The player can fight, but it's a bad idea.** Some or all of the patrol are essential NPCs
-    (they go down but can't be killed), and attacking them makes the Devils hostile at once. That
-    makes life much harder before the story starts and cuts off two story lines (siding with the
-    Devils, and the negotiated peace).
+  - **Vargas confirms the recall.** The Boston broadcast told Nate to report to division
+    headquarters; Vargas is where he learns it's real, that all officers were recalled there, and
+    how to get there: through the tunnels.
+  - **Then the shakedown.** Vargas has decided he isn't paid enough, so he takes a "fee" from anyone
+    who wants into the underground: whatever is worth the most, which for Nate means his fusion
+    cores. This is the captain's own racket, not Devils policy; a first, small look at what the
+    tithe can turn into.
+
+    > "Things are tough out here. You see what we're up against. And ammo ain't cheap. So... before
+    > you go anywhere, you're going to hand over all your power cores."
+
+    (The Devils call fusion cores "power cores".) Three replies:
+    1. **"That's highway robbery. Stick a power core up your ass!"** A fight, and **the Devils
+       turn hostile at once.** Some or all of the patrol are essential NPCs (they go down but can't
+       be killed), so the player can't win it outright, but **the tunnel unlocks** and the player
+       can escape. Life gets much harder before the story starts, and two story lines are gone
+       (siding with the Devils, and the negotiated peace).
+    2. **"I'll have to think about it."** Nothing happens, and **the tunnel stays locked.** The
+       player can come back to Vargas and answer again.
+    3. **"OK. Here they are."** Vargas takes every core **except the one in the frame**, so the
+       player can walk the armor to a settlement and hang it up: **"See... I'm not a monster."**
+       Delivered with just the right amount of sarcasm (casting matters for this line). Everybody
+       stays happy, and **the tunnel unlocks.**
   - **It can't be skipped:** the underground entrance is the only way off the drop zone.
-  - **He leaves the core in the frame** so the player can walk the armor to a settlement and hang
-    it up: **"I'm not a monster."** Delivered with just the right amount of sarcasm (casting
-    matters for this line).
+  - To decide: what Vargas says to a player with no spare cores to take.
   - **Decided: let the clever player be clever.** A player who drops cores on the DZ before talking
     to him can come back for them later. Anyone set on cheating can spawn cores from the console
     anyway; the shakedown sets the tone, it isn't a lock.
