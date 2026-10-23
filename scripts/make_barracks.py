@@ -316,7 +316,7 @@ def build(ground, mirror=False):
 
 LOD_PATH = "LOD/" + MOD_PATH
 LOD_BELOW = 2.0                # the facade texture starts this far below the main floor
-LOD_TEXTURES = ("sandstone", "roof", "lod_facade", "flat_n")
+LOD_TEXTURES = ("sandstone", "roof", "lod_facade")
 
 
 def facade_texture(path):
@@ -381,8 +381,8 @@ def write_lod(m, nif_path, name, tex, pyn):
         shape.shader._checked_for_materials = True
         shape.shader._materials = None
         shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
-        shape.set_texture("Diffuse", f"{tex}\\{mat}.dds")
-        shape.set_texture("Normal", f"{tex}\\flat_n.dds")
+        shape.set_texture("Diffuse", f"{tex}\\{mat}_d.dds")
+        shape.set_texture("Normal", f"{tex}\\{mat}_n.dds")
         shape.save_shader_attributes()
     nif.save()
 
@@ -472,9 +472,12 @@ def main():
     tga_dir = out / "source" / "TGATextures" / LOD_PATH
     lod_tex_dir.mkdir(parents=True, exist_ok=True)
     tga_dir.mkdir(parents=True, exist_ok=True)
-    for t in LOD_TEXTURES:
-        shutil.copy2(tex_dir / f"{t}.dds", lod_tex_dir / f"{t}.dds")
-        Image.open(tex_dir / f"{t}.dds").convert("RGB").save(tga_dir / f"{t}.tga")
+    # Each diffuse needs a normal map named to match: name_d and name_n.
+    lod_files = {f"{t}_d": tex_dir / f"{t}.dds" for t in LOD_TEXTURES}
+    lod_files |= {f"{t}_n": tex_dir / "flat_n.dds" for t in LOD_TEXTURES}
+    for name, src in lod_files.items():
+        shutil.copy2(src, lod_tex_dir / f"{name}.dds")
+        Image.open(src).convert("RGB").save(tga_dir / f"{name}.tga")
     lod_tex = "textures\\" + LOD_PATH.replace("/", "\\")
     tex = "textures\\" + MOD_PATH.replace("/", "\\")
     lod_dir = mod / "Meshes" / LOD_PATH
@@ -522,12 +525,12 @@ def main():
         files = [mesh_dir / f"Barracks{r[0]:02d}.nif" for r in rows]
         files += [lod_dir / f"Barracks{r[0]:02d}_lod.nif" for r in rows]
         files += [tex_dir / "flat_n.dds", tex_dir / "lod_facade.dds"] + [tex_dir / f"{n}.dds" for n in COLOURS]
-        files += [lod_tex_dir / f"{t}.dds" for t in LOD_TEXTURES]
+        files += [lod_tex_dir / f"{t}.dds" for t in lod_files]
         for f in files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
-        for t in LOD_TEXTURES:                       # beside Data: <game>\Source\TGATextures\...
+        for t in lod_files:                          # beside Data: <game>\Source\TGATextures\...
             dest = data.parent / "Source" / "TGATextures" / LOD_PATH / f"{t}.tga"
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(tga_dir / f"{t}.tga", dest)
