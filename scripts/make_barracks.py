@@ -534,8 +534,8 @@ def main():
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
-        for t in lod_files:                          # beside Data: <game>\Source\TGATextures\...
-            dest = data.parent / "Source" / "TGATextures" / LOD_PATH / f"{t}.tga"
+        for t in lod_files:   # the Creation Kit reads ..\Source\TGATextures from the game folder: beside it
+            dest = data.parent.parent / "Source" / "TGATextures" / LOD_PATH / f"{t}.tga"
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(tga_dir / f"{t}.tga", dest)
         print(f"  installed {len(files)} files under {data}")
