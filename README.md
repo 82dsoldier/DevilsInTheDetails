@@ -12,7 +12,7 @@ python scripts/make_heightmap.py [--area bragg_blvd] [--exaggerate 1.5]
 python scripts/make_overlay.py [--area bragg_blvd] data/doq_raw/O3507956.SES.811019.tif
 ```
 
-`--area` picks the worldspace (`barracks` is the default); each one's files go to `out/<area>/`.
+`--area` picks the worldspace (`barracks`, the default, `bragg_blvd` or `sicily`); each one's files go to `out/<area>/`.
 
 - `make_heightmap.py` downloads USGS 3DEP elevation for the area and writes a 16-bit heightmap
   sized to whole Fallout cells, with a shaded preview, to `out/<area>/`. It also writes

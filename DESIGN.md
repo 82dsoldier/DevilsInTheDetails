@@ -553,6 +553,19 @@ The player arrives the way the 82nd does: **by parachute, onto Sicily Drop Zone.
 **Decided: Sicily DZ.** The biggest drop zone on Bragg, and the one even people who know nothing
 about airborne operations have heard of. It's the second worldspace.
 
+- **The area (decided):** a four-sided outline about 2.2 km on a side, around the landing ground and
+  the assault strip:
+  - 35°08'57.04"N 79°08'53.59"W
+  - 35°10'03.34"N 79°08'26.20"W
+  - 35°09'47.29"N 79°07'09.71"W
+  - 35°08'39.13"N 79°07'31.10"W
+
+  **4.5 km² (about 1,310 cells)**, about the size of Bragg Boulevard; with the 150 m margin the box
+  is **50 x 50 cells**. Heightmap: `make_heightmap.py --area sicily` (50 to 105 m, 55 m of relief,
+  3817 game units top to bottom). Mostly open ground, so cheaper to dress than the other two. (A
+  first outline, 12.4 km² and 75 x 96 cells, was more than the other two maps together and was
+  cut down.)
+
 - **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight:
   a **C-130** or **C-141** (what the 82nd jumped in the early 90s; the C-17 was only being tested
   then). Engine drone, vibration (camera shake), red and green jump lights, static lines and
@@ -731,12 +744,12 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
 - Terrain: USGS 3DEP 1 m lidar, 70 to 128 m elevation (57 m of relief).
   `scripts/make_heightmap.py` makes the 16-bit heightmap (`--exaggerate` for taller hills).
   Each worldspace's outline is in its `AREAS` list (`--area barracks`, the default, or
-  `--area bragg_blvd`; Sicily DZ once its outline is decided), and its files go to `out/<area>/`.
+  `--area bragg_blvd` or `--area sicily`), and its files go to `out/<area>/`.
 - The lidar is recent (2010s), so it shows today's roads and grading, not 1993's. Where they
   differ, the terrain follows the 1993 photo and gets smoothed by hand in the Creation Kit.
 - Layout: USGS DOQ from **NAPP photo of 1993-02-23**, 1 m, in `data/doq_raw/`.
   `scripts/make_overlay.py` lines it up with the cell grid; `out/barracks/aerial_grid.png` shows
-  each cell's Creation Kit coordinates. Bragg Boulevard needs its own DOQ quarter quads.
+  each cell's Creation Kit coordinates. Bragg Boulevard and Sicily need their own DOQ quarter quads.
 - Importing: the Fallout 4 Creation Kit's heightmap editor (World menu) is now only an importer,
   and it reads a grayscale DDS of **one channel of 32-bit float** (DXGI R32_FLOAT); a normal DDS
   gives "The request is not supported". You give it the worldspace's cells and it says what image

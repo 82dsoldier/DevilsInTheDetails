@@ -53,6 +53,12 @@ AREAS = {
         ((35, 4, 46.18), (78, 55, 46.34)),
         ((35, 5, 42.02), (78, 57, 10.86)),
     ],
+    "sicily": [   # Sicily Drop Zone, the assault strip and the tunnel entrance
+        ((35, 8, 57.04), (79, 8, 53.59)),
+        ((35, 10, 3.34), (79, 8, 26.20)),
+        ((35, 9, 47.29), (79, 7, 9.71)),
+        ((35, 8, 39.13), (79, 7, 31.10)),
+    ],
 }
 MARGIN_M = 150                 # extra ground around the area, so its edges aren't the world's edges
 UNIT_M = 0.0142875             # one Fallout 4 game unit in metres
