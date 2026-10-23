@@ -97,9 +97,13 @@ class Mesh:
             self.solids.append((x0, y0, z0, x1, y1, z1))
 
     def beam(self, mat, p0, p1, t):
-        """A square beam of side t from p0 to p1."""
+        """A square beam of side t from p0 to p1, running t/2 past each end, with a block at each
+        end, so beams meeting at a corner close it with no notch."""
         p0, p1 = np.array(p0, float), np.array(p1, float)
         d = (p1 - p0) / np.linalg.norm(p1 - p0)
+        for c in (p0, p1):
+            self.box(mat, *(c - t / 2), *(c + t / 2), bottom=True)
+        p0, p1 = p0 - d * t / 2, p1 + d * t / 2
         a = np.cross(d, (0, 0, 1)) if abs(d[2]) < 0.99 else np.array((1.0, 0, 0))
         a = a / np.linalg.norm(a) * t / 2
         b = np.cross(d, a)
