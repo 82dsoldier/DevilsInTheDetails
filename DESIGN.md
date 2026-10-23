@@ -42,6 +42,13 @@ Airborne Corps headquarters. It's in the mod for atmosphere, not for a quest.
   luck before a patrol; the dead are named to him; "RonMike sees you" is both a blessing and a
   warning. Fragments of the worn plaque are recited as a creed, with the gaps filled in by
   guesswork.
+- **The sacred text is a technical manual.** The Devils' holiest book, kept at RonMike's shrine, is
+  really the instructions for setting up a large radio transmitter. Following it as scripture over
+  the generations, the Devils have built the whole thing behind RonMike, mast and all, without
+  knowing what it's for. **It has never had power.**
+- **The reactor wakes it.** When the player brings the reactor online, the transmitter comes alive
+  and starts broadcasting a **numbers station**: groups of four-digit numbers, read out on a loop
+  on the Pip-Boy radio. One of those groups is the armory code (see "The MacGuffin").
 - **The hardliner and the reformer** read him differently: one as the soldier who obeys, the
   other as the soldier who protects.
 - **Top knows better.** The pre-war ghouls remember a statue. "Ron Mike? It's *Iron* Mike, son."
@@ -187,6 +194,13 @@ part without knowing what it is.
   like the real-world "cookie" authenticators. A scavenger pulled it out of a pre-war office
   generations ago; the settlers keep it as a curiosity, or close to a holy text. Perhaps the
   moderate settler leader is its keeper.
+- **The numbers station (Devils' transmitter).** Once the reactor is on, the transmitter behind
+  RonMike broadcasts groups of four-digit numbers, and one group is the code that opens the
+  armory along with the key. **Proposed:** the codebook is how you know *which* group. Without it,
+  the broadcast is just numbers. That's how real numbers stations worked (useless without the
+  matching codebook), and it keeps the settlers' half of the two-person rule. So the armory needs
+  four things: **Nate's ID, the Key to the Post, the code from the broadcast, and the codebook to
+  find it**, which means the reactor has to be on, too.
 - **How the player gets both is the choice:**
   - **With the Devils:** they hand over the key; the codebook has to be traded for, stolen or
     taken by force from the settlers.
