@@ -1,7 +1,8 @@
 # The Devils in the Details
 
 Design notes for a Fallout 4 mod set on Fort Bragg, NC, in the 1-504 PIR barracks area as it was in the early 1990s.
-Started 2026-10-22. Nothing here is final.
+Started 2026-10-22. Nothing here is final. The player's choices are drawn as a flowchart in
+[DECISION_TREE.md](DECISION_TREE.md); update it when a choice changes here.
 
 ## Story
 
