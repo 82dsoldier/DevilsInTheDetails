@@ -66,7 +66,7 @@ flowchart TD
     F8 --> P1
     P1 --> P2["Clear the ferals beside Top's squad: 'Put them down clean'"]
     P2 --> P3["Nate relieves Top and his squad. They become the first settlers of the player's settlement on post. Reward: Top's pearl-handled 1911"]
-    P1 --> P4["The transmitter behind RonMike comes alive: a numbers station (part 3)"]
+    P1 --> P4["The transmitter behind RonMike comes alive: a numbers station (part 3). Nate made RonMike speak: the Devils swing hard toward friendly"]
     P2 -.-> P5["Optional: the vault at the bottom, still hot. Does it still hold nukes?"]:::open
 
     classDef hostile fill:#f8d7da,stroke:#b02a37,color:#000
@@ -81,7 +81,9 @@ flowchart TD
     Q2 --> Q3["Top: 'That's a numbers station. Useless without the book.'"]
     Q3 --> Q4["The trail leads to the settlers' codebook"]
     Q4 --> S1{"Pick a side"}
-    S1 -->|The Devils| D1["The Devils hand over the Key to the Post. The codebook is traded for, stolen or taken. The settlers turn hostile"]:::hostile
+    Q4 --> L1["Optional: light up the Cue and Ale with the Food Lion's generator. The settlers swing hard toward friendly and give Nate the codebook"]
+    L1 --> S1
+    S1 -->|The Devils| D1["The Devils hand over the Key to the Post. The codebook is earned, stolen or taken. The settlers turn hostile"]:::hostile
     S1 -->|The settlers| S2["Take the Key to the Post from the Devils' commander, the worst insult there is. The Devils turn hostile"]:::hostile
     S1 -->|"Peace (speech checks)"| PC["The reform officer and the moderate settler leader bring both halves to the door together"]
     D1 --> FM{"The Devils' hardliner: authorize a fire mission on the Cue and Ale market?"}

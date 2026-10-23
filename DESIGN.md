@@ -204,8 +204,8 @@ part without knowing what it is.
   four things: **Nate's ID, the Key to the Post, the code from the broadcast, and the codebook to
   find it**, which means the reactor has to be on, too.
 - **How the player gets both is the choice:**
-  - **With the Devils:** they hand over the key; the codebook has to be traded for, stolen or
-    taken by force from the settlers.
+  - **With the Devils:** they hand over the key; the codebook has to be earned (lighting up the
+    Cue and Ale), stolen or taken by force from the settlers.
   - **With the settlers:** the player takes the key from the Devils' commander. To the Devils
     that's about the worst insult there is.
   - **Peace:** both leaders bring their halves to the armory door together. The final scene.
@@ -325,12 +325,47 @@ behind RonMike: **groups of four-digit numbers, on a loop.** Hearing it starts a
 how to decode it.**
 
 - **The Devils think it's a miracle.** Their sacred transmitter, silent for two hundred years, has
-  started to speak: RonMike's voice. Nobody can understand it, and everybody has a theory.
+  started to speak: RonMike's voice. Nobody can understand it, and everybody has a theory. **Nate
+  made RonMike speak, and that pushes the Devils hard toward friendly.**
 - **Top recognizes it.** "That's a numbers station. Useless without the book." The
   authentication codebooks were kept on post before the war; he points Nate toward where it
   should have been, and that trail leads to the settlers, who have had it for generations.
-- From there the quest becomes getting the codebook: traded, stolen or taken from the settlers,
-  or brought to the door by their leader in the peace ending.
+- From there the quest becomes getting the codebook: earned by lighting up the Cue and Ale (below),
+  or stolen or taken from the settlers, or brought to the door by their leader in the peace ending.
+
+### Lighting up the Cue and Ale
+
+**The settlers' answer to RonMike speaking:** something they've believed impossible all their lives,
+happening in front of them. It pushes the settlers as hard toward friendly as RonMike's voice pushes
+the Devils.
+
+- **The quest:** the tinker says the old **Food Lion** has its own pre-war backup generator, dead
+  for two hundred years. Nate gathers the parts, clears whatever has nested in the loading dock,
+  and brings it back online.
+- **The scene:** the **Cue and Ale sign flickers on** over the market for the first time in two
+  centuries, and the market goes quiet.
+- **What it does for them:** the Food Lion's cold storage runs again, so the harvest keeps. Food
+  that keeps means less hunger and less need for the Devils: straight at the question the mod asks.
+- **Its own generator, not the reactor's power:** a line down Yadkin from the post would make the
+  settlers depend on the Devils, who could cut it whenever the tithe was late. Power of their own
+  is independence, which is what the settlers really want.
+- **The reward: the codebook.** In thanks, the settlers give Nate their holy text, the codebook,
+  which is what decodes the numbers station. Freely given, which makes it harder if Nate later
+  sides against them.
+- **The balance:** RonMike speaks for every player, since everyone restarts the reactor. The
+  Cue and Ale has to be sought out. That's deliberate: the Devils hold the power, and the
+  settlers have to be earned.
+
+### Side quest: bringing a conscript home
+
+A settler family's son was taken in the conscription. As an officer, Nate can sign a discharge.
+
+- **Done badly,** he just signs the papers and walks the boy out, and the Devils take it as an
+  officer undercutting them: they lean toward hostility.
+- **Done right,** he goes through the chain of command: the reform officer's approval, or a
+  **volunteer found to take the boy's place.** That's a small preview of the peace ending's terms
+  (volunteers instead of conscription), and nobody loses face.
+- Either way, the family and the settlers warm to Nate.
 
 **Technical notes:**
 - **The player always has power armor** (it's required for the jump), and power armor resists
