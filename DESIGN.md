@@ -575,6 +575,16 @@ about airborne operations have heard of. It's the second worldspace.
   About 1,370 m long (4,500 ft) and 300 m across, counting the cleared ground on each side; the
   dirt runway itself is a narrower band down the middle, darker in the 1993 photo. It falls about
   11 m from the southwest end to the northeast (under 1%), so it can follow the ground as it is.
+- **The staging area:** a sand parking lot with bleachers, on the west edge of the field beside the
+  southwest end of the strip, against the tree line, cells about (-17, -7) to (-11, 0):
+  - 35°09'23.59"N 79°08'32.58"W
+  - 35°09'15.20"N 79°08'27.11"W
+  - 35°09'10.30"N 79°08'33.23"W
+  - 35°09'19.46"N 79°08'39.87"W
+
+  About 220 x 300 m. A road comes in from the west through the trees. Here the plane parks off the
+  strip, the aircrew keeps its camp, and Vargas's patrol holds the ground; the bleachers, where
+  families once watched the jumps, make a ready-made firing line in the raider fight.
 
 - **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight:
   a **C-130** or **C-141** (what the 82nd jumped in the early 90s; the C-17 was only being tested
