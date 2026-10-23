@@ -24,6 +24,7 @@ import argparse
 import json
 import math
 import shutil
+import struct
 import sys
 from pathlib import Path
 
@@ -34,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from make_heightmap import CELL_UNITS, POINT_UNITS, ROOT, UNIT_M, out_dir     # noqa: E402
 from make_photo_overlay import load_pynifly                                   # noqa: E402
 import make_barracks_blockout as bo                                           # noqa: E402
+import ba2                                                                    # noqa: E402
 
 WING_L, WING_W = bo.WING_L, bo.WING_W
 BAYS = 10                      # about 8.5 m, measured off the photo's near end
@@ -317,6 +319,7 @@ def build(ground, mirror=False):
 LOD_PATH = "LOD/" + MOD_PATH
 LOD_BELOW = 2.0                # the facade texture starts this far below the main floor
 LOD_TEXTURES = ("sandstone", "roof", "lod_facade")
+LOD_MATERIAL_TEMPLATE = r"Materials\LOD\HitTechExtALargeLOD.BGSM"   # in Fallout4 - Materials.ba2
 
 
 def facade_texture(path):
@@ -384,8 +387,31 @@ def write_lod(m, nif_path, name, tex, pyn):
         shape.set_texture("Diffuse", f"{tex}\\{mat}_d.dds")
         shape.set_texture("Normal", f"{tex}\\{mat}_n.dds")
         shape.set_texture("Specular", f"{tex}\\{mat}_s.dds")
+        # The LOD generator reads the textures from the shape's material file, as vanilla LOD has.
+        shape.shader.name = f"materials\\{LOD_PATH.replace('/', chr(92))}\\{mat}.BGSM"
         shape.save_shader_attributes()
     nif.save()
+
+
+def lod_material(template, texture_dir, mat):
+    """A LOD material: vanilla's own (read from the game's archive, so none of Bethesda's files
+    are in this repository) with its _d, _n and _s texture paths swapped for ours. Strings in a
+    BGSM are a 32-bit length, then the text with a closing zero."""
+    out, i, swaps = bytearray(), 0, 0
+    while i < len(template):
+        if i + 4 <= len(template):
+            (n,) = struct.unpack_from("<I", template, i)
+            s = template[i + 4:i + 3 + n] if 5 <= n < 260 and i + 4 + n <= len(template) else b""
+            if s and template[i + 3 + n] == 0 and s.lower()[-6:] in (b"_d.dds", b"_n.dds", b"_s.dds"):
+                new = f"{texture_dir}/{mat}{s[-6:].decode().lower()}".encode() + b"\0"
+                out += struct.pack("<I", len(new)) + new
+                i += 4 + n
+                swaps += 1
+                continue
+        out.append(template[i])
+        i += 1
+    assert swaps == 3, f"expected 3 texture paths in the template, found {swaps}"
+    return bytes(out)
 
 
 def write_nif(m, nif_path, name, tex, pyn):
@@ -541,7 +567,13 @@ def main():
             dest = data.parent.parent / "Source" / "TGATextures" / LOD_PATH / f"{t}.tga"
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(tga_dir / f"{t}.tga", dest)
-        print(f"  installed {len(files)} files under {data}")
+        # The LOD materials, made from vanilla's own LOD material in the game's archive.
+        template = ba2.read(data / "Fallout4 - Materials.ba2", LOD_MATERIAL_TEMPLATE)
+        for t in LOD_TEXTURES:
+            dest = data / "Materials" / LOD_PATH / f"{t}.BGSM"
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(lod_material(template, LOD_PATH, t))
+        print(f"  installed {len(files) + len(LOD_TEXTURES)} files under {data}")
 
 
 if __name__ == "__main__":

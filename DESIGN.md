@@ -915,6 +915,10 @@ a modded receiver.)
   map's object LOD. **LOD models may only use textures under `Textures\LOD\`** (the atlas build
   fails otherwise), and the atlas is built from TGA copies under `Source\TGATextures\LOD\` beside the game folder (the Creation Kit reads `..\Source` from the game folder);
   `make_barracks.py --install` puts both there. Every LOD shape needs a full matching set,
-  `name_d`, `name_n` and `name_s` (diffuse, normal, specular), or the atlas build fails.
+  `name_d`, `name_n` and `name_s` (diffuse, normal, specular), or the atlas build fails. Each
+  must be the same size, and each LOD shape names a material (`.BGSM`) listing all three, as
+  vanilla LOD does; without one the generator finds no specular. The script makes ours from
+  vanilla's own LOD material, read out of `Fallout4 - Materials.ba2` (`scripts/ba2.py`), so no
+  Bethesda file is in the repository.
 - Tools: **PyNifly** for Blender (version 28.1.0 or later fixed Fallout 4 collision export; re-export
   anything made with earlier versions). Look for the old barracks NIF on the other drives.
