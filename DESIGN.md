@@ -392,6 +392,13 @@ A settler family's son was taken in the conscription. As an officer, Nate can si
 5. **Optional third path.** Speech checks bring the reform officer and the moderate settler leader
    together for a negotiated peace: a fairer tithe, volunteers instead of conscription, and both
    halves of the authenticator brought to the door together.
+   - **Speech checks earned along the way** (how Nate brings them together is still mostly open):
+     - **Volunteers instead of conscription:** unlocked if Nate brought the conscript home **the
+       right way** (a volunteer took the boy's place, or the reform officer approved it). He's
+       already shown the reformer that volunteers can work, and the settlers that the Devils can
+       bend. Done badly, or not at all, and the check isn't there.
+     - More to find: the other peace terms (a fairer tithe, and whatever else) should each have
+       a check earned the same way, by something Nate did earlier.
 
 ### Consequences to show
 

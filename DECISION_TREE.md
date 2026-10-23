@@ -85,7 +85,7 @@ flowchart TD
     L1 --> S1
     S1 -->|The Devils| D1["The Devils hand over the Key to the Post. The codebook is earned, stolen or taken. The settlers turn hostile"]:::hostile
     S1 -->|The settlers| S2["Take the Key to the Post from the Devils' commander, the worst insult there is. The Devils turn hostile"]:::hostile
-    S1 -->|"Peace (speech checks)"| PC["The reform officer and the moderate settler leader bring both halves to the door together"]
+    S1 -->|"Peace (speech checks)"| PC["The reform officer and the moderate settler leader bring both halves to the door together. Bringing the conscript home the right way unlocks the volunteers check"]
     D1 --> FM{"The Devils' hardliner: authorize a fire mission on the Cue and Ale market?"}
     FM -->|Yes| FM1["The market is shelled. Many settlers die; the settlers are hostile for good"]:::hostile
     FM -->|No| A0
