@@ -27,7 +27,7 @@ you ask.
   right.
 - They need: someone to show both a decent officer and a hard one. A **reform-minded officer**
   who thinks the tithe has become extortion; a **hardliner** who thinks the settlers owe them
-  everything.
+  everything, and who will ask Nate to shell their market (see "The fire mission").
 
 ### RonMike, the perfect soldier
 
@@ -276,6 +276,8 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
   1. Starts the exhaust fans. The hot zone clears over a short timed sequence (sirens, fans spinning
      up, the green haze thinning).
   2. Wakes the automated defenses, which still follow 2077 orders and don't know who anyone is.
+     Among them, an **artillery battery** still tied into 2077 fire control (see "The fire
+     mission" below).
   3. Restores light and power through the complex (doors, elevators, terminals).
   4. **Powers the post.** The reactor was the post's power plant, so the lights come back on in the
      barracks area too. The Devils gain from it whoever turns it on. (Real precedent: the Army ran
@@ -425,6 +427,28 @@ about airborne operations have heard of. It's the second worldspace.
   mission, and they have nowhere else to go.
 - Does the reactor quest come before or after the player picks a side? (Leaning: either, so
   the player can do it while still neutral.)
+
+### The fire mission
+
+The vent is the dark way to break the Devils. **The fire mission is the dark way to break the
+settlers**, so neither side is the only one the player can do the unthinkable to.
+
+- **The guns:** Bragg is an artillery post, and the 82nd had its own artillery. When the reactor
+  wakes the post's defenses, a battery of guns comes back online, still tied into 2077 fire
+  control. **Firing them takes an officer's authorization**, and Nate is the only one alive.
+- **The ask:** the **hardliner** asks Nate to authorize a fire mission on the **Cue and Ale
+  market**, to break the settlers' resistance for good. It's his defining moment, and saying yes is
+  the clear-cut choice: **I'm siding with this hardass.**
+- **If Nate authorizes it:** the market is shelled, many settlers die, and **the settlers turn
+  hostile for good.** The market and its booths are left in ruins. (Mind the player settlement on
+  Bragg Boulevard: in the blast zone, or near enough to feel it.)
+- **The mirror of the vent:** both are dark acts the reactor makes possible, each one kills one
+  side. The vent can happen out of neglect or on purpose; the fire mission is always deliberate,
+  and it's the one place Nate's credentials are used to kill rather than to open a door.
+- Slang tie-in (idea): "a box of grid squares" is what the Devils call a fire mission.
+- Technical: scripted explosions on markers around the market (vanilla Fallout 4 already does
+  artillery strikes this way), then swap the market for a ruined version with an enable parent and
+  kill or remove the settlers who were there.
 
 ### Power armor and player settlements
 
