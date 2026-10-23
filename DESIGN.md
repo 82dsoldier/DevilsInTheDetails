@@ -312,6 +312,24 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 - **Ending Top's story: Nate relieves the post.** Once the way is clear, Nate, the only officer
   with valid credentials, formally relieves Top and his squad. Two hundred years after the order,
   someone finally came. This ends the hot zone quest and opens the way to the armory.
+- **Top and his squad move up to Bragg.** Where, to decide. Idea: they become the **first
+  settlers of the player's settlement on post**, which gives it its first residents and
+  defenders. And the Devils' reaction is a scene in itself: ghouls who served with their
+  ancestors, walking out of the ground. Saints of RonMike, or monsters?
+
+### The numbers station quest
+
+When Nate climbs out of the tunnels with the reactor running, the Pip-Boy picks up the transmitter
+behind RonMike: **groups of four-digit numbers, on a loop.** Hearing it starts a quest: **find out
+how to decode it.**
+
+- **The Devils think it's a miracle.** Their sacred transmitter, silent for two hundred years, has
+  started to speak: RonMike's voice. Nobody can understand it, and everybody has a theory.
+- **Idea: Top recognizes it.** "That's a numbers station. Useless without the book." The
+  authentication codebooks were kept on post before the war; he points Nate toward where it
+  should have been, and that trail leads to the settlers, who have had it for generations.
+- From there the quest becomes getting the codebook: traded, stolen or taken from the settlers,
+  or brought to the door by their leader in the peace ending.
 
 **Technical notes:**
 - **The player always has power armor** (it's required for the jump), and power armor resists
@@ -324,9 +342,13 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 
 ### Story shape
 
-1. **Arrival.** The jump; the raid on the drop zone. Both sides are neutral. Small jobs for each;
-   learn how they see things. Witness a raid, and see what the soldiers do (and what they charge
-   for it).
+1. **Arrival.** The jump; the raid on the drop zone; Vargas and the shakedown. Both sides are
+   neutral. Small jobs for each; learn how they see things. Witness a raid, and see what the
+   soldiers do (and what they charge for it).
+   - **An explorer's path through the first act:** from the drop zone, west to Top; the reactor
+     quest (and the filters, if Nate bothers); relieve Top; then north out of the tunnels into
+     Bragg, where the numbers station is already on the air. A player who goes straight north
+     reaches Bragg first and does the reactor later; both orders have to work.
 2. **Rising tension.** Something forces the issue: a tithe raid on a farm, an ambush on a patrol,
    a missing recruit. The player learns what the armory is, and that it needs more than an ID.
 3. **The choice.** Help one side; **the other becomes hostile**. Get the key and the codebook.
