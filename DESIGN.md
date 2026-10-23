@@ -152,6 +152,15 @@ Not a side to choose: a constant pressure. Regular attacks on the farms and the 
 the soldiers necessary, and what make the player's choice cost something. Whatever the ending,
 the raids continue: whoever is left has to deal with them.
 
+- **The super mutants nest at the vents.** Even with the fans dead, a little radiation seeps up
+  through the outer vents on post. Super mutants are immune to it, and nobody else wants to stand
+  there, so the ground around the vents is theirs: a nest right inside the Devils' own area that
+  they've never been able to clear. It's where the mutant attacks come from. (The raiders come up
+  through the tunnels from the east.)
+- **The reactor choice touches them too.** Venting without filters kills Devils and leaves the
+  mutants untouched: the dark ending gets darker. Fixing the filters first doesn't remove the
+  mutants, but the ground around the vents stops being worth more to them than anywhere else.
+
 ### The player's hook
 
 **Nate is a pre-war Army veteran: the only living person with valid 2077 military credentials.**
