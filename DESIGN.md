@@ -797,8 +797,9 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   z 0, and anything built from the heightmap lines up with the ground.
 - **The photo on the ground:** `scripts/make_photo_overlay.py` drapes the 1993 photo over the
   terrain as a reference mesh (one NIF, 16 units above the ground point for point, no collision),
-  for finding your way and placing buildings. Placed once at 0, 0, 0 as a persistent, full-LOD
-  static; deleted when it's no longer needed. Needs PyNifly unpacked to `data/tools/`.
+  for finding your way and placing buildings. Placed once at 0, 0, 0 with **Is Full LOD** ticked
+  (Persistent isn't offered for a static, and isn't needed): it shows from every corner of the
+  map. Deleted when it's no longer needed. Needs PyNifly unpacked to `data/tools/`.
 - Creation Kit setup: without a `CreationKitCustom.ini` in the game folder it doesn't read the
   texture archives and complains about missing standard textures. Don't unpack the archives; add
   `[Archive]` with `bInvalidateOlderFiles=1`, `sResourceDataDirsFinal=` and `SResourceArchiveList2=`
