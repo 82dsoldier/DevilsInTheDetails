@@ -309,8 +309,16 @@ resupply. Nate runs into them in the street. They tell him about the bird, and h
   their last plane flying by stripping parts from the wrecks, and trading or scavenging for fuel.
 - **Why the signal is only heard in the south end (idea):** the crew carries a relay, or set one up
   where they're working, and it rebroadcasts the old loop. It reaches only that part of the city.
-- **The plane is at Boston Airport,** where the Brotherhood of Steel moors the Prydwen. To decide
-  how that works (see "Open questions").
+- **The plane is at Boston Airport,** where the Brotherhood of Steel moors the Prydwen.
+  **Decided: if the Brotherhood is there, the Devils trade with them.** Not common goods: nothing
+  ordinary would stop the Brotherhood taking a working C-130. The Devils pay in **pre-war tech**
+  the Brotherhood wants, from the parts of Bragg they can reach. Ideas: technical manuals and field
+  manuals from the post, signal and radar equipment, avionics, weapon parts.
+  - The irony: the Devils, who take a tithe from everyone, pay one of their own to keep flying.
+  - A possible hook: the Brotherhood would very much like to know where the Devils' tech comes
+    from, and what else is down there. (Mind the scope: a Brotherhood storyline is a lot to add.)
+  - Before the Prydwen arrives, or with the Brotherhood gone, the crew works the airport
+    undisturbed.
 - **The crew can warn him:** "You'll need a rig. Nobody goes out the door without one." That sets
   up the power armor requirement before he boards.
 
@@ -356,11 +364,9 @@ about airborne operations have heard of. It's the second worldspace.
 - Where does the storm drain come up?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
 - How does the player get back to Boston afterwards? (The C-130 again?)
-- **The Brotherhood and the airport.** The Prydwen moors at Boston Airport, and the Brotherhood
-  takes any pre-war tech it finds; a working C-130 is exactly what they'd seize. Do the Devils trade
-  with them, hide from them, or come only before the Prydwen arrives? What if the player has
-  already destroyed the Brotherhood? (And a technical risk: editing the vanilla airport cells can
-  conflict with other mods. A plane parked out on the runway, with minimal edits, is safer.)
+- What exactly do the Devils trade the Brotherhood? (Technical risk to remember: editing the
+  vanilla airport cells can conflict with other mods. A plane parked out on the runway, with
+  minimal edits, is safer.)
 - Who is Top, and do the Devils know the original garrison is still alive underground?
 - **Decided: Nate does not relieve the Devils.** Relieving the post happens once, with Top. The
   Devils have made a life at the post over two hundred years; it's their home now, not just a
