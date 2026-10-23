@@ -29,6 +29,28 @@ you ask.
   who thinks the tithe has become extortion; a **hardliner** who thinks the settlers owe them
   everything.
 
+### RonMike, the perfect soldier
+
+**Iron Mike** ("The Airborne Trooper") is the 15-foot statue of a paratrooper unveiled on Bragg in
+1961. In the early 90s it stood in the traffic circle between the Fort Bragg Club and the XVIII
+Airborne Corps headquarters. It's in the mod for atmosphere, not for a quest.
+
+- **The letters wore off.** Two hundred years of weather took the "I" from the plaque, and what's
+  left reads **RON MIKE**. The Devils worship him as **RonMike, the perfect soldier**: the one who
+  never broke, never quit and never left his post. The regulations are his scripture.
+- **The faith in small things:** recruits are sworn in at his feet; soldiers touch his boot for
+  luck before a patrol; the dead are named to him; "RonMike sees you" is both a blessing and a
+  warning. Fragments of the worn plaque are recited as a creed, with the gaps filled in by
+  guesswork.
+- **The hardliner and the reformer** read him differently: one as the soldier who obeys, the
+  other as the soldier who protects.
+- **Top knows better.** The pre-war ghouls remember a statue. "Ron Mike? It's *Iron* Mike, son."
+  Whether the player tells the Devils is up to them.
+- **Where he stands:** the real traffic circle isn't on either map. Either the barracks map stretches
+  to take it in, or (more Fallout) the Devils moved him, all 3,235 pounds, to a place of honor in
+  front of their headquarters. (He was moved for real in 1979, so there's precedent.)
+- **The plaque text** will be written for the mod; the real inscription doesn't need to be copied.
+
 ### The settlers
 
 - Survivors from Fayetteville. **Decided: they live on Bragg Boulevard** (see "Bragg Boulevard"
