@@ -857,6 +857,8 @@ a modded receiver.)
   a hall running **east-west**: the **company commander's** office north of it, the **First
   Sergeant's** south of it (east of the CQ desk), and north of the hall at its west end two more
   rooms, a **bathroom** and a **supply closet**.
+- **The arms room door is a Dutch door with a shelf:** top and bottom halves open separately, and
+  the bottom half has a shelf across it for handing out weapons and NODs.
 - **No way through inside.** The company entrance opens to the outside, just east of the main
   wing's east wall, and the orderly room and arms room don't connect to the main wing at all: you
   go outside one to get into the other. In the mod that makes them separate interior cells, each
@@ -869,7 +871,11 @@ a modded receiver.)
   1.9 x 1.2 m, a window's width apart), darker bands at the floor lines, plain end walls, a
   parapet cap, and **double doors** in bays 3 and 8 on both sides, each with a landing and steps
   running **straight out** from the wall to the ground, with a railing down each side. The main floor is 0.5 m above the highest
-  ground under the wing. The L is still plain boxes.
+  ground under the wing.
+- **The L's exterior:** the company entrance (double doors, one step up) at the west end of the
+  orderly room's south face; windows for the First Sergeant (south and east), the CO (east and
+  north) and a small high one for the bathroom; none for the supply closet. The **arms room has no
+  windows and no outside door.** A band and a parapet cap match the main wing.
 - Every hammerhead on the map is this one model, placed again and again.
 - **Easter egg: room 305** (third floor, third door from the end of the hall) has a big boulder
   in the middle of the floor. It belonged to a soldier everyone called **Rock**: in basic, his

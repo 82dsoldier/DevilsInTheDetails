@@ -1,5 +1,6 @@
 """The hammerhead barracks with its main wing's outside detailed: bays, windows, floor bands,
-doors, landings, steps and railings. The one-story L is still the block-out's plain boxes.
+doors, landings, steps and railings, and the one-story L: the orderly room with the
+company entrance and office windows, and the windowless arms room.
 
     python scripts/make_barracks.py [--install "<Fallout 4>/Data"]
 
@@ -47,6 +48,7 @@ DOOR_W, DOOR_H, DOOR_DEPTH = 1.8, 2.2, 0.3   # double doors
 LANDING_OUT, LANDING_ALONG = 1.5, 2.6
 RISER, TREAD = 0.18, 0.28   # the stair is as wide as the landing
 RAIL_H, RAIL_T = 0.95, 0.05
+L_HEIGHT = 3.6                 # the one-story L, floor to roof
 
 COLOURS = {
     "sandstone": (205, 188, 158), "band": (176, 160, 132), "glass": (38, 46, 54),
@@ -104,34 +106,43 @@ class Mesh:
             self.quad(mat, [p0 + r0, p0 + r1, p1 + r1, p1 + r0], (r0 + r1))
 
 
-def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
-    """A long wall in the plane x = x_face, facing side (+1 east, -1 west), with rectangular
-    openings (ya, yb, za, zb, kind); each opening gets reveals and its glass or door."""
-    ys = sorted({y0, y1, *[o[0] for o in openings], *[o[1] for o in openings]})
-    for ya, yb in zip(ys, ys[1:]):
-        holes = sorted((o[2], o[3]) for o in openings if o[0] <= ya and o[1] >= yb)
+def wall(m, axis, side, face, h0, h1, z0, z1, openings):
+    """A wall in the plane x = face (axis "x") or y = face (axis "y"), facing side (+1 or -1
+    along that axis), running h0..h1 along the other axis, with rectangular openings
+    (ha, hb, za, zb, kind); each opening gets reveals, and its glass or door set back."""
+    def P(h, z, d=0.0):
+        f = face - side * d
+        return (f, h, z) if axis == "x" else (h, f, z)
+
+    out = (side, 0, 0) if axis == "x" else (0, side, 0)
+    along = (0, 1, 0) if axis == "x" else (1, 0, 0)
+    hs = sorted({h0, h1, *[o[0] for o in openings], *[o[1] for o in openings]})
+    for ha, hb in zip(hs, hs[1:]):
+        holes = sorted((o[2], o[3]) for o in openings if o[0] <= ha and o[1] >= hb)
         z = z0
         for za, zb in holes + [(z1, z1)]:
             if za > z:
-                m.quad("sandstone", [(x_face, ya, z), (x_face, yb, z), (x_face, yb, za), (x_face, ya, za)],
-                       (side, 0, 0))
+                m.quad("sandstone", [P(ha, z), P(hb, z), P(hb, za), P(ha, za)], out)
             z = max(z, zb)
-    for ya, yb, za, zb, kind in openings:
-        depth = WIN_DEPTH if kind == "window" else DOOR_DEPTH
-        xi = x_face - side * depth
-        n_in = (0, 1, 0)
-        m.quad("frame", [(x_face, ya, za), (xi, ya, za), (xi, ya, zb), (x_face, ya, zb)], n_in)
-        m.quad("frame", [(x_face, yb, za), (xi, yb, za), (xi, yb, zb), (x_face, yb, zb)], (0, -1, 0))
-        m.quad("frame", [(x_face, ya, za), (xi, ya, za), (xi, yb, za), (x_face, yb, za)], (0, 0, 1))
-        m.quad("frame", [(x_face, ya, zb), (xi, ya, zb), (xi, yb, zb), (x_face, yb, zb)], (0, 0, -1))
-        if kind == "window":
-            m.quad("glass", [(xi, ya, za), (xi, yb, za), (xi, yb, zb), (xi, ya, zb)], (side, 0, 0))
-            ym = (ya + yb) / 2   # the mullion between the two panes
-            m.box("frame", min(xi, xi + side * 0.04), ym - 0.03, za, max(xi, xi + side * 0.04), ym + 0.03, zb)
-        else:
-            m.quad("door", [(xi, ya, za), (xi, yb, za), (xi, yb, zb), (xi, ya, zb)], (side, 0, 0))
-            ym = (ya + yb) / 2   # where the two leaves meet
-            m.box("frame", min(xi, xi + side * 0.05), ym - 0.03, za, max(xi, xi + side * 0.05), ym + 0.03, zb)
+    for ha, hb, za, zb, kind in openings:
+        dp = {"window": WIN_DEPTH, "small": WIN_DEPTH}.get(kind, DOOR_DEPTH)
+        neg = tuple(-c for c in along)
+        m.quad("frame", [P(ha, za), P(ha, za, dp), P(ha, zb, dp), P(ha, zb)], along)
+        m.quad("frame", [P(hb, za), P(hb, za, dp), P(hb, zb, dp), P(hb, zb)], neg)
+        m.quad("frame", [P(ha, za), P(ha, za, dp), P(hb, za, dp), P(hb, za)], (0, 0, 1))
+        m.quad("frame", [P(ha, zb), P(ha, zb, dp), P(hb, zb, dp), P(hb, zb)], (0, 0, -1))
+        pane = "door" if kind.startswith("door") else "glass"
+        m.quad(pane, [P(ha, za, dp), P(hb, za, dp), P(hb, zb, dp), P(ha, zb, dp)], out)
+        if kind in ("window", "door2"):   # the mullion, or where the two leaves meet
+            hm = (ha + hb) / 2
+            a, b = P(hm - 0.03, za, dp), P(hm + 0.03, zb, dp - 0.05)
+            m.box("frame", min(a[0], b[0]), min(a[1], b[1]), za, max(a[0], b[0]), max(a[1], b[1]), zb)
+
+
+def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
+    """A long side of the main wing: the plane x = x_face."""
+    wall(m, "x", side, x_face, y0, y1, z0, z1,
+         [(a, b, za, zb, "door2" if k == "door" else k) for a, b, za, zb, k in openings])
 
 
 def main():
@@ -243,9 +254,40 @@ def main():
                            (-hw, -hl, -hw + cap, hl), (hw - cap, -hl, hw, hl)):
         m.box("band", x0, y0, top - 0.1, x1, y1, top + 0.1)
 
-    # The one-story L, as in the block-out.
-    for x0, y0, x1, y1, h in bo.boxes()[1:]:
-        m.box("sandstone", x0, y0, -FOOTING, x1, y1, h, solid=True)
+    # The one-story L: the orderly room east of the main wing, the arms room on its west side
+    # running further north. Its floor is a step above the ground at the company entrance.
+    (ox0, oy0, ox1, oy1, _), (ax0, ay0, ax1, ay1, _) = bo.boxes()[1:]
+    door_x = ox0 + 0.4 + DOOR_W / 2           # the entrance, at the orderly room's west end
+    l_floor = ground(door_x, oy0 - 1.0) + RISER
+    l_top = l_floor + L_HEIGHT
+    sill, head = l_floor + 1.0, l_floor + 1.0 + WIN_H
+    win = lambda c: (c - WIN_W / 2, c + WIN_W / 2, sill, head, "window")
+    small = lambda c: (c - 0.4, c + 0.4, l_floor + 1.7, l_floor + 2.2, "small")
+    m.solids += [(ox0, oy0, -FOOTING, ox1, oy1, l_top), (ax0, ay0, -FOOTING, ax1, ay1, l_top)]
+    # Orderly room. South: the entrance, then the First Sergeant's window.
+    wall(m, "y", -1, oy0, ox0, ox1, -FOOTING, l_top,
+         [(door_x - DOOR_W / 2, door_x + DOOR_W / 2, l_floor, l_floor + DOOR_H, "door2"),
+          win(ox1 - 2.5)])
+    # East: the First Sergeant's window to the south, the CO's to the north.
+    wall(m, "x", 1, ox1, oy0, oy1, -FOOTING, l_top, [win(oy0 + 2.5), win(oy1 - 2.5)])
+    # North: the bathroom's small window to the west, the CO's window to the east.
+    wall(m, "y", 1, oy1, ox0, ox1, -FOOTING, l_top, [small(ox0 + 1.5), win(ox1 - 2.5)])
+    # Arms room: no windows, no outside door. West, north, and east beyond the orderly room.
+    wall(m, "x", -1, ax0, ay0, ay1, -FOOTING, l_top, [])
+    wall(m, "y", 1, ay1, ax0, ax1, -FOOTING, l_top, [])
+    wall(m, "x", 1, ax1, oy1, ay1, -FOOTING, l_top, [])
+    # Roofs, a band below the parapet, and the cap along every outside edge.
+    for x0, y0, x1, y1 in ((ox0, oy0, ox1, oy1), (ax0, ay0, ax1, ay1)):
+        m.quad("roof", [(x0, y0, l_top - 0.1), (x1, y0, l_top - 0.1), (x1, y1, l_top - 0.1), (x0, y1, l_top - 0.1)],
+               (0, 0, 1))
+    for x0, y0, x1, y1 in ((ox0, oy0 - BAND_OUT, ox1, oy0), (ox1, oy0, ox1 + BAND_OUT, oy1),
+                           (ox0, oy1, ox1, oy1 + BAND_OUT), (ax0 - BAND_OUT, ay0, ax0, ay1),
+                           (ax0, ay1, ax1, ay1 + BAND_OUT), (ax1, oy1, ax1 + BAND_OUT, ay1)):
+        m.box("band", x0, y0, l_top - 0.9, x1, y1, l_top - 0.6)
+        m.box("band", x0, y0, l_top - 0.1, x1, y1, l_top + 0.1)
+    # The entrance step: a pad the width of the door, one riser up from the ground.
+    m.box("concrete", door_x - DOOR_W / 2 - 0.3, oy0 - 1.2, -FOOTING, door_x + DOOR_W / 2 + 0.3, oy0,
+          l_floor, solid=True)
 
     # Textures: each colour with a little grain, so the walls aren't flat paint.
     mod = out / "mod"
