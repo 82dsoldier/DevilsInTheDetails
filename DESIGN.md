@@ -299,6 +299,9 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 - **Side with the settlers:** they're free, and the raids get worse. Can they hold? Maybe the
   player has to help them build defenses, or maybe some farms are lost.
 - **Negotiated peace:** the raids continue, but now the two sides face them together.
+- **Destroy the armory:** nobody gets it, and **both the Devils and the settlers turn hostile** to
+  the player. Each side wanted it; the player took it from both. The raids continue, with no side
+  holding the advantage, and the player is on their own.
 
 ### The recall: how it starts
 
