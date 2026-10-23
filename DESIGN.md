@@ -422,7 +422,8 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
        Delivered with just the right amount of sarcasm (casting matters for this line). Everybody
        stays happy, and **the tunnel unlocks.**
   - **It can't be skipped:** the underground entrance is the only way off the drop zone.
-  - To decide: what Vargas says to a player with no spare cores to take.
+  - **No spare cores to take** (only the one in the frame, or a clever player who stashed them):
+    "Nothing? Hell, you're poorer than we are. Get out of my sight." The tunnel unlocks.
   - **Decided: let the clever player be clever.** A player who drops cores on the DZ before talking
     to him can come back for them later. Anyone set on cheating can spawn cores from the console
     anyway; the shakedown sets the tone, it isn't a lock.
