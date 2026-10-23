@@ -162,8 +162,8 @@ the raids continue: whoever is left has to deal with them.
   two-person rule, and the other half is held by the factions themselves.
 - Unlocking it for the soldiers makes them unstoppable. Giving it to the settlers flips the
   balance. Or the player can destroy it.
-- **Why go to North Carolina:** a military radio signal or a recall order addressed to Nate's
-  service number, picked up in Boston.
+- **Why go to North Carolina:** a 2077 emergency broadcast, picked up in Boston (see "The
+  recall" below).
 
 ### The MacGuffin: the Key to the Post and the codebook
 
@@ -288,6 +288,32 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
   player has to help them build defenses, or maybe some farms are lost.
 - **Negotiated peace:** the raids continue, but now the two sides face them together.
 
+### The recall: how it starts
+
+**The broadcast.** Wandering toward the south end of Boston, Nate picks up a radio signal, a
+2077 recording still on its loop:
+
+> "This is not a drill. The United States has been hit by nuclear weapons. Everyone is ordered to
+> stand their post until relieved or until further orders arrive. All officers are required to
+> report to division headquarters to get assignments for your units."
+
+It's the same order the Devils' ancestors got, the one they still keep. Once Nate has listened to
+it, he gets the quest: **report to division headquarters**, which is the 82nd Airborne Division
+headquarters on the barracks map, where RonMike stands. The quest marker points there for the
+whole first act.
+
+**The Devils in Boston.** A Devils crew has flown the last airworthy **C-130** to Boston to
+resupply. Nate runs into them in the street. They tell him about the bird, and he gets on it.
+
+- **Why they're in Boston (idea):** the airport is a graveyard of pre-war aircraft. The Devils keep
+  their last plane flying by stripping parts from the wrecks, and trading or scavenging for fuel.
+- **Why the signal is only heard in the south end (idea):** the crew carries a relay, or set one up
+  where they're working, and it rebroadcasts the old loop. It reaches only that part of the city.
+- **The plane is at Boston Airport,** where the Brotherhood of Steel moors the Prydwen. To decide
+  how that works (see "Open questions").
+- **The crew can warn him:** "You'll need a rig. Nobody goes out the door without one." That sets
+  up the power armor requirement before he boards.
+
 ### Getting to Bragg: the jump
 
 The player arrives the way the 82nd does: **by parachute, onto Sicily Drop Zone.**
@@ -308,8 +334,8 @@ about airborne operations have heard of. It's the second worldspace.
   not going out my door without a rig") or, for comedy, lets them go.
 - **Landing** can open the story: a raid hits the drop zone as the player comes down, and the
   Devils' reception party fights it off. First impression of both the threat and the protectors.
-- **Getting on the plane** (to decide): maybe the Devils still keep one airworthy aircraft, the last
-  one, and it comes to Boston for the player after the recall signal.
+- **Getting on the plane (decided):** the Devils' last airworthy C-130, at Boston Airport (see
+  "The recall" above).
 
 **Technical notes:**
 - The drop zones are miles from the barracks area. **Solved by the underground:** the drop zone
@@ -329,7 +355,12 @@ about airborne operations have heard of. It's the second worldspace.
 - Is the hook tied to Nate's past, or is the player a stranger passing through?
 - Where does the storm drain come up?
 - What exactly is in the armory, and what does opening it do for whoever gets it?
-- How does the player get onto the plane, and back to Boston afterwards?
+- How does the player get back to Boston afterwards? (The C-130 again?)
+- **The Brotherhood and the airport.** The Prydwen moors at Boston Airport, and the Brotherhood
+  takes any pre-war tech it finds; a working C-130 is exactly what they'd seize. Do the Devils trade
+  with them, hide from them, or come only before the Prydwen arrives? What if the player has
+  already destroyed the Brotherhood? (And a technical risk: editing the vanilla airport cells can
+  conflict with other mods. A plane parked out on the runway, with minimal edits, is safer.)
 - Who is Top, and do the Devils know the original garrison is still alive underground?
 - **Decided: Nate does not relieve the Devils.** Relieving the post happens once, with Top. The
   Devils have made a life at the post over two hundred years; it's their home now, not just a
