@@ -914,6 +914,7 @@ a modded receiver.)
   with Has Distant LOD set, by the placement script; then the Creation Kit's World LOD generates the
   map's object LOD. **LOD models may only use textures under `Textures\LOD\`** (the atlas build
   fails otherwise), and the atlas is built from TGA copies under `<game>\Source\TGATextures\LOD\`;
-  `make_barracks.py --install` puts both there.
+  `make_barracks.py --install` puts both there. Every LOD shape needs a full matching set,
+  `name_d`, `name_n` and `name_s` (diffuse, normal, specular), or the atlas build fails.
 - Tools: **PyNifly** for Blender (version 28.1.0 or later fixed Fallout 4 collision export; re-export
   anything made with earlier versions). Look for the old barracks NIF on the other drives.
