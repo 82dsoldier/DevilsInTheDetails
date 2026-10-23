@@ -52,6 +52,24 @@ Airborne Corps headquarters. It's in the mod for atmosphere, not for a quest.
   for real in 1979, so there's precedent.)
 - **The plaque text** will be written for the mod; the real inscription doesn't need to be copied.
 
+### Devils slang and fool's errands
+
+Two hundred years on, the Devils still talk like the 82nd, even when nobody remembers what the
+words meant. Use these in dialogue and background barks.
+
+- **Sayings:**
+  - "Ate up like a soup sandwich." (Nobody's seen a sandwich of any kind in generations.)
+- **Fool's errands** the old hands send new recruits on, straight out of the motor pool:
+  - Go to another shop for a **Yadkin extension**. (Yadkin is the road; there's no such part.)
+  - Fetch a **bottle of blinker fluid**.
+  - Let the **winter air out of the tires** and fill them with **summer air**.
+  - Could be a small, funny side quest: a Devils sergeant sends the player on one. The settlers at
+    the Cue and Ale market have been in on the joke for two hundred years and sell "blinker fluid"
+    to every recruit who comes looking.
+  - Other classics to consider: a box of grid squares, a can of prop wash, the keys to the drop
+    zone. (Careful with that last one: it might be how the Key to the Post started.)
+- Add more as they come up.
+
 ### The settlers
 
 - Survivors from Fayetteville. **Decided: they live on Bragg Boulevard** (see "Bragg Boulevard"
