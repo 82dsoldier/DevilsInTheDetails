@@ -383,6 +383,7 @@ def write_lod(m, nif_path, name, tex, pyn):
         shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
         shape.set_texture("Diffuse", f"{tex}\\{mat}_d.dds")
         shape.set_texture("Normal", f"{tex}\\{mat}_n.dds")
+        shape.set_texture("Specular", f"{tex}\\{mat}_s.dds")
         shape.save_shader_attributes()
     nif.save()
 
@@ -472,9 +473,12 @@ def main():
     tga_dir = out / "source" / "TGATextures" / LOD_PATH
     lod_tex_dir.mkdir(parents=True, exist_ok=True)
     tga_dir.mkdir(parents=True, exist_ok=True)
-    # Each diffuse needs a normal map named to match: name_d and name_n.
+    # Each diffuse needs a normal and a specular map named to match: name_d, name_n, name_s.
+    # Specular: red is shine, green is smoothness; concrete has little of either.
+    Image.new("RGB", (4, 4), (12, 20, 0)).save(tex_dir / "matte_s.dds", pixel_format="DXT1")
     lod_files = {f"{t}_d": tex_dir / f"{t}.dds" for t in LOD_TEXTURES}
     lod_files |= {f"{t}_n": tex_dir / "flat_n.dds" for t in LOD_TEXTURES}
+    lod_files |= {f"{t}_s": tex_dir / "matte_s.dds" for t in LOD_TEXTURES}
     for name, src in lod_files.items():
         shutil.copy2(src, lod_tex_dir / f"{name}.dds")
         Image.open(src).convert("RGB").save(tga_dir / f"{name}.tga")
