@@ -344,7 +344,7 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
 
 - **Few cores to find:** none or almost none in containers and loot lists in these worldspaces.
   The ones that exist matter.
-- **The Devils hoard them.** Their armory of a post runs on scarcity, and cores are part of the
+- **The Devils hoard them.** They live on scarcity, and cores are part of the
   tithe. That makes cores something to trade for, steal, or earn.
 - **The catch:** the player can bring a pack of cores from the Commonwealth. Ideas to deal with it,
   to decide:
