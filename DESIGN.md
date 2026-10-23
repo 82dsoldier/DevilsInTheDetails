@@ -845,17 +845,18 @@ a modded receiver.)
   per bay on each floor (see `data/reference/barracks_exterior.jpg`, not in git).
 - **The main wing** runs roughly north-south, leaning about 15° (the south end further east): about
   85 to 90 m long and 15 to 20 m wide, from the 1993 photo.
-- **The cross-wing at the north end is an L:** the company offices in the east side, the **arms
-  room** in the short west end of the L. (The Devils' arms room in the story can be this room in
+- **The one-story wing at the north end is an L:** the orderly room on the east, the **arms
+  room** on the west as the short leg of the L, running further north than the rest. (The Devils' arms room in the story can be this room in
   every company's building.)
 - **Four sets of main doors,** two on each long side, with short flights of steps and railings.
-- **The L is one story,** offices along the north end and the armory's short leg at the west end
-  pointing north, toward the road. The **orderly room** (circled in
+- **The L is one story.** The arms room sits on the main wing's north end, against the orderly
+  room's west side, and runs further north than everything else, toward the road. The **orderly room** (circled in
   `data/reference/barracks_exterior_company_entrance.jpg`) stands east of the main wing's east
   wall, about 10 x 11 m, with the **company entrance** in its south face. Inside: the arms room
   door directly on the left, the **CQ desk** directly on the right, and behind (north of) the desk
-  a hall running **east-west**, with the **company commander's** and **First Sergeant's** offices
-  across it from each other. North of the hall, west end: a **bathroom and a supply closet**.
+  a hall running **east-west**: the **company commander's** office north of it, the **First
+  Sergeant's** south of it (east of the CQ desk), and north of the hall at its west end two more
+  rooms, a **bathroom** and a **supply closet**.
 - **Block-out:** `scripts/make_barracks_blockout.py` builds plain boxes at the measured size
   (main wing 85 x 17 x 11 m; the L's size is a guess, low buildings barely show in the photo),
   with collision, and prints where to place it: X -5339, Y 36039, Z 2202, rotation 349.1.
