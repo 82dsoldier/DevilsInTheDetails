@@ -44,7 +44,7 @@ WIN_DEPTH = 0.15               # glass set back from the wall face
 STRIP_W, STRIP_GAP, STRIP_OUT = 0.2, 0.15, 0.08
 BAND_H, BAND_OUT = 0.3, 0.05
 DOOR_BAYS = (2, 7)             # bays 3 and 8, counted from the south end, on both sides
-DOOR_W, DOOR_H, DOOR_DEPTH = 1.8, 2.2, 0.3   # double doors
+DOOR_W, DOOR_H, DOOR_DEPTH = 2.1, 2.2, 0.3   # double doors, closing straight together
 LANDING_OUT, LANDING_ALONG = 1.5, 2.6
 RISER, TREAD = 0.18, 0.28   # the stair is as wide as the landing
 RAIL_H, RAIL_T = 0.95, 0.05
@@ -133,10 +133,14 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
         m.quad("frame", [P(ha, zb), P(ha, zb, dp), P(hb, zb, dp), P(hb, zb)], (0, 0, -1))
         pane = "door" if kind.startswith("door") else "glass"
         m.quad(pane, [P(ha, za, dp), P(hb, za, dp), P(hb, zb, dp), P(ha, zb, dp)], out)
-        if kind in ("window", "door2"):   # the mullion, or where the two leaves meet
-            hm = (ha + hb) / 2
+        hm = (ha + hb) / 2
+        if kind == "window":              # the mullion between the two panes
             a, b = P(hm - 0.03, za, dp), P(hm + 0.03, zb, dp - 0.05)
             m.box("frame", min(a[0], b[0]), min(a[1], b[1]), za, max(a[0], b[0]), max(a[1], b[1]), zb)
+        elif kind == "door2":             # no strip: just the hairline where the leaves meet
+            d2 = dp - 0.003
+            m.quad("rail", [P(hm - 0.006, za, d2), P(hm + 0.006, za, d2), P(hm + 0.006, zb, d2),
+                            P(hm - 0.006, zb, d2)], out)
 
 
 def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
