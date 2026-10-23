@@ -16,7 +16,7 @@ unit DevilsPlaceBarracks;
 const
   PluginName = 'DevilsInTheDetails.esp';
   WorldName = 'DevilsBarracksWorld';
-  DefaultCsv = 'C:sourceeposBraggMapoutbarracksbarracks_placements.csv';   // where make_barracks.py writes it
+  DefaultCsv = 'C:\source\repos\BraggMap\out\barracks\barracks_placements.csv';   // where make_barracks.py writes it
 
 var
   Cells: TStringList;     // 'x,y' -> index into CellRecs
