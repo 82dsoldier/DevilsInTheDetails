@@ -1,4 +1,4 @@
-"""The hammerhead barracks with its main wing's outside detailed: bays, windows, floor bands,
+"""The hammerhead barracks with its main wing's outside detailed: bays, windows, sill ledges,
 doors, landings, steps and railings, and the one-story L: the orderly room with the
 company entrance and office windows, and the windowless arms room.
 
@@ -7,7 +7,9 @@ company entrance and office windows, and the windowless arms room.
 The main wing, from the 1993 photo and the photo in data/reference/barracks_exterior.jpg:
   - BAYS bays down each long side, split by paired vertical strips (the joints between the
     precast panels), with two windows per bay on each floor
-  - a darker band at each floor line; the end walls have the strips and bands, no windows
+  - a sill ledge under each upper row of windows: out from the wall just below the sills, a
+    face about 3 ft deep, then a 45-degree slope back to the wall; the end walls have the strips
+    and ledges, no windows
   - the main floor FLOOR_ABOVE m above the highest ground under the wing, so the low end
     stands taller on its foundation
   - four sets of double doors, two on each long side (DOOR_BAYS), each with a landing and steps
@@ -42,7 +44,8 @@ WIN_W, WIN_H, WIN_SILL = 1.9, 1.2, 0.9   # wide and low, as in the photo
 WIN_OFFSET = 1.9               # each window's centre from its bay's centre: the gap is one window
 WIN_DEPTH = 0.15               # glass set back from the wall face
 STRIP_W, STRIP_GAP, STRIP_OUT = 0.2, 0.15, 0.08
-BAND_H, BAND_OUT = 0.3, 0.05
+BAND_H, BAND_OUT = 0.3, 0.05   # the band under the L's roofline
+LEDGE_OUT, LEDGE_FACE = 0.2, 0.9   # sill ledges: how far out, how deep the face before the slope
 DOOR_BAYS = (2, 7)             # bays 3 and 8, counted from the south end, on both sides
 DOOR_W, DOOR_H, DOOR_DEPTH = 2.1, 2.2, 0.3   # double doors, closing straight together
 LANDING_OUT, LANDING_ALONG = 1.5, 2.6
@@ -143,6 +146,24 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
                             P(hm - 0.006, zb, d2)], out)
 
 
+def ledge(m, axis, side, face, h0, h1, z_top):
+    """A sill ledge along a wall: a flat top LEDGE_OUT out from the wall at z_top, a face
+    LEDGE_FACE deep, then a 45-degree slope back into the wall."""
+    def P(h, out, z):
+        f = face + side * out
+        return (f, h, z) if axis == "x" else (h, f, z)
+
+    o, zf = LEDGE_OUT, z_top - LEDGE_FACE
+    n_out = (side, 0, 0) if axis == "x" else (0, side, 0)
+    n_slope = tuple(c / math.sqrt(2) for c in n_out[:2]) + (-1 / math.sqrt(2),)
+    m.quad("sandstone", [P(h0, 0, z_top), P(h1, 0, z_top), P(h1, o, z_top), P(h0, o, z_top)], (0, 0, 1))
+    m.quad("sandstone", [P(h0, o, z_top), P(h1, o, z_top), P(h1, o, zf), P(h0, o, zf)], n_out)
+    m.quad("sandstone", [P(h0, o, zf), P(h1, o, zf), P(h1, 0, zf - o), P(h0, 0, zf - o)], n_slope)
+    for h, sgn in ((h0, -1), (h1, 1)):
+        n_end = (0, sgn, 0) if axis == "x" else (sgn, 0, 0)
+        m.quad("sandstone", [P(h, 0, z_top), P(h, o, z_top), P(h, o, zf), P(h, 0, zf - o)], n_end)
+
+
 def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
     """A long side of the main wing: the plane x = x_face."""
     wall(m, "x", side, x_face, y0, y1, z0, z1,
@@ -212,9 +233,7 @@ def main():
                     x0, x1 = sorted((xf, xf + side * STRIP_OUT))
                     m.box("sandstone", x0, ya, -FOOTING, x1, yb2, top)
         for f in (1, 2):
-            z = floor_z + f * FLOOR_H - 0.4
-            x0, x1 = sorted((xf, xf + side * BAND_OUT))
-            m.box("band", x0, -hl, z, x1, hl, z + BAND_H)
+            ledge(m, "x", side, xf, -hl, hl, floor_z + f * FLOOR_H + WIN_SILL - 0.05)
 
         # Doors: a landing at floor level, then steps straight out from the wall to the ground,
         # with a railing down each side.
@@ -247,9 +266,7 @@ def main():
                 y0, y1 = sorted((yf, yf + end * STRIP_OUT))
                 m.box("sandstone", xs + dx, y0, -FOOTING, xs + dx + STRIP_W, y1, top)
         for f in (1, 2):
-            z = floor_z + f * FLOOR_H - 0.4
-            y0, y1 = sorted((yf, yf + end * BAND_OUT))
-            m.box("band", -hw, y0, z, hw, y1, z + BAND_H)
+            ledge(m, "y", end, yf, -hw, hw, floor_z + f * FLOOR_H + WIN_SILL - 0.05)
 
     # Roof and parapet cap.
     m.quad("roof", [(-hw, -hl, top - 0.1), (hw, -hl, top - 0.1), (hw, hl, top - 0.1), (-hw, hl, top - 0.1)], (0, 0, 1))
