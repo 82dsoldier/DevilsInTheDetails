@@ -849,6 +849,11 @@ a modded receiver.)
   room** in the short west end of the L. (The Devils' arms room in the story can be this room in
   every company's building.)
 - **Four sets of main doors,** two on each long side, with short flights of steps and railings.
+- **The L is one story,** offices along the north end and the armory's short leg at the west end
+  pointing north, toward the road.
+- **Block-out:** `scripts/make_barracks_blockout.py` builds plain boxes at the measured size
+  (main wing 85 x 17 x 11 m; the L's size is a guess, low buildings barely show in the photo),
+  with collision, and prints where to place it: X -5339, Y 36039, Z 2202, rotation 349.1.
 - Every hammerhead on the map is this one model, placed again and again.
 - **Easter egg: room 305** (third floor, third door from the end of the hall) has a big boulder
   in the middle of the floor. It belonged to a soldier everyone called **Rock**: in basic, his
