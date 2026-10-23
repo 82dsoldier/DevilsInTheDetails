@@ -287,8 +287,21 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
   - **Turn it on now.** The hot zone clears at once, and the poisoned air pours out over the
     barracks. A lot of Devils die, and the Devils turn hostile for good. A player siding with the
     settlers might do it on purpose, as a weapon: the darkest way to win.
-  - **Fix the filters first.** Find the materials to repair them (a scavenging run through the
-    tunnels, or a trade with one of the factions), then start the reactor. Slower, and nobody dies.
+  - **Fix the filters first.** Slower, and nobody dies. An optional objective in the reactor quest:
+    1. **Pull an old filter from one of the vent stacks on post.** The stacks are the super
+       mutants' nest, so this means a fight.
+    2. **Take it to a tinker on Bragg Boulevard,** who can copy it: 3 or 4 new filters, one per
+       stack.
+    3. **What the tinker needs** (to decide). Fetch quests can feel like chores, but Nate needs
+       reasons to explore. A middle way: common parts the player can buy or scrap from their own
+       junk (Fallout 4 components like aluminum, adhesive, fiberglass), plus **one or two special
+       parts that only come from places worth visiting anyway**, each with something to find
+       there (a holotape, a character, a piece of the story). Candidates: the raider camp east in
+       the tunnels, the motor pool, the drop zone.
+    4. Install them, then start the reactor. (Where: in a filter room near the reactor, so it's one
+       trip, or at each stack topside, which means more mutant fights. Leaning: near the reactor.)
+    - **If the settlers are hostile,** the tinker won't help. Fallback, to decide: a Devils mechanic
+      in the motor pool, at a price.
 - **Ending Top's story: Nate relieves the post.** Once the way is clear, Nate, the only officer
   with valid credentials, formally relieves Top and his squad. Two hundred years after the order,
   someone finally came. This ends the hot zone quest and opens the way to the armory.
