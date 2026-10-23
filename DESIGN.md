@@ -312,7 +312,7 @@ Not realistic, and doesn't need to be: this is Fallout, and every pre-war base h
 - **Ending Top's story: Nate relieves the post.** Once the way is clear, Nate, the only officer
   with valid credentials, formally relieves Top and his squad. Two hundred years after the order,
   someone finally came. This ends the hot zone quest and opens the way to the armory.
-- **Top and his squad move up to Bragg.** Where, to decide. Idea: they become the **first
+- **Top and his squad move up to Bragg.** **Decided:** they become the **first
   settlers of the player's settlement on post**, which gives it its first residents and
   defenders. And the Devils' reaction is a scene in itself: ghouls who served with their
   ancestors, walking out of the ground. Saints of RonMike, or monsters?
@@ -325,7 +325,7 @@ how to decode it.**
 
 - **The Devils think it's a miracle.** Their sacred transmitter, silent for two hundred years, has
   started to speak: RonMike's voice. Nobody can understand it, and everybody has a theory.
-- **Idea: Top recognizes it.** "That's a numbers station. Useless without the book." The
+- **Top recognizes it.** "That's a numbers station. Useless without the book." The
   authentication codebooks were kept on post before the war; he points Nate toward where it
   should have been, and that trail leads to the settlers, who have had it for generations.
 - From there the quest becomes getting the codebook: traded, stolen or taken from the settlers,
