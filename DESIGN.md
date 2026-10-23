@@ -788,7 +788,15 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
   at true scale). If the Creation Kit asks for another size, rerun with `--dds-size WxH`.
 - Fallback if the importer misbehaves: write the terrain records (LAND) straight into the plugin
   with an xEdit script. More work, but exact.
-- First test: an empty worldspace, imported, walked in game, to check the scale and the hills.
+- **Tested 2026-10-23: it works.** The barracks heightmap went in through World → Heightmap
+  Editing → **Heightmap Import** (Heightmap Autopaint is for texturing later) at cells x -13 to 12,
+  y -19 to 18, min 0, max 4020, and walked in game (`cow DevilsBarracksWorld 0 0`): gently rolling
+  ground, not stretched or flattened.
+- Creation Kit setup: without a `CreationKitCustom.ini` in the game folder it doesn't read the
+  texture archives and complains about missing standard textures. Don't unpack the archives; add
+  `[Archive]` with `bInvalidateOlderFiles=1`, `sResourceDataDirsFinal=` and `SResourceArchiveList2=`
+  listing `Fallout4 - Animations.ba2` and `Fallout4 - Textures1.ba2` to `Textures9.ba2` and
+  `Fallout4 - TexturesPatch.ba2`.
 
 ### Weapons
 
