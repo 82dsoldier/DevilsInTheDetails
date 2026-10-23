@@ -2,6 +2,7 @@
 
     python scripts/make_heightmap.py                     # true scale, no exaggeration
     python scripts/make_heightmap.py --exaggerate 2      # hills twice as tall
+    python scripts/make_heightmap.py --dds-size 832x1216 # if the Creation Kit asks for another size
 
 The area is the four corners in AREA (lat, lon), plus MARGIN_M on every side,
 squared off to north and rounded out to whole Fallout cells.
@@ -14,12 +15,15 @@ Writes to out/:
   dem_utm.tif          the downloaded elevation, metres, UTM 17N, 1 m pixels
   heightmap16.png      16-bit grayscale, one pixel per height point, north up
   heightmap16.raw      the same, little-endian 16-bit, no header
+  heightmap.dds        for the Fallout 4 Creation Kit's importer: one channel of 32-bit float
+                       (DXGI R32_FLOAT), 0 at the lowest point and 1 at the highest, north up
   heightmap.json       how pixel values map to metres and game units, and the cell grid
   preview.png          shaded relief with the area's outline, for checking by eye
 """
 import argparse
 import json
 import math
+import struct
 from pathlib import Path
 
 import numpy as np
@@ -76,10 +80,30 @@ def download_dem(bounds, path):
     path.write_bytes(r.content)
 
 
+def write_dds_r32f(path, data):
+    """A DDS with the DX10 header holding one channel of 32-bit float (DXGI_FORMAT_R32_FLOAT),
+    the format the Fallout 4 Creation Kit's heightmap importer reads. No mipmaps."""
+    h, w = data.shape
+    header = struct.pack(
+        "<4s7I44s8I5I",
+        b"DDS ", 124,
+        0x1 | 0x2 | 0x4 | 0x8 | 0x1000,   # caps, height, width, pitch, pixel format
+        h, w, w * 4, 0, 1, bytes(44),
+        32, 0x4, int.from_bytes(b"DX10", "little"), 0, 0, 0, 0, 0,   # pixel format: FourCC DX10
+        0x1000, 0, 0, 0, 0,               # caps: texture
+    )
+    dx10 = struct.pack("<5I", 41, 3, 0, 1, 0)   # R32_FLOAT, 2D texture, array size 1
+    with open(path, "wb") as f:
+        f.write(header + dx10)
+        f.write(np.ascontiguousarray(data, dtype="<f4").tobytes())
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--exaggerate", type=float, default=1.0, help="vertical scale (1 = true)")
     ap.add_argument("--redownload", action="store_true")
+    ap.add_argument("--dds-size", help="WxH for heightmap.dds, if the Creation Kit wants a size "
+                    "other than one pixel per height point")
     args = ap.parse_args()
     OUT.mkdir(exist_ok=True)
 
@@ -129,6 +153,13 @@ def main():
     Image.fromarray(h16).save(OUT / "heightmap16.png")
     h16.astype("<u2").tofile(OUT / "heightmap16.raw")
 
+    norm = (rel_units / top_units if top_units > 0 else rel_units).astype(np.float32)
+    dds_size = (nx, ny)
+    if args.dds_size:
+        dds_size = tuple(int(v) for v in args.dds_size.lower().split("x"))
+        norm = np.asarray(Image.fromarray(norm, mode="F").resize(dds_size, Image.BILINEAR))
+    write_dds_r32f(OUT / "heightmap.dds", norm)
+
     meta = {
         "cells": [cells_x, cells_y],
         "points": [nx, ny],
@@ -143,6 +174,9 @@ def main():
         "height_range_game_units": top_units,
         "game_units_per_pixel_step": 1 / scale,
         "pixel_to_game_units": "units = pixel * game_units_per_pixel_step, above the lowest point",
+        "dds_size": list(dds_size),
+        "ck_import_min_height": 0,
+        "ck_import_max_height": round(top_units),
         "source_resolution_m": list(src_res),
     }
     (OUT / "heightmap.json").write_text(json.dumps(meta, indent=2))
@@ -171,6 +205,8 @@ def main():
           f"{nx} x {ny} height points")
     print(f"Elevation {base:.1f} to {grid.max():.1f} m (relief {grid.max() - base:.1f} m), "
           f"exaggeration {args.exaggerate}: {top_units:.0f} game units top to bottom")
+    print(f"heightmap.dds is {dds_size[0]} x {dds_size[1]}; in the Creation Kit's import, "
+          f"min height 0, max height {top_units:.0f}")
 
 
 if __name__ == "__main__":

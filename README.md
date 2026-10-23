@@ -13,7 +13,9 @@ python scripts/make_overlay.py data/doq_raw/O3507956.SES.811019.tif
 ```
 
 - `make_heightmap.py` downloads USGS 3DEP elevation for the area and writes a 16-bit heightmap
-  sized to whole Fallout cells, with a shaded preview, to `out/`.
+  sized to whole Fallout cells, with a shaded preview, to `out/`. It also writes
+  `heightmap.dds` (32-bit float, one channel) for the Creation Kit's heightmap import, and prints
+  the min and max heights to enter there.
 - `make_overlay.py` lines aerial photos up with the cell grid and labels each cell with its
   Creation Kit coordinates.
 

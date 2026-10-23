@@ -732,8 +732,16 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
 - Layout: USGS DOQ from **NAPP photo of 1993-02-23**, 1 m, in `data/doq_raw/`.
   `scripts/make_overlay.py` lines it up with the cell grid; `out/aerial_grid.png` shows each cell's
   Creation Kit coordinates.
-- Still to do: find a heightmap importer that works with Fallout 4 and make the script write its
-  format.
+- Importing: the Fallout 4 Creation Kit's heightmap editor (World menu) is now only an importer,
+  and it reads a grayscale DDS of **one channel of 32-bit float** (DXGI R32_FLOAT); a normal DDS
+  gives "The request is not supported". You give it the worldspace's cells and it says what image
+  size it wants; you give it the lowest and highest height, and a wrong range squashes the terrain.
+  `make_heightmap.py` writes `out/heightmap.dds` in that format (0 at the lowest point, 1 at the
+  highest), one pixel per height point (833 x 1217), and prints the heights to enter (0 and 4020
+  at true scale). If the Creation Kit asks for another size, rerun with `--dds-size WxH`.
+- Fallback if the importer misbehaves: write the terrain records (LAND) straight into the plugin
+  with an xEdit script. More work, but exact.
+- First test: an empty worldspace, imported, walked in game, to check the scale and the hills.
 
 ### Weapons
 
