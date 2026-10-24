@@ -14,7 +14,8 @@ The main wing, from the 1993 photo and the photo in data/reference/barracks_exte
     stands taller on its foundation
   - four sets of double doors, two on each long side (DOOR_BAYS), each with a landing and steps
     running straight out from the wall down to the ground, railings on both sides
-Placement, size and the L come from make_barracks_blockout.py.
+Placement, size and the L come from make_barracks_blockout.py. Every building is weathered in
+its own way, in its vertex colours (see Weathering).
 
 Writes to out/barracks/mod/ (the layout of the game's Data folder):
   Meshes/DevilsInTheDetails/Buildings/Barracks.nif
@@ -66,12 +67,169 @@ MOD_PATH = "DevilsInTheDetails/Buildings"
 FOOTING = bo.FOOTING
 
 
-class Mesh:
-    """Flat-shaded quads, one list per material, in metres."""
+# Metres between the vertices that carry the weathering: fine across a wall, so streaks stay
+# narrow, coarser up and down it, and coarse on flat roofs and landings.
+WEAR_STEP_ALONG, WEAR_STEP_UP, WEAR_STEP_FLAT = 0.3, 0.6, 1.2
+MAX_SHAPE_VERTS = 60000    # a shape's triangles index its vertices with 16 bits
+WEAR_GAIN = {          # how strongly each material shows the dirt (1 = fully)
+    "sandstone": 1.0, "band": 1.0, "concrete": 1.0, "roof": 0.8, "frame": 0.9,
+    "door": 0.7, "glass": 0.4, "rail": 0.3,
+}
 
-    def __init__(self, mirror=False):
+
+def _hash(ix, iy, iz, seed):
+    """A repeatable random number in 0..1 for each lattice point."""
+    h = (ix * 73856093) ^ (iy * 19349663) ^ (iz * 83492791) ^ (seed * 2654435761)
+    h = (h ^ (h >> 13)) * 1274126177
+    return ((h ^ (h >> 16)) & 0xFFFFFF) / float(0xFFFFFF)
+
+
+def noise(p, scale, seed):
+    """Smooth value noise in 0..1 at points p (N, 3), features about `scale` metres across."""
+    q = np.asarray(p, float) / scale
+    i = np.floor(q).astype(np.int64)
+    f = q - i
+    f = f * f * (3 - 2 * f)
+    out = 0.0
+    for dx in (0, 1):
+        for dy in (0, 1):
+            for dz in (0, 1):
+                w = (f[:, 0] if dx else 1 - f[:, 0]) * (f[:, 1] if dy else 1 - f[:, 1]) * \
+                    (f[:, 2] if dz else 1 - f[:, 2])
+                out = out + w * _hash(i[:, 0] + dx, i[:, 1] + dy, i[:, 2] + dz, seed)
+    return out
+
+
+class Weathering:
+    """Two hundred years of rain, fire and neglect, painted into the vertex colours (which
+    darken and tint the shared textures), different on every building: its own seed sets how
+    old it looks, how far the grime climbs, how long the streaks run and which windows burned.
+
+      streaks   down from every window sill, sill ledge and roofline (see Mesh.drips)
+      splash    dark grime rising from the ground, higher in places
+      moss      green on north-facing walls, ledge tops and low down
+      scorch    soot plumes above a few windows on some buildings
+      blotches  large uneven stains everywhere, and darker undersides"""
+
+    def __init__(self, seed, heading_deg, ground):
+        rng = np.random.default_rng(seed)
+        self.seed = seed
+        self.h = math.radians(heading_deg)
+        self._ground, self._cache = ground, {}
+        self.age = rng.uniform(0.62, 0.86)            # overall: lower is darker
+        self.splash_h = rng.uniform(0.6, 1.8)         # how high the ground grime climbs
+        self.streak_len = rng.uniform(1.5, 4.5)       # typical streak length below a drip edge
+        self.streak_dark = rng.uniform(0.35, 0.6)
+        self.moss = rng.uniform(0.2, 1.0)
+        self.tint = rng.uniform(-0.05, 0.05, 3)       # a slight shift of the whole building's hue
+        self.scorch_count = int(rng.choice([0, 0, 1, 2, 3, 5]))
+        self.rng = rng
+
+    def ground(self, x, y):
+        k = (round(x * 2), round(y * 2))
+        if k not in self._cache:
+            self._cache[k] = self._ground(k[0] / 2, k[1] / 2)
+        return self._cache[k]
+
+    def pick_scorched(self, windows):
+        if self.scorch_count and windows:
+            idx = self.rng.choice(len(windows), min(self.scorch_count, len(windows)), replace=False)
+            self.scorched = [windows[i] for i in idx]
+        else:
+            self.scorched = []
+
+    def colours(self, mat, p, n_bld, n_world, drips):
+        """RGBA 0..1 for points p (N, 3, building metres before mirroring) on a face whose
+        normal is n_bld in the building and n_world (east, north, up) in the world."""
+        N = len(p)
+        x, y, z = p[:, 0], p[:, 1], p[:, 2]
+        g = np.array([self.ground(a, b) for a, b in zip(x, y)])
+        above = z - g
+        s = self.seed
+        dark = np.zeros(N)
+
+        # Large blotches, and finer mottling.
+        dark += 0.35 * np.clip(noise(p, 4.0, s) - 0.35, 0, 1)
+        dark += 0.15 * noise(p, 0.9, s + 1)
+
+        # Ground splash, its upper edge ragged.
+        top = self.splash_h * (0.6 + 0.8 * noise(p * (1, 1, 0), 2.5, s + 2))
+        dark += 0.55 * np.exp(-np.clip(above, 0, None) / np.maximum(top, 0.1))
+
+        # Streaks below drip edges on vertical faces: a ragged profile along the edge, fading
+        # downward over a length that changes from streak to streak.
+        if abs(n_world[2]) < 0.5 and drips:
+            out = 0 if abs(n_bld[0]) > 0.5 else 1
+            along = 1 - out
+            face = p[:, out]
+            h = p[:, along]
+            streak = np.zeros(N)
+            for axis, side, fz, h0, h1, zd in drips:
+                if axis != out or side != np.sign(n_bld[out]):
+                    continue
+                on = (np.abs(face - fz) < 0.35) & (h >= h0 - 0.1) & (h <= h1 + 0.1) & (z < zd)
+                if not on.any():
+                    continue
+                q = np.stack([h, np.full(N, fz * 7.1 + zd * 3.3), np.zeros(N)], 1)
+                prof = np.clip((noise(q, 0.35, s + 3) - 0.3) * 2.2, 0, 1)
+                length = self.streak_len * (0.4 + 1.2 * noise(q, 1.2, s + 4))
+                v = prof * np.exp(-(zd - z) / length)
+                streak = np.where(on, np.maximum(streak, v), streak)
+            dark += self.streak_dark * streak
+
+        # Soot plumes above burned windows, widening as they rise.
+        for axis, side, fz, h0, h1, zd in getattr(self, "scorched", []):
+            if abs(n_world[2]) >= 0.5:
+                continue
+            out = 0 if abs(n_bld[0]) > 0.5 else 1
+            if axis != out or side != np.sign(n_bld[out]):
+                continue
+            face, h = p[:, out], p[:, 1 - out]
+            rise = z - zd
+            hc, hw = (h0 + h1) / 2, (h1 - h0) / 2
+            width = hw + 0.35 * np.clip(rise, 0, None)
+            v = np.exp(-np.clip(rise, 0, None) / 3.5) * np.exp(-((h - hc) / np.maximum(width, 0.1)) ** 2)
+            v = np.where((np.abs(face - fz) < 0.35) & (rise > -0.2), v, 0)
+            v *= 0.6 + 0.6 * noise(p, 0.8, s + 5)
+            dark += 0.9 * v
+
+        # Undersides catch dirt; tops collect moss.
+        if n_world[2] < -0.5:
+            dark += 0.2
+        mossy = np.zeros(N)
+        if n_world[2] > 0.5:
+            mossy += 0.6
+        elif abs(n_world[2]) < 0.5:
+            mossy += 0.5 * max(0.0, n_world[1])        # facing north
+            mossy += 0.5 * np.exp(-np.clip(above, 0, None) / 1.2)
+        mossy *= self.moss * np.clip((noise(p, 1.8, s + 6) - 0.25) * 2, 0, 1)
+
+        gain = WEAR_GAIN.get(mat, 1.0)
+        shade = self.age * (1 - gain * np.clip(dark, 0, 0.85))
+        rgb = np.stack([shade * (1 + self.tint[0]), shade * (1 + self.tint[1]), shade * (1 + self.tint[2])], 1)
+        rgb *= 1 - gain * mossy[:, None] * np.array([0.35, 0.15, 0.45])    # toward green-brown
+        if mat == "rail":                                                  # rust
+            rgb *= np.array([1.0, 0.62, 0.42]) * (0.8 + 0.4 * noise(p, 0.5, s + 7))[:, None]
+        if mat == "door":                                                  # faded paint
+            rgb *= np.array([0.95, 0.9, 0.92])
+        return np.concatenate([np.clip(rgb, 0, 1), np.ones((N, 1))], 1)
+
+
+class Mesh:
+    """Flat-shaded quads, one list per material, in metres. With weathering, each quad is
+    split into a grid about WEAR_STEP apart, each point carrying its own colour."""
+
+    def __init__(self, mirror=False, weather=None, heading=0.0, drips=()):
         self.mirror = mirror    # flip across the long axis (x -> -x) as quads are written
+        self.weather = weather
+        self.heading = math.radians(heading)
         self.parts = {m: ([], [], [], []) for m in [*COLOURS, "lod_facade"]}
+        self.colours = {m: [] for m in self.parts}
+        self.drips = []         # edges rain runs off: (axis, side, face, h0, h1, z), building
+                                # metres before mirroring; see wall() and ledge()
+        self.known_drips = list(drips)   # from a first pass: colours are made as quads are, and
+                                         # a streak can start at an edge not yet drawn
+        self.windows = []       # the same, one per window, at its head (for soot)
         self.solids = []        # collision: boxes (x0, y0, z0, x1, y1, z1), and ramps
                                 # (x0, y0, z0, x1, y1, (top at x0y0, x1y0, x1y1, x0y1))
 
@@ -80,22 +238,54 @@ class Mesh:
         projected from the world, 3 m per tile."""
         pts = [np.array(p, float) for p in pts]
         n = np.array(normal, float)
+        n_bld = n / np.linalg.norm(n)               # before mirroring, as the weathering sees it
+        raw = [p.copy() for p in pts]
         if self.mirror:
             for p in pts:
                 p[0] = -p[0]
             n[0] = -n[0]
         if np.dot(np.cross(pts[1] - pts[0], pts[2] - pts[0]), n) < 0:
-            pts = pts[::-1]     # counter-clockwise seen from outside
+            pts, raw = pts[::-1], raw[::-1]   # counter-clockwise seen from outside
             uv = uv[::-1] if uv else uv
         verts, norms, uvs, tris = self.parts[mat]
         b = len(verts)
         ax = int(np.argmax(np.abs(n)))
         u_ax, v_ax = [(1, 2), (0, 2), (0, 1)][ax]
-        for i, p in enumerate(pts):
-            verts.append(tuple(p / UNIT_M))
-            norms.append(tuple(n))
-            uvs.append(uv[i] if uv else (p[u_ax] / 3.0, p[v_ax] / 3.0))
-        tris += [(b, b + 1, b + 2), (b, b + 2, b + 3)]
+        if self.weather is None:
+            for i, p in enumerate(pts):
+                verts.append(tuple(p / UNIT_M))
+                norms.append(tuple(n))
+                uvs.append(uv[i] if uv else (p[u_ax] / 3.0, p[v_ax] / 3.0))
+            tris += [(b, b + 1, b + 2), (b, b + 2, b + 3)]
+            return
+
+        # A grid over the quad, by bilinear steps between its corners.
+        def steps(a, b, c, d):
+            e = (b - a + c - d) / 2
+            if abs(n[2]) > 0.5:
+                step = WEAR_STEP_FLAT
+            else:
+                step = WEAR_STEP_UP if abs(e[2]) > np.linalg.norm(e[:2]) else WEAR_STEP_ALONG
+            return max(1, math.ceil(max(np.linalg.norm(b - a), np.linalg.norm(c - d)) / step))
+        nu = steps(pts[0], pts[1], pts[2], pts[3])
+        nv = steps(pts[0], pts[3], pts[2], pts[1])
+        su, sv = np.meshgrid(np.linspace(0, 1, nu + 1), np.linspace(0, 1, nv + 1))
+        su, sv = su.ravel()[:, None], sv.ravel()[:, None]
+        lerp = lambda c: (c[0] * (1 - su) * (1 - sv) + c[1] * su * (1 - sv) + c[2] * su * sv + c[3] * (1 - su) * sv)
+        grid, grid_raw = lerp(pts), lerp(raw)
+        guv = lerp([np.array(t, float) for t in uv]) if uv else np.stack([grid[:, u_ax] / 3.0, grid[:, v_ax] / 3.0], 1)
+        c, s = math.cos(self.heading), math.sin(self.heading)
+        n_world = (n[0] * c + n[1] * s, -n[0] * s + n[1] * c, n[2])
+        n_world = tuple(np.array(n_world) / np.linalg.norm(n_world))
+        col = self.weather.colours(mat, grid_raw, n_bld, n_world, self.known_drips)
+        verts += [tuple(p / UNIT_M) for p in grid]
+        norms += [tuple(n)] * len(grid)
+        uvs += [tuple(t) for t in guv]
+        self.colours[mat] += [tuple(c_) for c_ in col]
+        for j in range(nv):
+            for i in range(nu):
+                a = b + j * (nu + 1) + i
+                tris += [(a, a + 1, a + nu + 2), (a, a + nu + 2, a + nu + 1)]
 
     def box(self, mat, x0, y0, z0, x1, y1, z1, bottom=False, solid=False):
         c = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
@@ -135,6 +325,12 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
 
     out = (side, 0, 0) if axis == "x" else (0, side, 0)
     along = (0, 1, 0) if axis == "x" else (1, 0, 0)
+    k = 0 if axis == "x" else 1
+    m.drips.append((k, side, face, h0, h1, z1))             # the roofline
+    for ha, hb, za, zb, kind in openings:
+        if kind in ("window", "small"):
+            m.drips.append((k, side, face, ha, hb, za))     # the sill
+            m.windows.append((k, side, face, ha, hb, zb))
     hs = sorted({h0, h1, *[o[0] for o in openings], *[o[1] for o in openings]})
     for ha, hb in zip(hs, hs[1:]):
         holes = sorted((o[2], o[3]) for o in openings if o[0] <= ha and o[1] >= hb)
@@ -170,6 +366,7 @@ def ledge(m, axis, side, face, h0, h1, z_top):
         return (f, h, z) if axis == "x" else (h, f, z)
 
     o, zf, zb = LEDGE_OUT, z_top - LEDGE_FACE, z_top - LEDGE_FACE - LEDGE_DROP
+    m.drips.append((0 if axis == "x" else 1, side, face, h0, h1, zb))
     n_out = (side, 0, 0) if axis == "x" else (0, side, 0)
     k = math.hypot(LEDGE_DROP, o)
     n_slope = tuple(c * LEDGE_DROP / k for c in n_out[:2]) + (-o / k,)
@@ -187,16 +384,17 @@ def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
          [(a, b, za, zb, "door2" if k == "door" else k) for a, b, za, zb, k in openings])
 
 
-def build(ground, mirror=False):
+def build(ground, mirror=False, weather=None, heading=0.0, drips=()):
     """The mesh for one site; ground(x, y) is the ground in metres above the reference's Z, in
-    the building's own coordinates before any mirroring."""
+    the building's own coordinates before any mirroring. With weather (a Weathering), the quads
+    carry its colours, streaking down from drips (the edges a first pass recorded)."""
     hw, hl = WING_W / 2, WING_L / 2
     wing_ground = [ground(x, y) for x in np.linspace(-hw, hw, 5) for y in np.linspace(-hl, hl, 20)]
     floor_z = max(wing_ground) + FLOOR_ABOVE
     top = floor_z + 3 * FLOOR_H + PARAPET
     bay = WING_L / BAYS
 
-    m = Mesh(mirror)
+    m = Mesh(mirror, weather, heading, drips)
     m.solids.append((-hw, -hl, -FOOTING, hw, hl, top))
 
     # Long sides.
@@ -260,6 +458,7 @@ def build(ground, mirror=False):
     # End walls: strips and bands, no windows.
     for end in (1, -1):
         yf = end * hl
+        m.drips.append((1, end, yf, -hw, hw, top))
         m.quad("sandstone", [(-hw, yf, -FOOTING), (hw, yf, -FOOTING), (hw, yf, top), (-hw, yf, top)], (0, end, 0))
         for xs in (-hw + 2.0, 0.0, hw - 2.0):
             for dx in (-(STRIP_GAP / 2 + STRIP_W), STRIP_GAP / 2):
@@ -319,6 +518,7 @@ def build(ground, mirror=False):
 LOD_PATH = "LOD/" + MOD_PATH
 LOD_BELOW = 2.0                # the facade texture starts this far below the main floor
 LOD_TEXTURES = ("sandstone", "roof", "lod_facade")
+LOD_WEAR = (0.55, 0.55, 0.5)   # the weathering's typical darkening, for the LOD textures
 LOD_MATERIAL_TEMPLATE = r"Materials\LOD\HitTechExtALargeLOD.BGSM"   # in Fallout4 - Materials.ba2
 
 
@@ -416,22 +616,38 @@ def lod_material(template, texture_dir, mat):
 
 def write_nif(m, nif_path, name, tex, pyn):
     NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, PhysicsProps, \
-        pack_shapes, HAVOC_SCALE_FACTOR = pyn
+        pack_shapes, HAVOC_SCALE_FACTOR, ShaderFlags2 = pyn
     nif = NifFile()
     nif.initialize("FO4", str(nif_path), root_type="BSFadeNode", root_name=name)
     for name, (verts, norms, uvs, tris) in m.parts.items():
-        if not verts:
-            continue
-        props = NiShapeBuf()
-        props.bufType = PynBufferTypes.BSTriShapeBufType
-        props.hasFullPrecision = 1
-        shape = nif.createShapeFromData(name, verts, tris, uvs, norms, props=props, parent=nif.root)
-        shape.shader._checked_for_materials = True
-        shape.shader._materials = None
-        shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
-        shape.set_texture("Diffuse", f"{tex}\\{name}.dds")
-        shape.set_texture("Normal", f"{tex}\\flat_n.dds")
-        shape.save_shader_attributes()
+        # Split into shapes of at most MAX_SHAPE_VERTS, between quads (each quad's vertices are
+        # its own and in order, so a cut before a triangle whose vertices all lie past it is safe).
+        cuts, start = [0], 0
+        for i, t in enumerate(tris):
+            if max(t) - start >= MAX_SHAPE_VERTS:
+                start = min(t)
+                cuts.append(i)
+        cuts.append(len(tris))
+        for k, (t0, t1) in enumerate(zip(cuts, cuts[1:])):
+            if t1 <= t0:
+                continue
+            v0 = min(min(t) for t in tris[t0:t1])
+            v1 = max(max(t) for t in tris[t0:t1]) + 1
+            part_tris = [tuple(i - v0 for i in t) for t in tris[t0:t1]]
+            props = NiShapeBuf()
+            props.bufType = PynBufferTypes.BSTriShapeBufType
+            props.hasFullPrecision = 1
+            shape = nif.createShapeFromData(name if k == 0 else f"{name}_{k}", verts[v0:v1], part_tris,
+                                            uvs[v0:v1], norms[v0:v1], props=props, parent=nif.root)
+            shape.shader._checked_for_materials = True
+            shape.shader._materials = None
+            shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
+            shape.set_texture("Diffuse", f"{tex}\\{name}.dds")
+            shape.set_texture("Normal", f"{tex}\\flat_n.dds")
+            if m.colours[name]:            # the weathering: vertex colours darken the texture
+                shape.set_colors(m.colours[name][v0:v1])
+                shape.shader.properties.shaderflags2_set(ShaderFlags2.VERTEX_COLORS)
+            shape.save_shader_attributes()
 
     coll_verts, coll_tris = [], []
     s = 1 / UNIT_M / HAVOC_SCALE_FACTOR
@@ -463,13 +679,13 @@ def main():
     ap.add_argument("--install", help="the game's Data folder, to copy the files into")
     ap.add_argument("--site", type=int, help="build only this site (see barracks_sites.json)")
     args = ap.parse_args()
-    NifFile, NiShapeBuf, PynBufferTypes, _ = load_pynifly()
+    NifFile, NiShapeBuf, PynBufferTypes, ShaderFlags2 = load_pynifly()
     from pyn.pynifly import BSXFlags, bhkPhysicsSystem
     from pyn.bhk_autounpack import CollisionShape, PhysicsProps
     from pyn.bhk_autopack import pack_shapes
     from pyn.nifconstants import HAVOC_SCALE_FACTOR
     pyn = (NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, PhysicsProps,
-           pack_shapes, HAVOC_SCALE_FACTOR)
+           pack_shapes, HAVOC_SCALE_FACTOR, ShaderFlags2)
 
     out = out_dir("barracks")
     meta = json.loads((out / "heightmap.json").read_text())
@@ -505,6 +721,9 @@ def main():
     lod_files = []
     for t in LOD_TEXTURES:
         d = Image.open(tex_dir / f"{t}.dds").convert("RGB")
+        # About as dark as the weathering leaves the close-up model, so nothing brightens as
+        # the LOD swaps in.
+        d = Image.fromarray((np.asarray(d, float) * LOD_WEAR).astype(np.uint8))
         for suffix, img in (("d", d), ("n", Image.new("RGB", d.size, (128, 128, 255))),
                             ("s", Image.new("RGB", d.size, (12, 20, 0)))):
             name = f"{t}_{suffix}"
@@ -531,7 +750,13 @@ def main():
 
         corners = [(x, y) for b in bo.boxes() for x in (b[0], b[2]) for y in (b[1], b[3])]
         ref_z = min(ground_units(x, y) for x, y in corners)
-        m, floor_z, top, l_top = build(lambda x, y: (ground_units(x, y) - ref_z) * UNIT_M, sx < 0)
+        ground = lambda x, y: (ground_units(x, y) - ref_z) * UNIT_M
+        # A plain first pass finds the edges rain runs off and the windows; then the weathered
+        # build, seeded by the site so every building wears differently.
+        plain = build(ground, sx < 0)[0]
+        weather = Weathering(site["n"], site["heading"], ground)
+        weather.pick_scorched(plain.windows)
+        m, floor_z, top, l_top = build(ground, sx < 0, weather, site["heading"], plain.drips)
         name = f"Barracks{site['n']:02d}"
         nif_path = mesh_dir / f"{name}.nif"
         write_nif(m, nif_path, name, tex, pyn)

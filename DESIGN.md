@@ -907,6 +907,18 @@ a modded receiver.)
 - **Stairs need ramp collision.** Collision built as a stack of step boxes stops the player at the
   first edge. Like vanilla stairs, the visible steps get no collision of their own; a smooth ramp
   under them, from the landing to the ground, is what the player walks on.
+- **Weathering.** Two hundred years after the war the barracks are filthy, and no two alike.
+  `make_barracks.py` splits the model's faces into a fine grid and paints vertex colours that
+  darken and tint the shared textures:
+  - grime rising from the ground
+  - streaks down from every sill, ledge and roofline
+  - moss on north faces, tops and low down
+  - blotches, and darker undersides
+  - soot plumes above a few burned windows on some buildings
+  - rust on the railings
+  Each building is seeded by its number, which sets its age, grime height, streak length, moss
+  and hue. About 64,000 vertices a building, with shapes split under the 16-bit vertex limit.
+  The LOD textures are darkened to match.
 - **Distant LOD.** Beyond the loaded cells (about 120 m) the game draws only LOD. Flagging the
   references Is Full LOD was tried and only half worked (pop-in, and some buildings never showing
   from afar). Each barracks has a stand-in, `Meshes\LOD\DevilsInTheDetails\Buildings\BarracksNN_lod.nif`
