@@ -921,7 +921,9 @@ a modded receiver.)
   The LOD textures are darkened to match.
 - **Damage**, also seeded per building, with a severity per building:
   - **Windows**, each one of: intact, cracked (star cracks in the glass), broken (jagged shards
-    left in the frame), gone, or boarded (planks with gaps, a few planks missing). Boarded is
+    left in the frame; a window that lost its mullion breaks as one pane, so no shard hangs
+    in the air), gone, or boarded (planks of grey barnwood with grain, knots, splits and rusty
+    nails, from a generated texture of four planks; gaps between them, a few missing). Boarded is
     likelier on the ground floor; burned windows are always open. An open window shows a dark,
     empty room, a stand-in until the interiors are built.
   - **Walls**: thin crack lines laid just off the face, running from the corners of openings, up

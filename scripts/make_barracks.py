@@ -63,7 +63,7 @@ COLOURS = {
     "sandstone": (205, 188, 158), "band": (176, 160, 132), "glass": (38, 46, 54),
     "frame": (226, 224, 216), "door": (112, 74, 44), "concrete": (172, 170, 164),
     "rail": (92, 92, 90), "roof": (118, 114, 108),
-    "crack": (34, 31, 28), "spall": (140, 134, 124), "void": (22, 21, 20), "board": (128, 110, 86),
+    "crack": (34, 31, 28), "spall": (140, 134, 124), "void": (22, 21, 20), "board": (150, 146, 138),
 }
 MOD_PATH = "DevilsInTheDetails/Buildings"
 FOOTING = bo.FOOTING
@@ -75,7 +75,7 @@ WEAR_STEP_ALONG, WEAR_STEP_UP, WEAR_STEP_FLAT = 0.3, 0.6, 1.2
 MAX_SHAPE_VERTS = 60000    # a shape's triangles index its vertices with 16 bits
 WEAR_GAIN = {          # how strongly each material shows the dirt (1 = fully)
     "sandstone": 1.0, "band": 1.0, "concrete": 1.0, "roof": 0.8, "frame": 0.9,
-    "door": 0.7, "glass": 0.4, "rail": 0.3, "crack": 0.2, "spall": 0.8, "void": 0.3, "board": 0.8,
+    "door": 0.7, "glass": 0.4, "rail": 0.3, "crack": 0.2, "spall": 0.8, "void": 0.3, "board": 0.5,
 }
 
 
@@ -411,7 +411,10 @@ def window_pane(m, P, out, along, wall_key, ha, hb, za, zb, dp, kind):
         state = "intact"
     rng = w.rng_for("pane", *wall_key, ha, za) if w else None
     hm = (ha + hb) / 2
-    halves = [(ha, hm - 0.03), (hm + 0.03, hb)] if kind == "window" else [(ha, hb)]
+    # Without its mullion a window breaks as one pane, so no shard is left hanging from a
+    # mullion that isn't there.
+    mullion = kind == "window" and (state in ("intact", "cracked", "boarded") or rng.random() < 0.5)
+    halves = [(ha, hm - 0.03), (hm + 0.03, hb)] if mullion else [(ha, hb)]
     if state in ("broken", "missing", "boarded"):
         dark_room(m, P, out, along, ha, hb, za, dp, kind)
     if state in ("intact", "cracked"):
@@ -450,8 +453,12 @@ def window_pane(m, P, out, along, wall_key, ha, hb, za, zb, dp, kind):
             tilt = rng.normal(0, 0.04)
             pts = [(ha - 0.1, z0 + 0.02 - tilt), (hb + 0.1, z0 + 0.02 + tilt),
                    (hb + 0.1, z1 - 0.02 + tilt), (ha - 0.1, z1 - 0.02 - tilt)]
-            m.quad("board", [P(h, z, -0.03) for h, z in pts], out)
-    if kind == "window" and (state in ("intact", "cracked", "boarded") or rng.random() < 0.5):
+            # One of the BOARD_PLANKS planks in the texture, either way round.
+            r = int(rng.integers(BOARD_PLANKS))
+            v0, v1 = (r + 0.04) / BOARD_PLANKS, (r + 0.96) / BOARD_PLANKS
+            u0, u1 = (0, 1) if rng.random() < 0.5 else (1, 0)
+            m.quad("board", [P(h, z, -0.03) for h, z in pts], out, uv=[(u0, v0), (u1, v0), (u1, v1), (u0, v1)])
+    if mullion:
         a, b = P(hm - 0.03, za, dp), P(hm + 0.03, zb, dp - 0.05)   # the mullion
         m.box("frame", min(a[0], b[0]), min(a[1], b[1]), za, max(a[0], b[0]), max(a[1], b[1]), zb)
 
@@ -701,6 +708,46 @@ LOD_WEAR = (0.55, 0.55, 0.5)   # the weathering's typical darkening, for the LOD
 LOD_MATERIAL_TEMPLATE = r"Materials\LOD\HitTechExtALargeLOD.BGSM"   # in Fallout4 - Materials.ba2
 
 
+BOARD_PLANKS = 4               # planks in the board texture, one above another
+
+
+def board_texture(path, seed=1945):
+    """Old grey barnwood: BOARD_PLANKS planks one above another, each 512 x 128, grain running
+    along them, with knots, splits, worn edges and a rusty nail head near each end."""
+    rng = np.random.default_rng(seed)
+    W, H = 512, 128
+    rows = []
+    for _ in range(BOARD_PLANKS):
+        base = rng.uniform(140, 172)
+        # Grain: noise stretched far along the plank, plus fine dark lines.
+        coarse = np.asarray(Image.fromarray(rng.normal(0, 1, (H // 4, 12)).astype(np.float32)).resize((W, H), Image.BICUBIC))
+        fine = np.asarray(Image.fromarray(rng.normal(0, 1, (H // 2, 20)).astype(np.float32)).resize((W, H), Image.BICUBIC))
+        v = base + 10 * coarse + 6 * fine
+        v -= 28 * (np.abs(fine) < 0.08)                      # dark grain lines
+        y = np.arange(H)[:, None]
+        v -= 30 * np.exp(-np.minimum(y, H - 1 - y) / 4.0)    # worn, dark edges
+        x = np.arange(W)[None, :]
+        for _ in range(rng.integers(0, 3)):                  # knots
+            kx, ky, r = rng.uniform(60, W - 60), rng.uniform(25, H - 25), rng.uniform(6, 14)
+            d = np.hypot((x - kx) / 1.6, y - ky)
+            v -= 45 * np.exp(-(d / r) ** 2)
+            v += 8 * np.sin(d / 2.0) * np.exp(-(d / (3 * r)) ** 2)
+        for _ in range(rng.integers(1, 4)):                  # splits along the grain
+            sy, sx, ln = rng.uniform(15, H - 15), rng.uniform(0, W), rng.uniform(60, 260)
+            on = (np.abs(y - sy - 0.01 * (x - sx)) < 1.2) & (x > sx) & (x < sx + ln)
+            v = np.where(on, v * rng.uniform(0.35, 0.7), v)
+        rgb = np.stack([v * 1.0, v * 0.98, v * 0.93], -1)   # grey, a touch warm
+        for nx in (18, W - 18):                              # nail heads, with rust bleeding down
+            for ny in (H * 0.3, H * 0.7):
+                d = np.hypot(x - nx, y - ny)
+                rgb *= (1 - 0.6 * np.exp(-(d / 4) ** 2))[..., None]
+                bleed = np.exp(-np.abs(x - nx) / 3) * np.exp(-np.clip(y - ny, 0, None) / 18) * (y > ny)
+                rgb *= (1 - bleed[..., None] * np.array([0.1, 0.35, 0.5]))
+        rows.append(rgb)
+    img = np.clip(np.concatenate(rows, 0), 0, 255).astype(np.uint8)
+    Image.fromarray(img).save(path, pixel_format="DXT1")
+
+
 def facade_texture(path):
     """One long wall of the main wing, painted for distant LOD: windows, ledges and doors on
     sandstone. Covers the wall's whole length, and from LOD_BELOW under the main floor to the top.
@@ -888,6 +935,7 @@ def main():
         Image.fromarray(img).save(tex_dir / f"{name}.dds", pixel_format="DXT1")
     Image.new("RGB", (4, 4), (128, 128, 255)).save(tex_dir / "flat_n.dds", pixel_format="DXT1")
     facade_texture(tex_dir / "lod_facade.dds")
+    board_texture(tex_dir / "board.dds")
     # The Creation Kit's LOD generator wants every texture a LOD model uses under Textures\LOD,
     # and builds its atlas from uncompressed TGA copies under <game>\Source\TGATextures.
     lod_tex_dir = mod / "Textures" / LOD_PATH
