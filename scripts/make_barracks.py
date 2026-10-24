@@ -4,16 +4,19 @@ company entrance and office windows, and the windowless arms room.
 
     python scripts/make_barracks.py [--install "<Fallout 4>/Data"]
 
-The main wing, from the 1993 photo and the photo in data/reference/barracks_exterior.jpg:
-  - BAYS bays down each long side, split by paired vertical strips (the joints between the
-    precast panels), with two windows per bay on each floor
-  - a sill ledge under each upper row of windows: out from the wall just below the sills, a
-    face about 3 ft deep, then a steep slope back to the wall; the end walls have the strips
-    and ledges, no windows
+The main wing as it was before the renovation, from the 1993 photo's length, the floor plan in
+DESIGN.md and the photo in data/reference/hqdefault.jpg:
+  - BAYS bays down each long side, one room per bay, split by pilasters; each room has two
+    windows on each floor, one by each pilaster, with light infill panels between them
+  - a ledge under every row of windows: a face proud of the wall, then a slope back that ends
+    at the heads of the windows below; the end walls have strips and ledges, no windows
+  - on the front (FRONT), two entrances (ENTRANCE_BAYS): double doors, a landing, and steps
+    running along the wall down to the ground, railings on both sides; above each door a room's
+    single window, and beside it the stair's landing windows, half a floor down
+  - on the back, no doors; the bathroom's short, wide ribbon windows (BATH_BAYS)
+  - the common room's narrow, tall windows on the ground floor at the arms room end
   - the main floor FLOOR_ABOVE m above the highest ground under the wing, so the low end
     stands taller on its foundation
-  - four sets of double doors, two on each long side (DOOR_BAYS), each with a landing and steps
-    running straight out from the wall down to the ground, railings on both sides
 Placement, size and the L come from make_barracks_blockout.py. Every building is weathered in
 its own way, in its vertex colours (see Weathering).
 
@@ -40,31 +43,50 @@ import make_barracks_blockout as bo                                           # 
 import ba2                                                                    # noqa: E402
 
 WING_L, WING_W = bo.WING_L, bo.WING_W
-BAYS = 10                      # about 8.5 m, measured off the photo's near end
+BAYS = 11                      # one room per bay on each side; about 7.7 m over the 1993 length
+FRONT = -1                     # the long side with the entrances: west, the arms room's side, so
+                               # facing it the arms room end is on the left, as in the photo
+ENTRANCE_BAYS = (3, 7)         # counted from the south end; the stairs are behind them, and the
+                               # one nearer the arms room has the barracks desk
+BATH_BAYS = (3, 4)             # the bathroom, on the back, every floor
+COMMON_BAYS = (9, 10)          # the common room, ground floor, both sides, at the arms room end
 FLOOR_H = 3.1                  # floor to floor
-FLOOR_ABOVE = 0.5              # main floor above the highest ground under the wing
+FLOOR_ABOVE = 1.5              # main floor above the highest ground under the wing
 PARAPET = 0.6
-WIN_W, WIN_H, WIN_SILL = 1.9, 1.2, 0.9   # wide and low, as in the photo
-WIN_OFFSET = 1.9               # each window's centre from its bay's centre: the gap is one window
+WIN_W, WIN_H, WIN_SILL = 1.6, 1.3, 0.9   # a room's two windows, one by each pilaster
+WIN_INSET = 0.15               # each room window in from its pilaster
+PANEL_GAP = 0.1                # the strip of wall between a window and the infill panels
+PANELS = 3                     # light infill panels between a room's two windows
+DOOR_WIN_W = 1.9               # the room over an entrance: one window, over the door
+LAND_W, LAND_H, LAND_SILL = 1.0, 1.0, 0.9   # stair landing windows, half a floor down
+RIBBON_H, RIBBON_SILL, RIBBON_PANES = 1.0, 1.2, 5   # the bathroom's short, wide windows
+NARROW_W, NARROW_H, NARROW_SILL, NARROW_N = 0.7, 1.6, 0.6, 4   # the common room's, per bay
+L_WIN_W, L_WIN_H = 1.9, 1.2    # the L's office windows
 WIN_DEPTH = 0.15               # glass set back from the wall face
-STRIP_W, STRIP_GAP, STRIP_OUT = 0.2, 0.15, 0.08
+PIL_W, PIL_OUT = 0.45, 0.3     # pilasters at the bay lines, prouder than the ledges
+STRIP_W, STRIP_GAP, STRIP_OUT = 0.2, 0.15, 0.08   # paired strips on the end walls
 BAND_H, BAND_OUT = 0.3, 0.05   # the band under the L's roofline
-LEDGE_OUT, LEDGE_FACE = 0.2, 0.9   # sill ledges: how far out, how deep the face before the slope
-LEDGE_DROP = 0.45                  # how far down the slope runs back to the wall (a steep slope)
-DOOR_BAYS = (2, 7)             # bays 3 and 8, counted from the south end, on both sides
+# The ledge under each row of windows: a flat top at the sill, LEDGE_OUT proud of the wall, a
+# face down to LEDGE_FACE below it, then a slope back into the wall that ends at the heads of
+# the windows below (so FLOOR_H = WIN_H + LEDGE_FACE + LEDGE_DROP).
+LEDGE_OUT, LEDGE_DROP = 0.23, 0.4
+LEDGE_FACE = FLOOR_H - WIN_H - LEDGE_DROP
 DOOR_W, DOOR_H, DOOR_DEPTH = 2.1, 2.2, 0.3   # double doors, closing straight together
 LANDING_OUT, LANDING_ALONG = 1.5, 2.6
-RISER, TREAD = 0.18, 0.28   # the stair is as wide as the landing
+RISER, TREAD = 0.18, 0.28   # the steps run along the wall, between the pilasters' faces and
+                            # the landing's outer edge
 RAMP_PAST = 1.0             # the collision ramp runs this far past the bottom step, underground
 RAIL_H, RAIL_T = 0.95, 0.05
 L_HEIGHT = 3.6                 # the one-story L, floor to roof
 
 COLOURS = {
     "sandstone": (205, 188, 158), "band": (176, 160, 132), "glass": (38, 46, 54),
-    "frame": (226, 224, 216), "door": (112, 74, 44), "concrete": (172, 170, 164),
+    "frame": (226, 224, 216), "door": (112, 74, 44), "concrete": (172, 170, 164), "panel": (218, 212, 196),
     "rail": (92, 92, 90), "roof": (118, 114, 108),
     "crack": (34, 31, 28), "spall": (140, 134, 124), "void": (22, 21, 20), "board": (150, 146, 138),
 }
+GLAZED = ("window", "small", "landing", "ribbon", "narrow")   # opening kinds with glass
+SILL = {"window": WIN_SILL, "small": 1.7, "landing": LAND_SILL, "ribbon": RIBBON_SILL, "narrow": NARROW_SILL}
 MOD_PATH = "DevilsInTheDetails/Buildings"
 FOOTING = bo.FOOTING
 
@@ -75,7 +97,7 @@ WEAR_STEP_ALONG, WEAR_STEP_UP, WEAR_STEP_FLAT = 0.3, 0.6, 1.2
 MAX_SHAPE_VERTS = 60000    # a shape's triangles index its vertices with 16 bits
 WEAR_GAIN = {          # how strongly each material shows the dirt (1 = fully)
     "sandstone": 1.0, "band": 1.0, "concrete": 1.0, "roof": 0.8, "frame": 0.9,
-    "door": 0.7, "glass": 0.4, "rail": 0.3, "crack": 0.2, "spall": 0.8, "void": 0.3, "board": 0.5,
+    "door": 0.7, "glass": 0.4, "rail": 0.3, "panel": 0.9, "crack": 0.2, "spall": 0.8, "void": 0.3, "board": 0.5,
 }
 
 
@@ -250,7 +272,7 @@ class Mesh:
         self.mirror = mirror    # flip across the long axis (x -> -x) as quads are written
         self.weather = weather
         self.heading = math.radians(heading)
-        self.parts = {m: ([], [], [], []) for m in [*COLOURS, "lod_facade"]}
+        self.parts = {m: ([], [], [], []) for m in [*COLOURS, "lod_facade", "lod_facade_back"]}
         self.colours = {m: [] for m in self.parts}
         self.drips = []         # edges rain runs off: (axis, side, face, h0, h1, z), building
                                 # metres before mirroring; see wall() and ledge()
@@ -345,7 +367,7 @@ class Mesh:
 def wall(m, axis, side, face, h0, h1, z0, z1, openings):
     """A wall in the plane x = face (axis "x") or y = face (axis "y"), facing side (+1 or -1
     along that axis), running h0..h1 along the other axis, with rectangular openings
-    (ha, hb, za, zb, kind); each opening gets reveals, and its glass or door set back."""
+    (ha, hb, za, zb, kind); each opening gets reveals, and its glass, panels or door set back."""
     def P(h, z, d=0.0):
         f = face - side * d
         return (f, h, z) if axis == "x" else (h, f, z)
@@ -355,7 +377,7 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
     k = 0 if axis == "x" else 1
     m.drips.append((k, side, face, h0, h1, z1))             # the roofline
     for ha, hb, za, zb, kind in openings:
-        if kind in ("window", "small"):
+        if kind in GLAZED:
             m.drips.append((k, side, face, ha, hb, za))     # the sill
             m.windows.append((k, side, face, ha, hb, zb))
     hs = sorted({h0, h1, *[o[0] for o in openings], *[o[1] for o in openings]})
@@ -367,7 +389,7 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
                 m.quad("sandstone", [P(ha, z), P(hb, z), P(hb, za), P(ha, za)], out)
             z = max(z, zb)
     for ha, hb, za, zb, kind in openings:
-        dp = {"window": WIN_DEPTH, "small": WIN_DEPTH}.get(kind, DOOR_DEPTH)
+        dp = DOOR_DEPTH if kind.startswith("door") else WIN_DEPTH
         neg = tuple(-c for c in along)
         m.quad("frame", [P(ha, za), P(ha, za, dp), P(ha, zb, dp), P(ha, zb)], along)
         m.quad("frame", [P(hb, za), P(hb, za, dp), P(hb, zb, dp), P(hb, zb)], neg)
@@ -380,6 +402,12 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
                 d2 = dp - 0.003
                 m.quad("rail", [P(hm - 0.006, za, d2), P(hm + 0.006, za, d2), P(hm + 0.006, zb, d2),
                                 P(hm - 0.006, zb, d2)], out)
+        elif kind == "panel":             # infill panels, split by thin frames
+            m.quad("panel", [P(ha, za, dp), P(hb, za, dp), P(hb, zb, dp), P(ha, zb, dp)], out)
+            for i in range(1, PANELS):
+                hp = ha + (hb - ha) * i / PANELS
+                a, b = P(hp - 0.02, za, dp), P(hp + 0.02, zb, dp - 0.03)
+                m.box("frame", min(a[0], b[0]), min(a[1], b[1]), za, max(a[0], b[0]), max(a[1], b[1]), zb)
         else:
             window_pane(m, P, out, along, (k, side, face), ha, hb, za, zb, dp, kind)
     if m.weather:
@@ -406,15 +434,16 @@ def window_pane(m, P, out, along, wall_key, ha, hb, za, zb, dp, kind):
     w = m.weather
     if w:
         x, y, _ = P((ha + hb) / 2, 0)
-        state = w.window_state(wall_key, ha, zb, za - w.ground(x, y) < 2.5)
+        state = w.window_state(wall_key, ha, zb, za - w.ground(x, y) < 3.0)
     else:
         state = "intact"
     rng = w.rng_for("pane", *wall_key, ha, za) if w else None
-    hm = (ha + hb) / 2
-    # Without its mullion a window breaks as one pane, so no shard is left hanging from a
+    # Without its mullions a window breaks as one pane, so no shard is left hanging from a
     # mullion that isn't there.
-    mullion = kind == "window" and (state in ("intact", "cracked", "boarded") or rng.random() < 0.5)
-    halves = [(ha, hm - 0.03), (hm + 0.03, hb)] if mullion else [(ha, hb)]
+    n = {"window": 2, "ribbon": RIBBON_PANES}.get(kind, 1)
+    mullion = n > 1 and (state in ("intact", "cracked", "boarded") or rng.random() < 0.5)
+    cuts = [ha + (hb - ha) * i / n for i in range(1, n)] if mullion else []
+    halves = list(zip([ha] + [c + 0.03 for c in cuts], [c - 0.03 for c in cuts] + [hb]))
     if state in ("broken", "missing", "boarded"):
         dark_room(m, P, out, along, ha, hb, za, dp, kind)
     if state in ("intact", "cracked"):
@@ -458,15 +487,20 @@ def window_pane(m, P, out, along, wall_key, ha, hb, za, zb, dp, kind):
             v0, v1 = (r + 0.04) / BOARD_PLANKS, (r + 0.96) / BOARD_PLANKS
             u0, u1 = (0, 1) if rng.random() < 0.5 else (1, 0)
             m.quad("board", [P(h, z, -0.03) for h, z in pts], out, uv=[(u0, v0), (u1, v0), (u1, v1), (u0, v1)])
-    if mullion:
-        a, b = P(hm - 0.03, za, dp), P(hm + 0.03, zb, dp - 0.05)   # the mullion
+    for c in cuts:                    # the mullions
+        a, b = P(c - 0.03, za, dp), P(c + 0.03, zb, dp - 0.05)
         m.box("frame", min(a[0], b[0]), min(a[1], b[1]), za, max(a[0], b[0]), max(a[1], b[1]), zb)
+    if kind == "ribbon" and mullion:  # and the ribbon's two bars across
+        for t in (1 / 3, 2 / 3):
+            zt = za + (zb - za) * t
+            a, b = P(ha, zt - 0.02, dp), P(hb, zt + 0.02, dp - 0.04)
+            m.box("frame", min(a[0], b[0]), min(a[1], b[1]), zt - 0.02, max(a[0], b[0]), max(a[1], b[1]), zt + 0.02)
 
 
 def dark_room(m, P, out, along, ha, hb, za, dp, kind):
     """What shows through an open window until the interiors are built: a dark, empty room,
     its faces turned inward."""
-    floor = za - (WIN_SILL if kind == "window" else 1.7)
+    floor = za - SILL[kind]
     ceil = floor + FLOOR_H - 0.3
     r0, r1, d0, d1 = ha - 0.6, hb + 0.6, dp, dp + 3.0
     m.quad("void", [P(r0, floor, d1), P(r1, floor, d1), P(r1, ceil, d1), P(r0, ceil, d1)], out)
@@ -570,6 +604,64 @@ def wall_with_openings(m, side, x_face, y0, y1, z0, z1, openings):
          [(a, b, za, zb, "door2" if k == "door" else k) for a, b, za, zb, k in openings])
 
 
+def bay_span(b):
+    """The wall of bay b between its pilasters' faces, along the wing (south end first)."""
+    bay = WING_L / BAYS
+    y0, y1 = -WING_L / 2 + b * bay, -WING_L / 2 + (b + 1) * bay
+    return (y0 + (PIL_W if b == 0 else PIL_W / 2), y1 - (PIL_W if b == BAYS - 1 else PIL_W / 2))
+
+
+def entrance_spots(b):
+    """In an entrance bay: the door (and the room over it) in the north half, toward the arms
+    room end, the stair landings in the south half."""
+    a, c = bay_span(b)
+    return a + 3 * (c - a) / 4, a + (c - a) / 4
+
+
+def facade(side):
+    """A long side of the main wing, as the floor plan has it: openings (ha, hb, za, zb, kind)
+    and ledges (h0, h1, z_top), with z measured up from the main floor.
+
+      a room       two windows, one by each pilaster, light infill panels between them
+      entrance     front only: the door; above it a room's single window, and beside it the
+                   stair's landing windows, half a floor down, breaking the ledge
+      bathroom     back only, every floor: one short, wide ribbon window per bay
+      common room  ground floor at the arms room end: a row of narrow, tall windows"""
+    openings, ledges = [], []
+    front = side == FRONT
+    for b in range(BAYS):
+        a, c = bay_span(b)
+        for f in range(3):
+            fz = f * FLOOR_H
+            sill, head = fz + WIN_SILL, fz + WIN_SILL + WIN_H
+            if front and b in ENTRANCE_BAYS:
+                yd, yl = entrance_spots(b)
+                if f == 0:
+                    openings.append((yd - DOOR_W / 2, yd + DOOR_W / 2, fz, fz + DOOR_H, "door"))
+                    continue
+                openings.append((yd - DOOR_WIN_W / 2, yd + DOOR_WIN_W / 2, sill, head, "window"))
+                lz = fz - FLOOR_H / 2 + LAND_SILL
+                openings.append((yl - LAND_W / 2, yl + LAND_W / 2, lz, lz + LAND_H, "landing"))
+                ledges += [(a, yl - LAND_W / 2 - 0.15, sill), (yl + LAND_W / 2 + 0.15, c, sill)]
+                continue
+            ledges.append((a, c, fz + NARROW_SILL if f == 0 and b in COMMON_BAYS else sill))
+            if not front and b in BATH_BAYS:
+                rz = fz + RIBBON_SILL
+                openings.append((a + 0.5, c - 0.5, rz, rz + RIBBON_H, "ribbon"))
+            elif f == 0 and b in COMMON_BAYS:
+                step = (c - a) / NARROW_N
+                for i in range(NARROW_N):
+                    yc = a + (i + 0.5) * step
+                    openings.append((yc - NARROW_W / 2, yc + NARROW_W / 2, fz + NARROW_SILL,
+                                     fz + NARROW_SILL + NARROW_H, "narrow"))
+            else:
+                w0, w1 = a + WIN_INSET, c - WIN_INSET
+                openings += [(w0, w0 + WIN_W, sill, head, "window"),
+                             (w0 + WIN_W + PANEL_GAP, w1 - WIN_W - PANEL_GAP, sill, head, "panel"),
+                             (w1 - WIN_W, w1, sill, head, "window")]
+    return openings, ledges
+
+
 def build(ground, mirror=False, weather=None, heading=0.0, drips=()):
     """The mesh for one site; ground(x, y) is the ground in metres above the reference's Z, in
     the building's own coordinates before any mirroring. With weather (a Weathering), the quads
@@ -586,60 +678,58 @@ def build(ground, mirror=False, weather=None, heading=0.0, drips=()):
     # Long sides.
     for side in (1, -1):
         xf = side * hw
-        openings = []
-        for b in range(BAYS):
-            yc = -hl + (b + 0.5) * bay
-            for f in range(3):
-                fz = floor_z + f * FLOOR_H
-                if f == 0 and b in DOOR_BAYS:
-                    openings.append((yc - DOOR_W / 2, yc + DOOR_W / 2, fz, fz + DOOR_H, "door"))
-                    continue
-                for k in (-1, 1):
-                    wy = yc + k * WIN_OFFSET
-                    openings.append((wy - WIN_W / 2, wy + WIN_W / 2, fz + WIN_SILL, fz + WIN_SILL + WIN_H, "window"))
-        wall_with_openings(m, side, xf, -hl, hl, -FOOTING, top, openings)
+        openings, ledges = facade(side)
+        wall_with_openings(m, side, xf, -hl, hl, -FOOTING, top,
+                           [(a, b, za + floor_z, zb + floor_z, k) for a, b, za, zb, k in openings])
+        for h0, h1, z in ledges:
+            ledge(m, "x", side, xf, h0, h1, floor_z + z)
 
-        # Paired strips at every bay line, and the floor-line bands.
+        # A pilaster at every bay line, the ones at the corners flush with the end walls.
+        x0, x1 = sorted((xf, xf + side * PIL_OUT))
         for b in range(BAYS + 1):
             yb = -hl + b * bay
-            for dy in (-(STRIP_GAP / 2 + STRIP_W), STRIP_GAP / 2):
-                ya, yb2 = max(-hl, yb + dy), min(hl, yb + dy + STRIP_W)
-                if yb2 > ya:
-                    x0, x1 = sorted((xf, xf + side * STRIP_OUT))
-                    m.box("sandstone", x0, ya, -FOOTING, x1, yb2, top)
-        for f in (1, 2):
-            ledge(m, "x", side, xf, -hl, hl, floor_z + f * FLOOR_H + WIN_SILL - 0.05)
+            ya, yb2 = max(-hl, yb - PIL_W / 2), min(hl, yb + PIL_W / 2)
+            if b in (0, BAYS):
+                ya, yb2 = (-hl, -hl + PIL_W) if b == 0 else (hl - PIL_W, hl)
+            m.box("sandstone", x0, ya, -FOOTING, x1, yb2, top)
 
-        # Doors: a landing at floor level, then steps straight out from the wall to the ground,
-        # with a railing down each side.
-        for b in DOOR_BAYS:
-            yc = -hl + (b + 0.5) * bay
-            ly0, ly1 = yc - LANDING_ALONG / 2, yc + LANDING_ALONG / 2
-            lx0, lx1 = sorted((xf, xf + side * LANDING_OUT))
+        if side != FRONT:
+            continue
+        # Entrances: a landing at the door, then steps running north along the wall, between the
+        # pilasters' faces and the landing's outer edge, down to the ground; railings both sides.
+        out0 = xf + side * LANDING_OUT
+        sx0, sx1 = sorted((xf + side * PIL_OUT, out0))
+        for b in ENTRANCE_BAYS:
+            yd, _ = entrance_spots(b)
+            ly0, ly1 = yd - LANDING_ALONG / 2, yd + LANDING_ALONG / 2
+            lx0, lx1 = sorted((xf, out0))
             m.box("concrete", lx0, ly0, -FOOTING, lx1, ly1, floor_z, solid=True)
-            out0 = xf + side * LANDING_OUT
-            g = ground(out0 + side * 1.0, yc)
+            g = ground((sx0 + sx1) / 2, ly1 + 2.0)
             steps = max(1, math.ceil((floor_z - g) / RISER))
             rise = (floor_z - g) / steps
             for i in range(1, steps):
-                x0, x1 = sorted((out0 + side * (i - 1) * TREAD, out0 + side * i * TREAD))
-                m.box("concrete", x0, ly0, -FOOTING, x1, ly1, floor_z - i * rise)
-            foot_x = out0 + side * (steps - 1) * TREAD
+                m.box("concrete", sx0, ly1 + (i - 1) * TREAD, -FOOTING, sx1, ly1 + i * TREAD, floor_z - i * rise)
+            foot_y = ly1 + (steps - 1) * TREAD
+            foot_z = floor_z - (steps - 1) * rise
             # Walking on steps of boxes stops the player at the first edge: like Bethesda's own
             # stairs, the collision is a smooth ramp from the landing down to the ground. It runs
             # RAMP_PAST beyond the bottom step at the same slope, so it ends underground and
             # rises out of the terrain wherever the ground really is, with no lip to trip on.
             slope = rise / TREAD
-            end_x = foot_x + side * RAMP_PAST
-            zx = {out0: floor_z, end_x: g - slope * RAMP_PAST}
-            rx0, rx1 = sorted((out0, end_x))
-            m.solids.append((rx0, ly0, -FOOTING, rx1, ly1, (zx[rx0], zx[rx1], zx[rx1], zx[rx0])))
-            foot_z = floor_z - (steps - 1) * rise
-            for ry in (ly0 + RAIL_T, ly1 - RAIL_T):
-                for px, pz in ((xf + side * RAIL_T, floor_z), (out0, floor_z), (foot_x, foot_z)):
-                    m.beam("rail", (px, ry, pz), (px, ry, pz + RAIL_H), RAIL_T)
-                m.beam("rail", (xf + side * RAIL_T, ry, floor_z + RAIL_H), (out0, ry, floor_z + RAIL_H), RAIL_T)
-                m.beam("rail", (out0, ry, floor_z + RAIL_H), (foot_x, ry, foot_z + RAIL_H), RAIL_T)
+            end_y = foot_y + RAMP_PAST
+            low = g - slope * RAMP_PAST
+            m.solids.append((sx0, ly1, -FOOTING, sx1, end_y, (floor_z, floor_z, low, low)))
+            # Railings: down the outer edge of the landing and steps, down the steps by the wall,
+            # and across the landing's south end.
+            xo, xi = out0 - side * RAIL_T, xf + side * (PIL_OUT + RAIL_T)
+            for px, py, pz in ((xo, ly0 + RAIL_T, floor_z), (xo, ly1, floor_z), (xo, foot_y, foot_z),
+                               (xi, ly1, floor_z), (xi, foot_y, foot_z), (xf + side * RAIL_T, ly0 + RAIL_T, floor_z)):
+                m.beam("rail", (px, py, pz), (px, py, pz + RAIL_H), RAIL_T)
+            for (pa, za), (pb, zb) in ((((xo, ly0 + RAIL_T), floor_z), ((xo, ly1), floor_z)),
+                                       (((xo, ly1), floor_z), ((xo, foot_y), foot_z)),
+                                       (((xi, ly1), floor_z), ((xi, foot_y), foot_z)),
+                                       (((xf + side * RAIL_T, ly0 + RAIL_T), floor_z), ((xo, ly0 + RAIL_T), floor_z))):
+                m.beam("rail", (*pa, za + RAIL_H), (*pb, zb + RAIL_H), RAIL_T)
 
     # End walls: strips and bands, no windows.
     for end in (1, -1):
@@ -650,8 +740,8 @@ def build(ground, mirror=False, weather=None, heading=0.0, drips=()):
             for dx in (-(STRIP_GAP / 2 + STRIP_W), STRIP_GAP / 2):
                 y0, y1 = sorted((yf, yf + end * STRIP_OUT))
                 m.box("sandstone", xs + dx, y0, -FOOTING, xs + dx + STRIP_W, y1, top)
-        for f in (1, 2):
-            ledge(m, "y", end, yf, -hw, hw, floor_z + f * FLOOR_H + WIN_SILL - 0.05)
+        for f in range(3):
+            ledge(m, "y", end, yf, -hw, hw, floor_z + f * FLOOR_H + WIN_SILL)
 
     # Roof and parapet cap.
     m.quad("roof", [(-hw, -hl, top - 0.1), (hw, -hl, top - 0.1), (hw, hl, top - 0.1), (-hw, hl, top - 0.1)], (0, 0, 1))
@@ -666,8 +756,8 @@ def build(ground, mirror=False, weather=None, heading=0.0, drips=()):
     door_x = ox0 + 0.4 + DOOR_W / 2           # the entrance, at the orderly room's west end
     l_floor = ground(door_x, oy0 - 1.0) + RISER
     l_top = l_floor + L_HEIGHT
-    sill, head = l_floor + 1.0, l_floor + 1.0 + WIN_H
-    win = lambda c: (c - WIN_W / 2, c + WIN_W / 2, sill, head, "window")
+    sill, head = l_floor + 1.0, l_floor + 1.0 + L_WIN_H
+    win = lambda c: (c - L_WIN_W / 2, c + L_WIN_W / 2, sill, head, "window")
     small = lambda c: (c - 0.4, c + 0.4, l_floor + 1.7, l_floor + 2.2, "small")
     m.solids += [(ox0, oy0, -FOOTING, ox1, oy1, l_top), (ax0, ay0, -FOOTING, ax1, ay1, l_top)]
     # Orderly room. South: the entrance, then the First Sergeant's window.
@@ -703,7 +793,7 @@ def build(ground, mirror=False, weather=None, heading=0.0, drips=()):
 
 LOD_PATH = "LOD/" + MOD_PATH
 LOD_BELOW = 2.0                # the facade texture starts this far below the main floor
-LOD_TEXTURES = ("sandstone", "roof", "lod_facade")
+LOD_TEXTURES = ("sandstone", "roof", "lod_facade", "lod_facade_back")
 LOD_WEAR = (0.55, 0.55, 0.5)   # the weathering's typical darkening, for the LOD textures
 LOD_MATERIAL_TEMPLATE = r"Materials\LOD\HitTechExtALargeLOD.BGSM"   # in Fallout4 - Materials.ba2
 
@@ -748,31 +838,28 @@ def board_texture(path, seed=1945):
     Image.fromarray(img).save(path, pixel_format="DXT1")
 
 
-def facade_texture(path):
-    """One long wall of the main wing, painted for distant LOD: windows, ledges and doors on
-    sandstone. Covers the wall's whole length, and from LOD_BELOW under the main floor to the top.
-    The same for every site, since the texture is laid out from the main floor."""
+def facade_texture(path, side):
+    """One long wall of the main wing, painted for distant LOD from facade(side): windows,
+    panels, ledges, pilasters and doors on sandstone. Covers the wall's whole length, and from
+    LOD_BELOW under the main floor to the top. The same for every site, since the texture is
+    laid out from the main floor."""
     W, H = 1024, 256
     span = LOD_BELOW + 3 * FLOOR_H + PARAPET
     px = lambda y: (y + WING_L / 2) / WING_L * W
     py = lambda z: (span - (z + LOD_BELOW)) / span * H        # z from the main floor
     img = Image.new("RGB", (W, H), COLOURS["sandstone"])
     d = ImageDraw.Draw(img)
-    bay = WING_L / BAYS
-    for f in (1, 2):                                          # the ledges' shadowed undersides
-        zt = f * FLOOR_H + WIN_SILL - 0.05 - LEDGE_FACE
-        d.rectangle([0, py(zt), W, py(zt - LEDGE_DROP)], fill=COLOURS["band"])
-    for b in range(BAYS):
-        yc = -WING_L / 2 + (b + 0.5) * bay
-        for f in range(3):
-            fz = f * FLOOR_H
-            if f == 0 and b in DOOR_BAYS:
-                d.rectangle([px(yc - DOOR_W / 2), py(fz + DOOR_H), px(yc + DOOR_W / 2), py(fz)], fill=COLOURS["door"])
-                continue
-            for k in (-1, 1):
-                wy = yc + k * WIN_OFFSET
-                d.rectangle([px(wy - WIN_W / 2), py(fz + WIN_SILL + WIN_H), px(wy + WIN_W / 2), py(fz + WIN_SILL)],
-                            fill=COLOURS["glass"], outline=COLOURS["frame"])
+    openings, ledges = facade(side)
+    for h0, h1, zt in ledges:                                 # the ledges' shadowed undersides
+        zf = zt - LEDGE_FACE
+        d.rectangle([px(h0), py(zf), px(h1), py(zf - LEDGE_DROP)], fill=COLOURS["band"])
+    fills = {"door": COLOURS["door"], "panel": COLOURS["panel"]}
+    for ha, hb, za, zb, kind in openings:
+        d.rectangle([px(ha), py(zb), px(hb), py(za)], fill=fills.get(kind, COLOURS["glass"]),
+                    outline=COLOURS["frame"])
+    for b in range(BAYS + 1):                                 # pilasters, a shade lighter
+        yb = -WING_L / 2 + b * WING_L / BAYS
+        d.rectangle([px(yb - PIL_W / 2), 0, px(yb + PIL_W / 2), H], fill=COLOURS["frame"])
     img.save(path, pixel_format="DXT1")
 
 
@@ -785,7 +872,8 @@ def build_lod(floor_z, top, l_top, mirror):
     for side in (1, -1):
         x = side * hw
         m.quad("sandstone", [(x, -hl, -FOOTING), (x, hl, -FOOTING), (x, hl, zb), (x, -hl, zb)], (side, 0, 0))
-        m.quad("lod_facade", [(x, -hl, zb), (x, hl, zb), (x, hl, top), (x, -hl, top)], (side, 0, 0),
+        m.quad("lod_facade" if side == FRONT else "lod_facade_back",
+               [(x, -hl, zb), (x, hl, zb), (x, hl, top), (x, -hl, top)], (side, 0, 0),
                uv=[(0, 0), (1, 0), (1, (top - zb) / span), (0, (top - zb) / span)])
     for end in (1, -1):
         y = end * hl
@@ -934,7 +1022,8 @@ def main():
         img = np.clip(np.array(rgb, float) + grain, 0, 255).astype(np.uint8)
         Image.fromarray(img).save(tex_dir / f"{name}.dds", pixel_format="DXT1")
     Image.new("RGB", (4, 4), (128, 128, 255)).save(tex_dir / "flat_n.dds", pixel_format="DXT1")
-    facade_texture(tex_dir / "lod_facade.dds")
+    facade_texture(tex_dir / "lod_facade.dds", FRONT)
+    facade_texture(tex_dir / "lod_facade_back.dds", -FRONT)
     board_texture(tex_dir / "board.dds")
     # The Creation Kit's LOD generator wants every texture a LOD model uses under Textures\LOD,
     # and builds its atlas from uncompressed TGA copies under <game>\Source\TGATextures.
@@ -1009,7 +1098,8 @@ def main():
         data = Path(args.install)
         files = [mesh_dir / f"Barracks{r[0]:02d}.nif" for r in rows]
         files += [lod_dir / f"Barracks{r[0]:02d}_lod.nif" for r in rows]
-        files += [tex_dir / "flat_n.dds", tex_dir / "lod_facade.dds"] + [tex_dir / f"{n}.dds" for n in COLOURS]
+        files += [tex_dir / "flat_n.dds", tex_dir / "lod_facade.dds", tex_dir / "lod_facade_back.dds"]
+        files += [tex_dir / f"{n}.dds" for n in COLOURS]
         files += [lod_tex_dir / f"{t}.dds" for t in lod_files]
         for f in files:
             dest = data / f.relative_to(mod)

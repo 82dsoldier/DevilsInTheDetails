@@ -849,7 +849,69 @@ a modded receiver.)
 - **The one-story wing at the north end is an L:** the orderly room on the east, the **arms
   room** on the west as the short leg of the L, running further north than the rest. (The Devils' arms room in the story can be this room in
   every company's building.)
-- **Four sets of main doors,** two on each long side, with short flights of steps and railings.
+- **Two main doors, both on the front,** with flights of steps and railings. **Open question:
+  back doors.** The user clearly remembers going in a friend's barracks by a back entrance, but
+  not where it fit in the plan (the bathroom and NCO quarters fill the middle of the back, and
+  the floors above an entrance would differ from the ground floor). Left out until it comes
+  back; the 2021 model had back doors across from the front ones.
+- **Floor plan, as it was before the renovation** (from memory, confirmed on the front by the 2021 reference photo,
+  `data/reference/hqdefault.jpg`, an AP news still, not in git). A hall runs the length of each
+  floor, with **one room per bay on each side**, so the wing is **11 bays** long:
+
+  ```
+  2nd and 3rd floors                         arms room end (north) -->
+  BACK   |R |R |R |Ba    Ba |NCO   NCO|R |R |R |R |
+         |------------------ hall ----------------|
+  FRONT  |R |R |R |S |R |R |R |S |R |R |R |
+         bay 1      4           8          11
+
+  Ground floor: the same, except
+  BACK   |R |R |R |Ba    Ba |NCO   NCO|R |R |Common   |
+         |------------------ hall --------  room     |
+  FRONT  |R |R |R |E |R |R |R |E |R |(2 bays each   |
+                               desk     side + hall)
+  ```
+
+  - **Rooms:** one per bay, each for two soldiers: two beds, two wall lockers, two nightstands,
+    and barely room for more.
+  - **Center:** one communal **bathroom** on the back, two bays wide (bays 4 and 5), the same on
+    every floor, with short, wide windows (a ribbon of five panes with horizontal bars;
+    `D:\Modding\Windows\Cropped\wide window 1.png` on the user's machine, not in git). Inside,
+    left to right (as drawn): a shower bay with three showers, a washer and dryer, a row of
+    sinks, a row of toilets. Beside it, toward the arms room end, the **NCO quarters** (bays 6
+    and 7). Across the hall, three rooms. Back bay 8 is a room: the user wasn't down that end much, and the bays measure out that way.
+  - **Stairs:** only two, both on the front, in bays 4 and 8 behind the two entrances (E). On
+    the floors above, the entrance bay holds the landing and one room.
+  - **Barracks desk** (ground floor, the entrance nearer the arms room, bay 8): not the CQ desk,
+    which is in the orderly room. Before women were allowed in the barracks, one soldier sat
+    here and checked everyone's ID on the way in: a counter like a hotel check-in desk, a
+    couple of chairs and a phone. (A natural post for a Devils guard.)
+  - **Common room** (ground floor, arms room end): the last two bays on both sides and the
+    hall between them, one big room.
+  - **Size against the aerial:** 11 bays over the 85 m measured in 1993 makes bays and rooms of
+    about 7.7 m, bigger than remembered. The aerial wins for the footprint; rooms a little big
+    also play better in Fallout 4, whose camera makes real-size rooms feel cramped.
+- **The front, from the 2021 photo:**
+  - **Pilasters** stand proud of the wall at every bay line; **deep ledge bands** run across
+    each bay at the floor lines.
+  - **A room's bay, each floor:** two windows, one near each pilaster, with **light-colored
+    infill panels** between them in the same band (the window, panels, window rhythm the 2021
+    model has as narrow, wide, narrow).
+  - **An entrance bay:** the front door on the ground floor. Above it, on the 2nd and 3rd floors,
+    one room's window over the door, and beside it a **landing window set lower, cutting into the
+    ledge band**.
+  - **The main floor is well above the ground,** about 1.5 m: a tall plain base below the
+    ground-floor windows, and **the steps run along the wall** up to a landing at the door, with a
+    railing on each side.
+  - The far end's ground floor has a row of **narrow, tall windows** instead (use unknown).
+  - The back isn't in the photo.
+- **The 2021 model** (`D:\Modding\Blender\Barracks`, not in git, Blender 2.91, under the old
+  name "BraggingRights") has the wall pattern the user remembers best: per floor, one wide window set into
+  the wall (narrow, wide, narrow panes), a plain panel below it, and the shadowed ledge at the
+  floor line; drain pipes at the bay lines on the front, plain pilasters on the back. Its
+  **stairs and shower-wall pieces are outside pieces**: the front stairwell bays with the offset
+  landing windows, and plain full-height bays on the back where the bathroom's windows go. It
+  is shortened (9 bays, 47.5 m), so only the wall pattern carries over, not the size.
 - **The L is one story.** The arms room sits on the main wing's north end, against the orderly
   room's west side, and runs further north than everything else, toward the road. The **orderly room** (circled in
   `data/reference/barracks_exterior_company_entrance.jpg`) stands east of the main wing's east
@@ -867,14 +929,26 @@ a modded receiver.)
 - **Block-out:** `scripts/make_barracks_blockout.py` builds plain boxes at the measured size
   (main wing 85 x 17 x 11 m; the L's size is a guess, low buildings barely show in the photo),
   with collision, and prints where to place it: X -5339, Y 36039, Z 2202, rotation 349.1.
-- **Main wing exterior:** `scripts/make_barracks.py` builds it from the photo's proportions:
-  10 bays of about 8.5 m, paired strips at the bay lines, two windows per bay per floor (about
-  1.9 x 1.2 m, a window's width apart), a **sill ledge** under each upper row of windows (out
-  from the wall just below the sills, a face about 3 ft deep, then a steep slope back to the wall,
-  about 1.5 ft down; its shadowed underside is the dark stripe in photos), plain end walls, a
-  parapet cap, and **double doors** in bays 3 and 8 on both sides, each with a landing and steps
-  running **straight out** from the wall to the ground, with a railing down each side. The main floor is 0.5 m above the highest
-  ground under the wing.
+- **Main wing exterior:** `scripts/make_barracks.py` builds it to the floor plan and photo above
+  (the layout is one function, `facade()`, shared with the LOD texture):
+  - **The front is the west side,** the arms room's side: facing it, the arms room end is on the
+    left, as in the photo (where the far end, on the left, has the common room's narrow windows,
+    and each door is left of its landing windows). The orderly room and company entrance are
+    round the back.
+  - **11 bays** of about 7.7 m, a **pilaster** at each bay line, standing proud of the ledges.
+  - **A room's bay:** on each floor two windows (1.6 x 1.3 m, two panes), one by each pilaster,
+    with three light infill panels between them.
+  - **Ledges** under every row of windows, the ground floor's too: a flat top at the sill, a face
+    9 in proud of the wall, then a slope back that ends at the heads of the windows below, with
+    no flat wall between (as in the 2021 model). The end walls carry them too, with paired strips.
+  - **Entrances,** front only, in bays 4 and 8 (from the south): double doors in the north half,
+    a landing, and steps running north along the wall, outside the pilasters, down to the
+    ground, with railings on both sides. Above each door a room's single window; in the south
+    half the stair's landing windows, half a floor down, breaking the ledge.
+  - **The bathroom** (back, bays 4 and 5): one ribbon window per bay on every floor, five panes
+    with two bars across, its sill higher than a room's.
+  - **The common room** (ground floor, bays 10 and 11, both sides): four narrow, tall windows a bay.
+  - **No back doors.** The main floor is 1.5 m above the highest ground under the wing.
 - **The L's exterior:** the company entrance (double doors, one step up) at the west end of the
   orderly room's south face; windows for the First Sergeant (south and east), the CO (east and
   north) and a small high one for the bathroom; none for the supply closet. The **arms room has no
@@ -932,7 +1006,7 @@ a modded receiver.)
 - **Distant LOD.** Beyond the loaded cells (about 120 m) the game draws only LOD. Flagging the
   references Is Full LOD was tried and only half worked (pop-in, and some buildings never showing
   from afar). Each barracks has a stand-in, `Meshes\LOD\DevilsInTheDetails\Buildings\BarracksNN_lod.nif`
-  (boxes, with the facade painted on `lod_facade.dds`), named in its static's Distant LOD (MNAM)
+  (boxes, with the front and back painted on `lod_facade.dds` and `lod_facade_back.dds`), named in its static's Distant LOD (MNAM)
   with Has Distant LOD set, by the placement script; then the Creation Kit's World LOD generates the
   map's object LOD. **LOD models may only use textures under `Textures\LOD\`** (the atlas build
   fails otherwise), and the atlas is built from TGA copies under `Source\TGATextures\LOD\` beside the game folder (the Creation Kit reads `..\Source` from the game folder);
