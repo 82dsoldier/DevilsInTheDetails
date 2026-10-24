@@ -917,8 +917,12 @@ a modded receiver.)
   `make_barracks.py --install` puts both there. Every LOD shape needs a full matching set,
   `name_d`, `name_n` and `name_s` (diffuse, normal, specular), or the atlas build fails. Each
   must be the same size, and each LOD shape names a material (`.BGSM`) listing all three, as
-  vanilla LOD does; without one the generator finds no specular. The script makes ours from
-  vanilla's own LOD material, read out of `Fallout4 - Materials.ba2` (`scripts/ba2.py`), so no
-  Bethesda file is in the repository.
+  vanilla LOD does. The script makes ours from vanilla's own LOD material, read out of
+  `Fallout4 - Materials.ba2` (`scripts/ba2.py`), so no Bethesda file is in the repository. Even
+  so, the Creation Kit's object atlas still fails ("0 specular textures"), so object LOD is
+  generated with FO4Edit's LODGen (`FO4Edit.exe -lodgen`) and the Creation Kit does terrain LOD only.
+  **Never save in the Creation Kit after World LOD**: one such save dropped every landscape
+  (LAND) record from the plugin, and the player fell through the map. LOD output goes straight to
+  disk and needs no save. FO4Edit keeps backups in `Data\FO4Edit Backups\`.
 - Tools: **PyNifly** for Blender (version 28.1.0 or later fixed Fallout 4 collision export; re-export
   anything made with earlier versions). Look for the old barracks NIF on the other drives.
