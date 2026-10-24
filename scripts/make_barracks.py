@@ -27,6 +27,7 @@ import math
 import shutil
 import struct
 import sys
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -62,6 +63,7 @@ COLOURS = {
     "sandstone": (205, 188, 158), "band": (176, 160, 132), "glass": (38, 46, 54),
     "frame": (226, 224, 216), "door": (112, 74, 44), "concrete": (172, 170, 164),
     "rail": (92, 92, 90), "roof": (118, 114, 108),
+    "crack": (34, 31, 28), "spall": (140, 134, 124), "void": (22, 21, 20), "board": (128, 110, 86),
 }
 MOD_PATH = "DevilsInTheDetails/Buildings"
 FOOTING = bo.FOOTING
@@ -73,7 +75,7 @@ WEAR_STEP_ALONG, WEAR_STEP_UP, WEAR_STEP_FLAT = 0.3, 0.6, 1.2
 MAX_SHAPE_VERTS = 60000    # a shape's triangles index its vertices with 16 bits
 WEAR_GAIN = {          # how strongly each material shows the dirt (1 = fully)
     "sandstone": 1.0, "band": 1.0, "concrete": 1.0, "roof": 0.8, "frame": 0.9,
-    "door": 0.7, "glass": 0.4, "rail": 0.3,
+    "door": 0.7, "glass": 0.4, "rail": 0.3, "crack": 0.2, "spall": 0.8, "void": 0.3, "board": 0.8,
 }
 
 
@@ -123,7 +125,34 @@ class Weathering:
         self.moss = rng.uniform(0.2, 1.0)
         self.tint = rng.uniform(-0.05, 0.05, 3)       # a slight shift of the whole building's hue
         self.scorch_count = int(rng.choice([0, 0, 1, 2, 3, 5]))
+        self.severity = rng.uniform(0.5, 1.3)          # how cracked and broken
         self.rng = rng
+        self.scorched = []
+
+    def rng_for(self, *key):
+        """A generator seeded by this building and a place on it, so the damage there comes out
+        the same however the building is put together."""
+        key = (self.seed,) + tuple(round(float(v), 2) if isinstance(v, float) else v for v in key)
+        return np.random.default_rng(zlib.crc32(repr(key).encode()))
+
+    def window_state(self, wall_key, ha, zb, low):
+        """intact, cracked, broken, missing or boarded; burned windows are always open, and
+        more ground-floor windows are boarded."""
+        k, side, face = wall_key
+        if any(s[:3] == (k, side, face) and abs(s[3] - ha) < 0.01 and abs(s[5] - zb) < 0.01
+               for s in self.scorched):
+            return "missing" if self.rng_for("burn", *wall_key, ha).random() < 0.6 else "broken"
+        r = self.rng_for("state", *wall_key, ha, zb).random()
+        p_intact = max(0.05, 0.35 - 0.2 * self.severity)
+        p_boarded = 0.35 if low else 0.08
+        p_broken = 0.3 * self.severity
+        p_missing = 0.15 * self.severity
+        for state, pr in (("intact", p_intact), ("boarded", p_boarded), ("broken", p_broken),
+                          ("missing", p_missing)):
+            if r < pr:
+                return state
+            r -= pr
+        return "cracked"
 
     def ground(self, x, y):
         k = (round(x * 2), round(y * 2))
@@ -135,8 +164,6 @@ class Weathering:
         if self.scorch_count and windows:
             idx = self.rng.choice(len(windows), min(self.scorch_count, len(windows)), replace=False)
             self.scorched = [windows[i] for i in idx]
-        else:
-            self.scorched = []
 
     def colours(self, mat, p, n_bld, n_world, drips):
         """RGBA 0..1 for points p (N, 3, building metres before mirroring) on a face whose
@@ -346,16 +373,168 @@ def wall(m, axis, side, face, h0, h1, z0, z1, openings):
         m.quad("frame", [P(hb, za), P(hb, za, dp), P(hb, zb, dp), P(hb, zb)], neg)
         m.quad("frame", [P(ha, za), P(ha, za, dp), P(hb, za, dp), P(hb, za)], (0, 0, 1))
         m.quad("frame", [P(ha, zb), P(ha, zb, dp), P(hb, zb, dp), P(hb, zb)], (0, 0, -1))
-        pane = "door" if kind.startswith("door") else "glass"
-        m.quad(pane, [P(ha, za, dp), P(hb, za, dp), P(hb, zb, dp), P(ha, zb, dp)], out)
         hm = (ha + hb) / 2
-        if kind == "window":              # the mullion between the two panes
-            a, b = P(hm - 0.03, za, dp), P(hm + 0.03, zb, dp - 0.05)
-            m.box("frame", min(a[0], b[0]), min(a[1], b[1]), za, max(a[0], b[0]), max(a[1], b[1]), zb)
-        elif kind == "door2":             # no strip: just the hairline where the leaves meet
-            d2 = dp - 0.003
-            m.quad("rail", [P(hm - 0.006, za, d2), P(hm + 0.006, za, d2), P(hm + 0.006, zb, d2),
-                            P(hm - 0.006, zb, d2)], out)
+        if kind.startswith("door"):
+            m.quad("door", [P(ha, za, dp), P(hb, za, dp), P(hb, zb, dp), P(ha, zb, dp)], out)
+            if kind == "door2":           # no strip: just the hairline where the leaves meet
+                d2 = dp - 0.003
+                m.quad("rail", [P(hm - 0.006, za, d2), P(hm + 0.006, za, d2), P(hm + 0.006, zb, d2),
+                                P(hm - 0.006, zb, d2)], out)
+        else:
+            window_pane(m, P, out, along, (k, side, face), ha, hb, za, zb, dp, kind)
+    if m.weather:
+        wall_damage(m, P, out, (k, side, face), h0, h1, z0, z1, openings)
+
+
+def _strip(m, mat, P, out, pts, w0, w1, d):
+    """A thin line laid on a wall plane: pts are (h, z) points, its width tapering w0 to w1, d
+    the depth into the wall (negative: out from it)."""
+    pts = [np.array(p, float) for p in pts]
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        t = b - a
+        nrm = np.array((-t[1], t[0])) / (np.linalg.norm(t) + 1e-9)
+        wa = (w0 + (w1 - w0) * i / (len(pts) - 1)) / 2
+        wb = (w0 + (w1 - w0) * (i + 1) / (len(pts) - 1)) / 2
+        q = [a - nrm * wa, b - nrm * wb, b + nrm * wb, a + nrm * wa]
+        m.quad(mat, [P(h, z, d) for h, z in q], out)
+
+
+def window_pane(m, P, out, along, wall_key, ha, hb, za, zb, dp, kind):
+    """A window's glass in whatever state the weathering leaves it: intact, cracked, broken
+    to shards round the frame, gone, or boarded up. An open one shows a dark, gutted room."""
+    w = m.weather
+    if w:
+        x, y, _ = P((ha + hb) / 2, 0)
+        state = w.window_state(wall_key, ha, zb, za - w.ground(x, y) < 2.5)
+    else:
+        state = "intact"
+    rng = w.rng_for("pane", *wall_key, ha, za) if w else None
+    hm = (ha + hb) / 2
+    halves = [(ha, hm - 0.03), (hm + 0.03, hb)] if kind == "window" else [(ha, hb)]
+    if state in ("broken", "missing", "boarded"):
+        dark_room(m, P, out, along, ha, hb, za, dp, kind)
+    if state in ("intact", "cracked"):
+        m.quad("glass", [P(ha, za, dp), P(hb, za, dp), P(hb, zb, dp), P(ha, zb, dp)], out)
+    if state == "cracked":            # a star of cracks in one pane or both
+        for h0, h1 in halves:
+            if rng.random() < 0.4:
+                continue
+            c = np.array((rng.uniform(h0 + 0.1, h1 - 0.1), rng.uniform(za + 0.1, zb - 0.1)))
+            for a in rng.uniform(0, 2 * math.pi, rng.integers(4, 9)):
+                end = c + rng.uniform(0.15, 0.8) * np.array((math.cos(a), math.sin(a)))
+                end = np.clip(end, (h0 + 0.01, za + 0.01), (h1 - 0.01, zb - 0.01))
+                mid = (c + end) / 2 + rng.normal(0, 0.02, 2)
+                _strip(m, "frame", P, out, [c, mid, end], 0.008, 0.003, dp - 0.004)
+    if state == "broken":             # jagged shards left in the frame
+        for h0, h1 in halves:
+            ring = [(h0, za), (h1, za), (h1, zb), (h0, zb)]
+            centre = np.array(((h0 + h1) / 2, (za + zb) / 2))
+            pts = []
+            for i in range(4):
+                a, b = np.array(ring[i]), np.array(ring[(i + 1) % 4])
+                for t in np.linspace(0, 1, 5)[:-1]:
+                    pts.append(a + (b - a) * t)
+            inset = rng.uniform(0.0, 0.55, len(pts)) * (rng.random(len(pts)) < 0.75)
+            inner = [p + (centre - p) * f for p, f in zip(pts, inset)]
+            for i in range(len(pts)):
+                j = (i + 1) % len(pts)
+                if inset[i] + inset[j] > 0.02:
+                    m.quad("glass", [P(*pts[i], dp), P(*pts[j], dp), P(*inner[j], dp), P(*inner[i], dp)], out)
+    if state == "boarded":            # planks across, with gaps between them
+        n = int(rng.integers(3, 6))
+        edges = np.linspace(za - 0.05, zb + 0.05, n + 1)
+        for z0, z1 in zip(edges, edges[1:]):
+            if rng.random() < 0.15:
+                continue              # a plank gone
+            tilt = rng.normal(0, 0.04)
+            pts = [(ha - 0.1, z0 + 0.02 - tilt), (hb + 0.1, z0 + 0.02 + tilt),
+                   (hb + 0.1, z1 - 0.02 + tilt), (ha - 0.1, z1 - 0.02 - tilt)]
+            m.quad("board", [P(h, z, -0.03) for h, z in pts], out)
+    if kind == "window" and (state in ("intact", "cracked", "boarded") or rng.random() < 0.5):
+        a, b = P(hm - 0.03, za, dp), P(hm + 0.03, zb, dp - 0.05)   # the mullion
+        m.box("frame", min(a[0], b[0]), min(a[1], b[1]), za, max(a[0], b[0]), max(a[1], b[1]), zb)
+
+
+def dark_room(m, P, out, along, ha, hb, za, dp, kind):
+    """What shows through an open window until the interiors are built: a dark, empty room,
+    its faces turned inward."""
+    floor = za - (WIN_SILL if kind == "window" else 1.7)
+    ceil = floor + FLOOR_H - 0.3
+    r0, r1, d0, d1 = ha - 0.6, hb + 0.6, dp, dp + 3.0
+    m.quad("void", [P(r0, floor, d1), P(r1, floor, d1), P(r1, ceil, d1), P(r0, ceil, d1)], out)
+    m.quad("void", [P(r0, floor, d0), P(r1, floor, d0), P(r1, floor, d1), P(r0, floor, d1)], (0, 0, 1))
+    m.quad("void", [P(r0, ceil, d0), P(r1, ceil, d0), P(r1, ceil, d1), P(r0, ceil, d1)], (0, 0, -1))
+    m.quad("void", [P(r0, floor, d0), P(r0, floor, d1), P(r0, ceil, d1), P(r0, ceil, d0)], along)
+    m.quad("void", [P(r1, floor, d0), P(r1, floor, d1), P(r1, ceil, d1), P(r1, ceil, d0)],
+           tuple(-c for c in along))
+
+
+def wall_damage(m, P, out, wall_key, h0, h1, z0, z1, openings):
+    """Cracks and spalls on a wall: cracks running from the corners of its openings, up from
+    the ground and down from the roofline; spalled patches where the face has fallen away, some
+    showing rusted rebar."""
+    w = m.weather
+    rng = w.rng_for("wall", *wall_key, h0, h1)
+    sev = w.severity
+    holes = [(a - 0.03, b + 0.03, c - 0.03, d + 0.03) for a, b, c, d, _ in openings]
+
+    def ground_at(h):
+        x, y, _ = P(h, 0)
+        return w.ground(x, y)
+
+    def blocked(h, z):
+        return (not h0 + 0.05 < h < h1 - 0.05 or not z0 < z < z1 - 0.05 or z < ground_at(h) - 0.05
+                or any(a < h < b and c < z < d for a, b, c, d in holes))
+
+    def crack(h, z, angle, length, width, branch=True):
+        pts, p = [np.array((h, z))], np.array((h, z), float)
+        for _ in range(max(2, int(length / 0.12))):
+            angle += rng.normal(0, 0.35)
+            p = p + 0.12 * np.array((math.cos(angle), math.sin(angle)))
+            if blocked(*p):
+                break
+            pts.append(p)
+        if len(pts) > 1:
+            _strip(m, "crack", P, out, pts, width, 0.004, -0.012)
+            if branch and len(pts) > 4 and rng.random() < 0.4:
+                i = int(rng.integers(2, len(pts) - 1))
+                crack(*pts[i], angle + rng.choice((-1, 1)) * rng.uniform(0.4, 1.0),
+                      length * 0.4, width * 0.6, branch=False)
+
+    # From the corners of openings: down and out from the bottom ones, up and out from the top.
+    for a, b, c, d, _ in openings:
+        for h, z, up, sgn in ((a, c, False, -1), (b, c, False, 1), (a, d, True, -1), (b, d, True, 1)):
+            if rng.random() < 0.45 * sev:
+                base = math.pi / 2 if up else -math.pi / 2
+                crack(h, z, base + sgn * rng.uniform(0.3, 0.9), rng.uniform(0.6, 3.0), rng.uniform(0.025, 0.045))
+    length = h1 - h0
+    # Up from the ground, settling cracks.
+    for _ in range(rng.poisson(length / 5 * sev)):
+        h = rng.uniform(h0 + 0.2, h1 - 0.2)
+        crack(h, ground_at(h) + 0.05, math.pi / 2 + rng.normal(0, 0.4), rng.uniform(0.8, 3.5),
+              rng.uniform(0.03, 0.06))
+    # Down from the roofline.
+    for _ in range(rng.poisson(length / 12 * sev)):
+        crack(rng.uniform(h0 + 0.2, h1 - 0.2), z1 - 0.1, -math.pi / 2 + rng.normal(0, 0.4),
+              rng.uniform(0.6, 2.5), rng.uniform(0.025, 0.045))
+    # Spalls: ragged patches where the face has fallen away, more of them low down.
+    for _ in range(rng.poisson(length / 9 * sev)):
+        h = rng.uniform(h0 + 0.5, h1 - 0.5)
+        g = ground_at(h)
+        z = g + min(rng.exponential(1.5), z1 - g - 0.6) + 0.3
+        r = rng.uniform(0.15, 0.55)
+        if blocked(h, z) or any(a - r < h < b + r and c - r < z < d + r for a, b, c, d in holes):
+            continue
+        ang = np.sort(rng.uniform(0, 2 * math.pi, 9))
+        ring = [(h + r * rng.uniform(0.5, 1.0) * math.cos(t), z + r * rng.uniform(0.5, 1.0) * math.sin(t))
+                for t in ang]
+        for i in range(len(ring)):
+            q = [(h, z), ring[i], ring[(i + 1) % len(ring)], (h, z)]
+            m.quad("spall", [P(hh, zz, -0.008) for hh, zz in q], out)
+        if r > 0.3 and rng.random() < 0.5:     # rusted rebar across it
+            _strip(m, "rail", P, out, [(h - r * 0.6, z + r * 0.1), (h + r * 0.6, z - r * 0.1)],
+                   0.025, 0.025, -0.014)
 
 
 def ledge(m, axis, side, face, h0, h1, z_top):

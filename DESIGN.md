@@ -919,6 +919,14 @@ a modded receiver.)
   Each building is seeded by its number, which sets its age, grime height, streak length, moss
   and hue. About 64,000 vertices a building, with shapes split under the 16-bit vertex limit.
   The LOD textures are darkened to match.
+- **Damage**, also seeded per building, with a severity per building:
+  - **Windows**, each one of: intact, cracked (star cracks in the glass), broken (jagged shards
+    left in the frame), gone, or boarded (planks with gaps, a few planks missing). Boarded is
+    likelier on the ground floor; burned windows are always open. An open window shows a dark,
+    empty room, a stand-in until the interiors are built.
+  - **Walls**: thin crack lines laid just off the face, running from the corners of openings, up
+    from the ground and down from the roofline, some branching. Spalls are ragged patches where
+    the face fell away, some with rusted rebar.
 - **Distant LOD.** Beyond the loaded cells (about 120 m) the game draws only LOD. Flagging the
   references Is Full LOD was tried and only half worked (pop-in, and some buildings never showing
   from afar). Each barracks has a stand-in, `Meshes\LOD\DevilsInTheDetails\Buildings\BarracksNN_lod.nif`
