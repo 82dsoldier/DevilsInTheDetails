@@ -618,17 +618,21 @@ about airborne operations have heard of. It's the second worldspace.
     every command).
   - **Anchor cables confirmed: one each side,** high enough that a six-foot jumper hooks up
     without stretching. The block-out's 2.25 m (7 ft 4 in) fits that.
-  - **Other jumpers (open):** the first plan was Nate and the jumpmaster alone. The idea now is a
-    small stick of Devils who jump with him and join the fight on the DZ. See "The stick" below.
-- **The stick (proposed):** 8 to 10 Devils seated near the doors; the forward seats are folded up
+  - **Other jumpers (decided):** not Nate and the jumpmaster alone, but a small stick of Devils
+    who jump with him and join the fight on the DZ. See "The stick" below.
+- **The stick (decided):** 8 to 10 Devils seated near the doors; the forward seats are folded up
   behind cargo pallets from the Boston run (the Devils don't have 64 jumpers, and a full cabin
   would cost too much). They sit through the flight, stand and hook up with the commands, and
   their echo is one recorded group shout, not lines for each.
   - **Out the door:** each jumper is disabled in the plane as he goes and enabled on Sicily. The
     stick lands behind its first jumper along the run, so the others come down **behind Nate**,
-    who faces west-northwest: he never sees them appear. Better, if it works: drop them from the
-    air a second apart, with a perk that cancels their fall damage (Fallout 4's fall damage
-    would kill them otherwise). Test that; fall back to appearing on the ground.
+    who faces west-northwest: he never sees them appear. **Decided: this, not dropping them
+    through the air.** A real drop would need parachutes animated on falling bodies (a major
+    job), and a way round fall damage that raises the question of why Nate needs power armor
+    and they don't.
+  - **Parachutes only in the plane.** The jumpers in their seats wear a main and a reserve (a
+    harness model; community help). The ones on the ground have already shed their harness to
+    fight, so they need none.
   - **On the ground** they're ordinary Devils with a combat package, fighting beside the
     reception party, then walking back to the staging area. Losses in the fight are just losses.
   - **A reason to jump at all:** the plane lives on Sicily's strip, so why not land? Because the
