@@ -615,6 +615,9 @@ about airborne operations have heard of. It's the second worldspace.
   - The position comes from the photo and lidar, converted with the heightmap's own grid
     (`out/sicily/cells.json`); check it in the Creation Kit with the photo overlay
     (`DevilsSicilyPhoto`, `make_photo_overlay.py --area sicily`) in place.
+  - **Tested 2026-11-13: keep the height.** The fall takes 4 to 5 seconds in game, not the 8 on
+    paper (the game's fall is faster than real gravity). That's long enough, not tedious, and the
+    player drops through the cloud layer on the way down, a nice effect worth keeping.
   - **No Persistent box to tick.** The Fallout 4 Creation Kit doesn't offer one for the marker. It
     makes a reference persistent by itself once a script property or quest alias points at it,
     so the jump door's script gets an `ObjectReference` property filled with this marker.
