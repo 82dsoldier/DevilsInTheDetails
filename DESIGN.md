@@ -112,6 +112,9 @@ Fayetteville as a skyline past the playable edge.
   to be in the mod.** The settlers' town grows out of it:
   - **The Cue and Ale itself** is the settlers' bar and gathering place, its sign still up two
     hundred years on. It's where the player meets people, hears rumors and picks up work.
+  - **Easter egg: a bottle of brandy on the dance floor.** Just one bottle (vanilla bourbon or
+    wine, renamed "Brandy"), alone in the middle of the floor. It's a personal nod from the
+    author; it gets no note and no explanation in game.
   - **The parking lot is the market:** booths and stalls inside the U, where the settlers sell crops
     from the fields and things they make: light armor, clothes, homemade goods. The settlers aren't
     just people the Devils tax; they're the region's market.
