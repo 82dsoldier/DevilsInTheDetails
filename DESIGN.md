@@ -599,9 +599,32 @@ about airborne operations have heard of. It's the second worldspace.
   story, and it's the one that can land on Sicily's dirt assault strip; a C-141 can't. Engine
   drone, vibration (camera shake), red and green jump lights, static lines and anchor cables,
   jump seats. (A C-141 could still be a wreck at Boston Airport, one the crew strips for parts.)
-- **The jump commands as a scripted scene** with the jumpmaster: "Get ready... Stand up...
-  Hook up... Check equipment... Sound off for equipment check... Stand in the door... GO!" Red
-  light, then green light.
+- **The cabin (from the author's jumps):** troop seats down both sides facing in, and a
+  **centerline row**, back to back down the middle. Every seat full, **packed in like sardines**:
+  the cabin should feel crowded, not roomy. Jumpers go out **both side paratroop doors**, two
+  sticks; the ramp stays shut (ramp jumps were special, not normal).
+- **The jump commands are the heart of the scene,** and what gets the author's adrenaline going.
+  Keep all of them, said properly, with the jumpers **echoing each one back** as a shout:
+  1. Time warnings: "Twenty minutes!", "Ten minutes!" (time compressed: a few seconds apart, not
+     minutes)
+  2. "Get ready!"
+  3. "Outboard personnel, stand up!" (the side seats), then "Inboard personnel, stand up!" (the
+     centerline seats; this is why both kinds of seat matter)
+  4. "Hook up!"
+  5. "Check static lines!"
+  6. "Check equipment!"
+  7. "Sound off for equipment check!" (passed down the stick: "OK!", "OK!", "All OK, jumpmaster!")
+  8. The jumpmaster opens the door: wind roar, light pours in. "Six minutes!", "One minute!",
+     "Thirty seconds!", "Stand by!"
+  9. Red light, green light, **"GO!"**, and the stick shuffles toward the door.
+  - **Length:** about a minute, with the time warnings squeezed. That's short for how much it
+    carries, and it's the build-up the 4-5 second fall pays off.
+  - **The player takes part:** stand up when the call comes, hook up, and shout "OK" (a dialogue
+    choice). Doing something keeps a minute from feeling like waiting.
+  - **Skippable after the first time:** later flights (going home, the Sanctuary jump) get a short
+    version, from "Stand by!" on.
+  - **Voice:** needs real recordings, since nothing vanilla sounds like a jumpmaster. Open: who
+    voices him (and the echoing stick).
 - **Out the door** is a teleport to a marker about **1,000 ft above Sicily DZ**. The loading screen in between can be its own art.
 - **The jump marker (worked out 2026-11-13):** an `XMarkerHeading`, `DevilsSicilyJumpMarker`,
   at **X -13650, Y -20430, Z 24300**,
