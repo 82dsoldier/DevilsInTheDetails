@@ -613,11 +613,28 @@ about airborne operations have heard of. It's the second worldspace.
   is too tight.
   - **The aisle is 0.71 m** between the outboard and centerline seats. Fine for a soldier, maybe
     not for power armor: the first thing to test.
-  - **Problem: power armor can't sit.** Fallout 4 won't let a player in power armor use a chair,
-    so Nate can't take a seat like the others. Ideas: he boards last and stands by the door
-    (last on, first out, so he's first in the stick); or the scene starts at "Get ready!", with
-    everyone already up. Open.
-  - The anchor cables' number and height are a guess; to check with the author.
+  - **Power armor can't sit,** so Nate can't take a seat. **Decided: he boards last and stands by
+    the door** (last on, first out: he's first in the stick, right in the jumpmaster's face for
+    every command).
+  - **Anchor cables confirmed: one each side,** high enough that a six-foot jumper hooks up
+    without stretching. The block-out's 2.25 m (7 ft 4 in) fits that.
+  - **Other jumpers (open):** the first plan was Nate and the jumpmaster alone. The idea now is a
+    small stick of Devils who jump with him and join the fight on the DZ. See "The stick" below.
+- **The stick (proposed):** 8 to 10 Devils seated near the doors; the forward seats are folded up
+  behind cargo pallets from the Boston run (the Devils don't have 64 jumpers, and a full cabin
+  would cost too much). They sit through the flight, stand and hook up with the commands, and
+  their echo is one recorded group shout, not lines for each.
+  - **Out the door:** each jumper is disabled in the plane as he goes and enabled on Sicily. The
+    stick lands behind its first jumper along the run, so the others come down **behind Nate**,
+    who faces west-northwest: he never sees them appear. Better, if it works: drop them from the
+    air a second apart, with a perk that cancels their fall damage (Fallout 4's fall damage
+    would kill them otherwise). Test that; fall back to appearing on the ground.
+  - **On the ground** they're ordinary Devils with a combat package, fighting beside the
+    reception party, then walking back to the staging area. Losses in the fight are just losses.
+  - **A reason to jump at all:** the plane lives on Sicily's strip, so why not land? Because the
+    raid is on the DZ: the plane **can't land until the strip is clear,** so the stick goes in by
+    parachute to clear it, and the plane lands after the fight. That makes the jump a mission,
+    not a stunt.
 - **The jump commands are the heart of the scene,** and what gets the author's adrenaline going.
   Keep all of them, said properly, with the jumpers **echoing each one back** as a shout:
   1. "Ten minutes!" (no twenty-minute warning: the author's unit never used one)
