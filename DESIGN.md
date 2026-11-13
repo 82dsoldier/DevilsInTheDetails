@@ -603,6 +603,18 @@ about airborne operations have heard of. It's the second worldspace.
   Hook up... Check equipment... Sound off for equipment check... Stand in the door... GO!" Red
   light, then green light.
 - **Out the door** is a teleport to a marker about **1,000 ft above Sicily DZ**. The loading screen in between can be its own art.
+- **The jump marker (worked out 2026-11-13):** an `XMarkerHeading`, `DevilsSicilyJumpMarker`,
+  persistent so the aircraft's script can find it, at **X -13650, Y -20430, Z 24300**,
+  **rotation Z 284** (in cell -4, -5).
+  - **Where he lands:** open grass on the main landing ground, just southeast of the assault strip
+    and about 620 m east of the staging area. Within 150 m the ground rises and falls only 7 m
+    (2° on average, 12° at the steepest), with no trees in the 1993 photo.
+  - **Height:** the ground there is z 2967; 1,000 ft (304.8 m) is 21,333 units, so z 24300.
+  - **Facing:** heading 284, west-northwest, so he comes down looking at the staging area, the
+    bleachers and the strip: the reception party and the raid are in front of him.
+  - The position comes from the photo and lidar, converted with the heightmap's own grid
+    (`out/sicily/cells.json`); check it in the Creation Kit with the photo overlay
+    (`DevilsSicilyPhoto`, `make_photo_overlay.py --area sicily`) in place.
 - **Power armor only.** Power armor takes no fall damage in Fallout 4, so it's the one way to
   survive. The jump only works in power armor: the jumpmaster refuses anyone without it ("You're
   not going out my door without a rig") or, for comedy, lets them go.
