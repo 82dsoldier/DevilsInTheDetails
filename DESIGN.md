@@ -605,8 +605,7 @@ about airborne operations have heard of. It's the second worldspace.
   sticks; the ramp stays shut (ramp jumps were special, not normal).
 - **The jump commands are the heart of the scene,** and what gets the author's adrenaline going.
   Keep all of them, said properly, with the jumpers **echoing each one back** as a shout:
-  1. Time warnings: "Twenty minutes!", "Ten minutes!" (time compressed: a few seconds apart, not
-     minutes)
+  1. "Ten minutes!" (no twenty-minute warning: the author's unit never used one)
   2. "Get ready!"
   3. "Outboard personnel, stand up!" (the side seats), then "Inboard personnel, stand up!" (the
      centerline seats; this is why both kinds of seat matter)
@@ -617,10 +616,15 @@ about airborne operations have heard of. It's the second worldspace.
   8. The jumpmaster opens the door: wind roar, light pours in. "Six minutes!", "One minute!",
      "Thirty seconds!", "Stand by!"
   9. Red light, green light, **"GO!"**, and the stick shuffles toward the door.
-  - **Length:** about a minute, with the time warnings squeezed. That's short for how much it
-    carries, and it's the build-up the 4-5 second fall pays off.
-  - **The player takes part:** stand up when the call comes, hook up, and shout "OK" (a dialogue
-    choice). Doing something keeps a minute from feeling like waiting.
+  - **Order confirmed by the author.**
+  - **Length:** about a minute, with the gaps between commands squeezed. That's short for how much
+    it carries, and it's the build-up the 4-5 second fall pays off.
+  - **The player takes part:** stand up when the call comes, hook up, and give the sound-off as a
+    dialogue choice. Doing something keeps a minute from feeling like waiting.
+  - **The sound-off choice:** "All OK, jumpmaster!" or **"All OK, dumb bastard!"** A real joke
+    the troops played: over the engines, the jumpmaster couldn't hear what anyone shouted, only
+    that they shouted. Either way he gives the same nod and carries on; the jumper next to
+    Nate grins or laughs, and that's the only sign anyone heard.
   - **Skippable after the first time:** later flights (going home, the Sanctuary jump) get a short
     version, from "Stand by!" on.
   - **Voice:** needs real recordings, since nothing vanilla sounds like a jumpmaster. Open: who
