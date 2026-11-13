@@ -593,10 +593,12 @@ about airborne operations have heard of. It's the second worldspace.
   bleachers are placed). The patrol guards it from the lot, and the bleachers screen it from the
   field, so a player who lands out on the drop zone can't see it until the fight leads them there.
 
-- **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight:
-  a **C-130** or **C-141** (what the 82nd jumped in the early 90s; the C-17 was only being tested
-  then). Engine drone, vibration (camera shake), red and green jump lights, static lines and
-  anchor cables, jump seats.
+- **The aircraft** is an interior cell made to look like the inside of a cargo plane in flight.
+  **Decided: a C-130.** The 82nd jumped both the C-130 and the C-141 in the early 90s (the C-17
+  was only being tested then), but the C-130 is the airborne icon, it's the plane already in the
+  story, and it's the one that can land on Sicily's dirt assault strip; a C-141 can't. Engine
+  drone, vibration (camera shake), red and green jump lights, static lines and anchor cables,
+  jump seats. (A C-141 could still be a wreck at Boston Airport, one the crew strips for parts.)
 - **The jump commands as a scripted scene** with the jumpmaster: "Get ready... Stand up...
   Hook up... Check equipment... Sound off for equipment check... Stand in the door... GO!" Red
   light, then green light.
