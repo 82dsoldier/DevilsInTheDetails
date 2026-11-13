@@ -603,6 +603,21 @@ about airborne operations have heard of. It's the second worldspace.
   **centerline row**, back to back down the middle. Every seat full, **packed in like sardines**:
   the cabin should feel crowded, not roomy. Jumpers go out **both side paratroop doors**, two
   sticks; the ramp stays shut (ramp jumps were special, not normal).
+- **Block-out:** `scripts/make_c130_blockout.py` builds the cargo compartment at true size as
+  coloured boxes with collision (`Meshes\DevilsInTheDetails\Aircraft\C130_Blockout.nif`): 12.2 m
+  of floor plus the 3 m closed ramp, 3.12 m wide, 2.74 m high; four rows of 16 red troop seats
+  (64 jumpers), outboard against the walls and centerline back to back; a closed paratroop door
+  each side just forward of the ramp hinge, with a red and a green jump light; an anchor cable
+  each side overhead; steps up to the flight deck at the front on the left. Placed at 0, 0, 0 in
+  an interior cell (`DevilsC130Interior`), forward is +Y. `--scale` enlarges it all if true size
+  is too tight.
+  - **The aisle is 0.71 m** between the outboard and centerline seats. Fine for a soldier, maybe
+    not for power armor: the first thing to test.
+  - **Problem: power armor can't sit.** Fallout 4 won't let a player in power armor use a chair,
+    so Nate can't take a seat like the others. Ideas: he boards last and stands by the door
+    (last on, first out, so he's first in the stick); or the scene starts at "Get ready!", with
+    everyone already up. Open.
+  - The anchor cables' number and height are a guess; to check with the author.
 - **The jump commands are the heart of the scene,** and what gets the author's adrenaline going.
   Keep all of them, said properly, with the jumpers **echoing each one back** as a shout:
   1. "Ten minutes!" (no twenty-minute warning: the author's unit never used one)
