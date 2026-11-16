@@ -697,8 +697,12 @@ about airborne operations have heard of. It's the second worldspace.
     makes a reference persistent by itself once a script property or quest alias points at it,
     so the jump door's script gets an `ObjectReference` property filled with this marker.
 - **Power armor only.** Power armor takes no fall damage in Fallout 4, so it's the one way to
-  survive. The jump only works in power armor: the jumpmaster refuses anyone without it ("You're
-  not going out my door without a rig") or, for comedy, lets them go.
+  survive. **Checked at boarding** (the author's point: nobody gets on a jump flight without
+  one): the crew won't take Nate on a flight that ends in a jump unless he's in power armor
+  ("You'll need a rig"). A flight that lands (going home to Boston Airport) needs none.
+  **The door checks again** as a backstop, since a player can climb out of the armor in the
+  cabin: the jumpmaster refuses ("You're not going out my door without a rig"), and the frame is
+  right there to climb back into.
 - **Landing** can open the story: a raid hits the drop zone as the player comes down, and the
   Devils' reception party fights it off. First impression of both the threat and the protectors.
 - **Getting on the plane (decided):** the Devils' last airworthy C-130, at Boston Airport (see
@@ -712,8 +716,11 @@ about airborne operations have heard of. It's the second worldspace.
   terrain past the playable edge) have to look right from the air.
 - The fall from 1,000 ft (about 305 m, 21,000 game units) takes several seconds in game: long enough
   to see the drop zone, short enough not to bore.
-- Script: the door is an activator that checks `IsInPowerArmor()` before moving the player to the
-  marker in the air.
+- Script: `scripts/papyrus/DevilsJumpDoor.psc` on the door activator (`C130_Door.nif`, made by
+  `make_c130_blockout.py`, one reference each side). It checks `IsInPowerArmor()`, shows the
+  refusal (a Message, `DevilsJumpNoRigMessage`, until the jumpmaster is voiced) or moves the
+  player to `DevilsSicilyJumpMarker`; if the move sets him down on the ground, it puts him back
+  up at the marker's height. The commands scene and the green light will gate it later.
 
 ### Open questions
 

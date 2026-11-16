@@ -266,21 +266,19 @@ def parts(length):
     p["seats"] = ("seat", True, seats)
     p["centre_frame"] = ("frame", True, frame)
 
-    # Doors with rounded corners and a porthole; round jump lights just forward; portholes
-    # spaced down each side between the seats' ends.
+    # Round jump lights just forward of each door; portholes spaced down each side between the
+    # seats' ends. The doors themselves are their own model (door_parts), for the activator.
     da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
-    doors, glass, reds, greens = Mesh(), Mesh(), Mesh(), Mesh()
+    rims, glass, reds, greens = Mesh(), Mesh(), Mesh(), Mesh()
     ports = [y0 + (y1 - y0) * (i + 0.5) / PORTHOLES for i in range(PORTHOLES)]
     for side in (-1, 1):
-        doors.on_wall(rounded_rect(da, 0.05, db, 0.05 + DOOR_H, DOOR_R), side, 0.03)
-        glass.on_wall(circle((da + db) / 2, PORTHOLE_Z, PORTHOLE_D / 2), side, 0.05)
         for y in ports:
-            doors.on_wall(circle(y, PORTHOLE_Z, PORTHOLE_D / 2 + 0.04), side, 0.01)   # the rim
+            rims.on_wall(circle(y, PORTHOLE_Z, PORTHOLE_D / 2 + 0.04), side, 0.01)
             glass.on_wall(circle(y, PORTHOLE_Z, PORTHOLE_D / 2), side, 0.025)
         ly = db + 0.15 + LIGHT_D / 2
         reds.on_wall(circle(ly, 1.81, LIGHT_D / 2), side, 0.02)
         greens.on_wall(circle(ly, 1.61, LIGHT_D / 2), side, 0.02)
-    p["doors"] = ("door", False, doors)
+    p["porthole_rims"] = ("door", False, rims)
     p["portholes"] = ("glass", False, glass)
     p["light_red"] = ("red", False, reds)
     p["light_green"] = ("green", False, greens)
@@ -294,6 +292,66 @@ def parts(length):
     steps.box(-hw, fwd - STEPS_L, 0, -hw + STEPS_W, fwd, STEPS_H, "tsew")
     p["flight_deck_steps"] = ("frame", True, steps)
     return p, per_row
+
+
+def door_parts(length):
+    """The starboard paratroop door, closed, as its own model for the jump door activator:
+    ({name: (colour, collides, Mesh)}, origin). The origin is where the door's centre line meets
+    the wall at the floor; the port door is the same model turned 180 degrees."""
+    hinge = -length / 2
+    da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
+    origin = (wall_x(0), (da + db) / 2, 0.0)
+    panel, glass, block = Mesh(), Mesh(), Mesh()
+    panel.on_wall(rounded_rect(da, 0.05, db, 0.05 + DOOR_H, DOOR_R), 1, 0.03)
+    glass.on_wall(circle((da + db) / 2, PORTHOLE_Z, PORTHOLE_D / 2), 1, 0.05)
+    # Something solid to activate: a slab just inboard of the door, through to the wall.
+    block.box(origin[0] - 0.04, da, 0.05, origin[0] + 0.15, db, 0.05 + DOOR_H)
+    parts = {"door": ("door", False, panel), "door_porthole": ("glass", False, glass),
+             "activation": (None, True, block)}
+    for _, _, m in parts.values():
+        m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
+    return parts, origin
+
+
+def write_nif(path, root_name, built, s, tex, pyn):
+    """One static model from {name: (colour, collides, Mesh)}: colour None is collision only."""
+    NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, \
+        PhysicsProps, pack_shapes, HAVOC_SCALE_FACTOR = pyn
+    nif = NifFile()
+    nif.initialize("FO4", str(path), root_type="BSFadeNode", root_name=root_name)
+    coll_verts, coll_tris = [], []
+    for name, (colour, collides, m) in built.items():
+        verts = [tuple(c * s for c in v) for v in m.verts]
+        if colour:
+            props = NiShapeBuf()
+            props.bufType = PynBufferTypes.BSTriShapeBufType
+            props.hasFullPrecision = 1
+            shape = nif.createShapeFromData(name, verts, m.tris, m.uvs, m.norms,
+                                            props=props, parent=nif.root)
+            shape.shader._checked_for_materials = True
+            shape.shader._materials = None
+            shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
+            shape.set_texture("Diffuse", f"{tex}\\blockout_{colour}.dds")
+            shape.set_texture("Normal", f"{tex}\\flat_n.dds")
+            shape.save_shader_attributes()
+        if collides:
+            base = len(coll_verts)
+            coll_verts += [tuple(c / HAVOC_SCALE_FACTOR for c in v) for v in verts]
+            coll_tris += [[a + base, b + base, c + base] for a, b, c in m.tris]
+
+    physics = PhysicsProps(is_dynamic=False,
+                           body_props_raw=bytes.fromhex("00ff003f003fcd3e01024c3deeff7f7f"),
+                           collision_filter_info=1)
+    packed = pack_shapes([CollisionShape(shape_type="compressed_mesh", name="collision",
+                                         transform=None, verts=coll_verts, faces=coll_tris,
+                                         convex_radius=0.0, children=[], physics=physics)])
+    # BSX "has Havok" (2) plus 128, and collision flags 128, as vanilla statics have them.
+    BSXFlags.New(nif, flags=130, parent=nif.root)
+    coll = nif.root.add_collision(None, flags=128,
+                                  collision_type=PynBufferTypes.bhkNPCollisionObjectBufType,
+                                  body_id=0)
+    bhkPhysicsSystem.New(nif, data=packed, parent=coll)
+    nif.save()
 
 
 def main():
@@ -322,42 +380,14 @@ def main():
         tex_files.append(f)
     tex = "textures\\" + MOD_PATH.replace("/", "\\")
 
+    pyn = (NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape,
+           PhysicsProps, pack_shapes, HAVOC_SCALE_FACTOR)
     built, per_row = parts(args.length)
     nif_path = mesh_dir / "C130_Blockout.nif"
-    nif = NifFile()
-    nif.initialize("FO4", str(nif_path), root_type="BSFadeNode", root_name="C130_Blockout")
-    coll_verts, coll_tris = [], []
-    for name, (colour, collides, m) in built.items():
-        verts = [tuple(c * s for c in v) for v in m.verts]
-        props = NiShapeBuf()
-        props.bufType = PynBufferTypes.BSTriShapeBufType
-        props.hasFullPrecision = 1
-        shape = nif.createShapeFromData(name, verts, m.tris, m.uvs, m.norms,
-                                        props=props, parent=nif.root)
-        shape.shader._checked_for_materials = True
-        shape.shader._materials = None
-        shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
-        shape.set_texture("Diffuse", f"{tex}\\blockout_{colour}.dds")
-        shape.set_texture("Normal", f"{tex}\\flat_n.dds")
-        shape.save_shader_attributes()
-        if collides:
-            base = len(coll_verts)
-            coll_verts += [tuple(c / HAVOC_SCALE_FACTOR for c in v) for v in verts]
-            coll_tris += [[a + base, b + base, c + base] for a, b, c in m.tris]
-
-    physics = PhysicsProps(is_dynamic=False,
-                           body_props_raw=bytes.fromhex("00ff003f003fcd3e01024c3deeff7f7f"),
-                           collision_filter_info=1)
-    packed = pack_shapes([CollisionShape(shape_type="compressed_mesh", name="collision",
-                                         transform=None, verts=coll_verts, faces=coll_tris,
-                                         convex_radius=0.0, children=[], physics=physics)])
-    # BSX "has Havok" (2) plus 128, and collision flags 128, as vanilla statics have them.
-    BSXFlags.New(nif, flags=130, parent=nif.root)
-    coll = nif.root.add_collision(None, flags=128,
-                                  collision_type=PynBufferTypes.bhkNPCollisionObjectBufType,
-                                  body_id=0)
-    bhkPhysicsSystem.New(nif, data=packed, parent=coll)
-    nif.save()
+    write_nif(nif_path, "C130_Blockout", built, s, tex, pyn)
+    door_built, door_origin = door_parts(args.length)
+    door_path = mesh_dir / "C130_Door.nif"
+    write_nif(door_path, "C130_Door", door_built, s, tex, pyn)
 
     aisle = wall_x(SEAT_Z) - SEAT_D - (CENTER_BACK_W / 2 + SEAT_D)
     sc = args.scale
@@ -366,9 +396,13 @@ def main():
           f"{2 * (FLOOR_W / 2 + BULGE) * sc:.2f} m; ceiling {CABIN_H * sc:.2f} m; "
           f"aisle {aisle * sc:.2f} m ({aisle * s:.0f} units); {per_row} seats a row, {4 * per_row} in all")
     print("  place in an interior cell at 0, 0, 0; the floor is z 0, forward is +Y")
+    ox, oy = door_origin[0] * s, door_origin[1] * s
+    print(f"{door_path.relative_to(ROOT)}: the jump door activator, placed twice:")
+    print(f"  starboard X {ox:.0f}  Y {oy:.0f}  Z 0, rotation Z 0")
+    print(f"  port      X {-ox:.0f}  Y {oy:.0f}  Z 0, rotation Z 180")
     if args.install:
         data = Path(args.install)
-        for f in [nif_path] + tex_files:
+        for f in [nif_path, door_path] + tex_files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
