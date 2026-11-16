@@ -721,6 +721,10 @@ about airborne operations have heard of. It's the second worldspace.
   refusal (a Message, `DevilsJumpNoRigMessage`, until the jumpmaster is voiced) or moves the
   player to `DevilsSicilyJumpMarker`; if the move sets him down on the ground, it puts him back
   up at the marker's height. The commands scene and the green light will gate it later.
+  - **Tested 2026-11-16: it works,** cabin door to Sicily DZ, end to end.
+  - CK: the script property's picker lists only interior cells, so the marker is set with **Pick
+    Reference in Render Window** (load cell -4, -5 of `DevilsSicilyWorld`, markers shown with M).
+    If the Add button is missing under Scripts, right-click the scripts list.
 
 ### Open questions
 
