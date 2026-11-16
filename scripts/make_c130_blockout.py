@@ -1,5 +1,6 @@
-"""A block-out of the C-130's cargo compartment, rigged for a jump: the right size and shape,
-plain colours, no detail.
+"""The C-130's cargo compartment, rigged for a jump: the right size and shape, with its main
+structure and textures made here in code (from the author's reference photos). Not final art,
+but it reads as the inside of a Herc.
 
     python scripts/make_c130_blockout.py [--length 15] [--scale 1.0] [--install "<Fallout 4>/Data"]
 
@@ -7,26 +8,30 @@ The cabin, in its own coordinates (metres; +y runs forward toward the flight dec
 right (starboard), the cargo floor at z 0, the origin at the middle of the floor between the
 forward bulkhead and the ramp hinge):
   hull          seen from inside: the side walls bulge gently outward as they rise, then round
-                over into an arched ceiling; flat floor; the closed ramp (RAMP_L) aft
-  troop seats   four rows, red webbing: outboard along each side wall facing in, and the
-                centerline rows back to back down the middle, packed in like sardines
+                over into an arched ceiling, lined with quilted insulation blankets; the closed
+                ramp (RAMP_L) aft
+  frames        the fuselage frames, every 20 in, curving up the walls and over the ceiling
+  floor         dark aluminium with tie-down rings; a roller conveyor down each aisle
+  troop seats   four rows: red seat pans on aluminium legs, with red webbing nets for backs
+                (on the side walls, hung from a tube rail; down the centerline, back to back
+                between stanchions that run floor to ceiling)
   doors         one paratroop doorway in each side wall, just forward of the ramp hinge, open
                 for the jump (the doors themselves are C130_Door.nif, the activator); round red
                 and green jump lights forward of each
   portholes     round windows down each side
+  overhead      two air ducts down the ceiling, conduits along the upper walls, dome lights
   anchor cables one each side, overhead, running aft to the doors
-  forward end   the bulkhead, with steps up to the flight deck on the left (port) side
-The hull, seats and steps have collision; the door, lights, portholes and cables lie on or
-near the hull and don't need their own.
+  forward end   the bulkhead, panelled, with steps up to the flight deck on the left (port) side
+The hull, floor, seats, centre backrests and steps have collision; the rest is for looks.
 
 --length is the cargo floor's length (the true C-130H is 12.2 m; the author found that too short
 in game, so the default is longer). --scale makes everything bigger, if it's too tight to move
 through in power armor.
 
 Writes to out/c130/mod/ (the layout of the game's Data folder):
-  Meshes/DevilsInTheDetails/Aircraft/C130_Blockout.nif
-  Textures/DevilsInTheDetails/Aircraft/blockout_<colour>.dds, flat_n.dds
-Place it in an interior cell at 0, 0, 0.
+  Meshes/DevilsInTheDetails/Aircraft/C130_Blockout.nif, C130_Door.nif
+  Textures/DevilsInTheDetails/Aircraft/c130_<material>.dds, c130_<material>_n.dds
+The cabin keeps the name C130_Blockout.nif so references placed in the Creation Kit still find it.
 """
 import argparse
 import math
@@ -34,6 +39,7 @@ import shutil
 import sys
 from pathlib import Path
 
+import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -56,29 +62,167 @@ PORTHOLE_D, PORTHOLE_Z = 0.30, 1.45         # diameter, centre height
 PORTHOLES = 6                  # each side, between the doors and the forward bulkhead
 SEAT_W, SEAT_D, SEAT_Z = 0.52, 0.40, 0.45   # one troop seat: width, depth, height
 SEAT_AFT_GAP = 0.9             # clear floor between the doors and the seats
-CENTER_BACK_W, CENTER_BACK_H = 0.10, 1.05   # the centreline seats' shared backrest frame
+CENTER_BACK_W = 0.10           # the gap between the centerline rows' seat pans
+WALL_NET_TOP = 1.30            # the side seats' webbing hangs from a rail this high
+CENTER_NET_TOP = 1.15          # the centerline seats' shared webbing, up to its rail
+STANCHION_PITCH = 2.6          # centerline stanchions, floor to ceiling
 CABLE_Z, CABLE_X, CABLE_D = 2.25, 0.75, 0.03   # anchor cables
 STEPS_W, STEPS_L, STEPS_H = 0.8, 1.0, 1.0   # up to the flight deck, port side forward
 LIGHT_D = 0.12                 # jump light diameter
+FRAME_PITCH = 0.508            # fuselage frames, 20 in apart
+FRAME_W, FRAME_DEPTH = 0.07, 0.035          # a frame's width, and how far it stands proud of the blankets
+DUCT_X, DUCT_Z, DUCT_R = 0.35, 2.55, 0.10   # the two overhead air ducts
+DOME_Z, DOME_PITCH, DOME_D = 2.3, 2.5, 0.18 # dome lights, high on each wall
+ROLLER_PITCH, ROLLER_R = 0.254, 0.025       # roller conveyor, one down each aisle
 ARC_STEPS, WALL_STEPS, ROUND_STEPS = 12, 6, 24
 # The open doorway's top: the arch's first profile point, 1.88 m, near enough the door's 1.83 m
 # plus its sill.
 DOOR_TOP = WALL_TOP + (CABIN_H - WALL_TOP) * math.sin(math.pi / 2 / ARC_STEPS) + 1e-6
 JAMB = 0.12                    # the hull's thickness, shown at the doorway's edges
 
-COLOURS = {
-    "hull": (104, 110, 92),     # insulation blankets, drab green-grey
-    "floor": (62, 62, 60),
-    "ramp": (78, 74, 66),
-    "seat": (150, 42, 36),      # red nylon webbing
-    "frame": (150, 150, 145),   # aluminium tubing
-    "door": (176, 176, 166),
-    "glass": (150, 185, 215),   # sky through the portholes
-    "red": (230, 30, 25),
-    "green": (40, 210, 60),
-    "cable": (190, 190, 190),
-}
 MOD_PATH = "DevilsInTheDetails/Aircraft"
+TEX_SIZE = 256
+
+
+# --- Textures ----------------------------------------------------------------------------
+# Each material: an RGB(A) image and a height map (for its normal map), made from numpy. A tile
+# is one texture repeat; the meshes' UVs are set so a tile is the size given here.
+
+def _uv(n=TEX_SIZE):
+    v, u = np.mgrid[0:n, 0:n] / n
+    return u, v
+
+
+def _noise(seed, n=TEX_SIZE, scale=1.0):
+    rng = np.random.default_rng(seed)
+    return rng.normal(0, scale, (n, n))
+
+
+def _flat(rgb):
+    return lambda: (np.broadcast_to(np.array(rgb, float), (TEX_SIZE, TEX_SIZE, 3)).copy(), None)
+
+
+def tex_quilt():
+    """Insulation blanket, one tile per frame bay (FRAME_PITCH wide, 0.5 m tall): a puffy
+    pillow, pale khaki-grey, with diagonal quilting stitches."""
+    u, v = _uv()
+    h = np.sqrt(np.clip(np.sin(np.pi * u) * np.sin(np.pi * v), 0, 1))
+    d = np.minimum(np.abs(((u + v) * 2) % 1 - 0.5), np.abs(((u - v) * 2) % 1 - 0.5))
+    h = h - 0.12 * np.exp(-((0.5 - d) / 0.03) ** 2)
+    shade = 0.72 + 0.28 * np.clip(h, 0, 1) + _noise(1, scale=0.015)
+    rgb = np.array([186, 186, 166])[None, None, :] * shade[..., None]
+    return rgb, h * 6
+
+
+def tex_floor():
+    """Cargo floor, one tile 1.016 m square: dark aluminium with a recessed tie-down ring in the
+    middle and black anti-skid slots."""
+    u, v = _uv()
+    rgb = np.ones((TEX_SIZE, TEX_SIZE, 3)) * np.array([66, 68, 68]) * (1 + _noise(2, scale=0.04))[..., None]
+    h = np.zeros((TEX_SIZE, TEX_SIZE))
+    r = np.hypot(u - 0.5, v - 0.5) * 1.016                 # metres from the tile's centre
+    ring = (r > 0.032) & (r < 0.05)
+    cup = r <= 0.05
+    rgb[cup] = [40, 40, 40]
+    rgb[ring] = [160, 160, 155]
+    h[cup] -= 0.5
+    h[ring] += 0.8
+    for cv in (0.18, 0.32, 0.68, 0.82):                     # slots along the tile, across it
+        s = (np.abs(v - cv) * 1.016 < 0.018) & (np.abs(u - 0.5) * 1.016 < 0.07)
+        rgb[s] = [22, 22, 22]
+        h[s] -= 0.6
+    seam = (u < 0.006) | (u > 0.994)
+    rgb[seam] *= 0.6
+    h[seam] -= 0.4
+    return rgb, h
+
+
+def tex_fabric():
+    """Seat pans, one tile per seat: red-maroon nylon, a fine weave, a seam between seats."""
+    u, v = _uv()
+    weave = 0.5 + 0.5 * np.sin(u * TEX_SIZE * np.pi / 2) * np.sin(v * TEX_SIZE * np.pi / 2)
+    seam = np.exp(-(np.minimum(u, 1 - u) / 0.015) ** 2)
+    shade = (0.88 + 0.12 * weave + _noise(3, scale=0.03)) * (1 - 0.45 * seam)
+    return np.array([150, 30, 32])[None, None, :] * shade[..., None], weave * 0.5 - seam
+
+
+def tex_webbing():
+    """Webbing net, one tile per seat (SEAT_W wide, the net's full height): red straps hanging
+    from the rail, crossed by horizontal bands; transparent between them."""
+    u, v = _uv()
+    # Five straps across a seat (about 10 cm apart), seven bands down the net: 10 cm squares,
+    # straps about 3.5 cm wide.
+    vert = np.abs(((u * 5) % 1) - 0.5) < 0.17
+    horiz = np.abs(((v * 7) % 1) - 0.5) < 0.15
+    strap = vert | horiz
+    edge = vert & ~(np.abs(((u * 5) % 1) - 0.5) < 0.12)
+    rgb = np.ones((TEX_SIZE, TEX_SIZE, 3)) * np.array([196, 28, 30])
+    rgb[edge] *= 0.75
+    rgb *= (1 + _noise(4, scale=0.03))[..., None]
+    alpha = np.where(strap, 255, 0)
+    return np.dstack([rgb, alpha]), strap.astype(float) * 0.6
+
+
+def tex_bulkhead():
+    """The forward bulkhead, one tile 1 m square: pale green panels, riveted seams."""
+    u, v = _uv()
+    rgb = np.ones((TEX_SIZE, TEX_SIZE, 3)) * np.array([150, 170, 152]) * (1 + _noise(5, scale=0.02))[..., None]
+    h = np.zeros((TEX_SIZE, TEX_SIZE))
+    seam = (np.abs(u - 0.5) > 0.495) | (np.abs(v - 0.5) > 0.495) | (np.abs(u - 0.5) < 0.004)
+    rgb[seam] *= 0.65
+    h[seam] -= 0.5
+    rivet_rows = (np.abs(v - 0.5) > 0.48) | (np.abs(u - 0.5) > 0.48) | (np.abs(u - 0.5) < 0.02)
+    dots = (np.hypot(((u * 25) % 1) - 0.5, ((v * 25) % 1) - 0.5) < 0.18)
+    riv = rivet_rows & dots & ~seam
+    rgb[riv] *= 1.15
+    h[riv] += 0.5
+    return rgb, h
+
+
+MATERIALS = {
+    # name: (texture maker, {alpha, double_sided, emit})
+    "quilt": (tex_quilt, {}),
+    "floor": (tex_floor, {}),
+    "fabric": (tex_fabric, {}),
+    "webbing": (tex_webbing, {"alpha": True, "double_sided": True}),
+    "bulkhead": (tex_bulkhead, {}),
+    "frame": (_flat((172, 178, 170)), {}),        # the frames, painted pale grey-green
+    "aluminium": (_flat((188, 190, 192)), {}),    # tubes, rails, stanchions, rollers
+    "duct": (_flat((205, 202, 188)), {}),
+    "dark": (_flat((48, 48, 48)), {}),            # conveyor rails
+    "conduit": (_flat((128, 130, 124)), {}),
+    "door": (_flat((176, 176, 166)), {}),
+    "glass": (_flat((150, 185, 215)), {}),        # sky through the portholes
+    "red": (_flat((230, 30, 25)), {}),
+    "green": (_flat((40, 210, 60)), {}),
+    "cable": (_flat((190, 190, 190)), {}),
+    "lamp": (_flat((255, 246, 222)), {"emit": True}),
+}
+
+
+def normal_map(h, strength=2.0):
+    """Tangent-space normal map from a height map (tiling)."""
+    if h is None:
+        h = np.zeros((TEX_SIZE, TEX_SIZE))
+    dx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) * strength / 2
+    dy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) * strength / 2
+    n = np.dstack([-dx, dy, np.ones_like(h)])
+    n /= np.linalg.norm(n, axis=2, keepdims=True)
+    return (n * 0.5 + 0.5) * 255
+
+
+def write_textures(tex_dir):
+    files = []
+    for name, (make, opts) in MATERIALS.items():
+        img, h = make()
+        img = np.clip(img, 0, 255).astype(np.uint8)
+        mode = "RGBA" if img.shape[2] == 4 else "RGB"
+        f = tex_dir / f"c130_{name}.dds"
+        Image.fromarray(img, mode).save(f, pixel_format="DXT5" if mode == "RGBA" else "DXT1")
+        fn = tex_dir / f"c130_{name}_n.dds"
+        Image.fromarray(np.clip(normal_map(h), 0, 255).astype(np.uint8), "RGB").save(fn, pixel_format="DXT1")
+        files += [f, fn]
+    return files
 
 
 # --- The hull's cross-section ------------------------------------------------------------
@@ -101,6 +245,16 @@ def wall_normal(z, side):
     return (side * nx / m, 0.0, nz / m)
 
 
+def hull_normal(x, z):
+    """The hull's inward normal at a point (x, z) on its cross-section."""
+    if z <= WALL_TOP:
+        return wall_normal(z, 1 if x > 0 else -1)
+    top, b = FLOOR_W / 2 + BULGE, CABIN_H - WALL_TOP       # the arch: the ellipse's normal
+    nx, nz = -x / (top * top), -(z - WALL_TOP) / (b * b)
+    m = math.hypot(nx, nz)
+    return (nx / m, 0.0, nz / m)
+
+
 def profile():
     """The hull's cross-section, port floor edge up and over to starboard floor edge: [(x, z)]."""
     top = FLOOR_W / 2 + BULGE
@@ -111,6 +265,13 @@ def profile():
         right.append((top * math.cos(a), WALL_TOP + (CABIN_H - WALL_TOP) * math.sin(a)))
     left = [(-x, z) for x, z in right[:-1]]     # port floor edge up to just short of the top
     return left + right[::-1]                   # then over the top and down to starboard
+
+
+def arc_lengths(prof):
+    s = [0.0]
+    for (x0, z0), (x1, z1) in zip(prof, prof[1:]):
+        s.append(s[-1] + math.hypot(x1 - x0, z1 - z0))
+    return s
 
 
 # --- Mesh building -----------------------------------------------------------------------
@@ -141,33 +302,46 @@ class Mesh:
         self.tri(a, b, c)
         self.tri(a, c, d)
 
-    def box(self, x0, y0, z0, x1, y1, z1, sides="tbnsew"):
+    def box(self, x0, y0, z0, x1, y1, z1, sides="tbnsew", tile=1.0):
         faces = {
-            "t": ([(x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)], (0, 0, 1)),
-            "b": ([(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0)], (0, 0, -1)),
-            "s": ([(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)], (0, -1, 0)),
-            "e": ([(x1, y0, z0), (x1, y1, z0), (x1, y1, z1), (x1, y0, z1)], (1, 0, 0)),
-            "n": ([(x0, y1, z0), (x1, y1, z0), (x1, y1, z1), (x0, y1, z1)], (0, 1, 0)),
-            "w": ([(x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1)], (-1, 0, 0)),
+            "t": ([(x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)], (0, 0, 1), (0, 1)),
+            "b": ([(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0)], (0, 0, -1), (0, 1)),
+            "s": ([(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)], (0, -1, 0), (0, 2)),
+            "e": ([(x1, y0, z0), (x1, y1, z0), (x1, y1, z1), (x1, y0, z1)], (1, 0, 0), (1, 2)),
+            "n": ([(x0, y1, z0), (x1, y1, z0), (x1, y1, z1), (x0, y1, z1)], (0, 1, 0), (0, 2)),
+            "w": ([(x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1)], (-1, 0, 0), (1, 2)),
         }
         for s in sides:
-            pts, n = faces[s]
-            self.quad(*[self.vert(p, n) for p in pts])
+            pts, n, (a, b) = faces[s]
+            self.quad(*[self.vert(p, n, (p[a] / tile, p[b] / tile)) for p in pts])
 
-    def cylinder(self, p0, p1, r, steps=8):
-        """A closed tube from p0 to p1 along the y axis (cables)."""
-        (x, y0, z), y1 = p0, p1[1]
+    def tube(self, p0, p1, r, steps=8, caps=False):
+        """A tube from p0 to p1, any direction."""
+        ax = [p1[i] - p0[i] for i in range(3)]
+        ln = math.sqrt(sum(a * a for a in ax))
+        ax = [a / ln for a in ax]
+        ref = (0, 0, 1) if abs(ax[2]) < 0.9 else (1, 0, 0)
+        e1 = [ax[1] * ref[2] - ax[2] * ref[1], ax[2] * ref[0] - ax[0] * ref[2], ax[0] * ref[1] - ax[1] * ref[0]]
+        m = math.sqrt(sum(a * a for a in e1))
+        e1 = [a / m for a in e1]
+        e2 = [ax[1] * e1[2] - ax[2] * e1[1], ax[2] * e1[0] - ax[0] * e1[2], ax[0] * e1[1] - ax[1] * e1[0]]
         rings = []
-        for y in (y0, y1):
+        for k, p in enumerate((p0, p1)):
             ring = []
-            for i in range(steps):
+            for i in range(steps + 1):
                 a = 2 * math.pi * i / steps
-                n = (math.cos(a), 0, math.sin(a))
-                ring.append(self.vert((x + r * n[0], y, z + r * n[2]), n))
+                n = [math.cos(a) * e1[j] + math.sin(a) * e2[j] for j in range(3)]
+                ring.append(self.vert([p[j] + r * n[j] for j in range(3)], n, (i / steps, k * ln)))
             rings.append(ring)
         for i in range(steps):
-            j = (i + 1) % steps
-            self.quad(rings[0][i], rings[0][j], rings[1][j], rings[1][i])
+            self.quad(rings[0][i], rings[0][i + 1], rings[1][i + 1], rings[1][i])
+        if caps:
+            for p, ring, sgn in ((p0, rings[0], -1), (p1, rings[1], 1)):
+                n = [sgn * a for a in ax]
+                c = self.vert(p, n, (0.5, 0.5))
+                rim = [self.vert(self.verts[i], n, (0.5, 0.5)) for i in ring[:-1]]
+                for i in range(steps):
+                    self.tri(c, rim[i], rim[(i + 1) % steps])
 
     def on_wall(self, outline, side, inset):
         """A flat shape laid onto a side wall, following its curve: outline is [(y, z)] around a
@@ -204,18 +378,21 @@ def rounded_rect(y0, z0, y1, z1, r, steps=6):
 # --- The parts ---------------------------------------------------------------------------
 
 def parts(length):
-    """{name: (colour, collides, Mesh)} in metres."""
+    """{name: (material, collides, Mesh)} in metres; material None is collision only."""
     fwd, hinge = length / 2, -length / 2
     aft = hinge - RAMP_L
     hw = FLOOR_W / 2
+    da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
     p = {}
 
     # Hull: the cross-section run from the ramp's end to the forward bulkhead, seen from inside,
-    # with both end walls closing it. Over the ramp the tail sweeps up: the closed ramp rises
-    # aft from its hinge, the upper cargo door slopes down to meet it, and the sides draw in,
-    # so the aft wall is a smaller arch, high up.
-    hull = Mesh()
+    # lined with blankets (one texture tile per frame bay). Over the ramp the tail sweeps up: the
+    # closed ramp rises aft from its hinge, the upper cargo door slopes down to meet it, and the
+    # sides draw in. The paratroop doors are open: a hole in each side wall from the floor to the
+    # first profile point of the arch, which sits at the door's top.
+    hull, bulkhead = Mesh(), Mesh()
     prof = profile()
+    arc = arc_lengths(prof)
     rise = RAMP_L * math.tan(math.radians(RAMP_ANGLE))
 
     def section(t):
@@ -224,20 +401,10 @@ def parts(length):
         h = 1 - t * (1 - AFT_HEIGHT / CABIN_H)
         return [(x * w, rise * t + z * h) for x, z in prof]
 
-    def normal(x, z):
-        if z <= WALL_TOP:         # the side walls
-            return wall_normal(z, 1 if x > 0 else -1)
-        top, b = hw + BULGE, CABIN_H - WALL_TOP     # the arch: the ellipse's normal, pointing in
-        nx, nz = -x / (top * top), -(z - WALL_TOP) / (b * b)
-        m = math.hypot(nx, nz)
-        return (nx / m, 0.0, nz / m)
-
-    # The paratroop doors are open (slid up inside, as for a jump): a hole in each side wall
-    # from the floor to the first profile point of the arch, which sits at the door's top.
-    da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
     stations = [(aft, section(1.0)), (hinge, section(0.0)), (da, section(0.0)),
                 (db, section(0.0)), (fwd, section(0.0))]
-    rows = [[hull.vert((x, y, z), normal(x0, z0)) for (x, z), (x0, z0) in zip(sec, prof)]
+    rows = [[hull.vert((x, y, z), hull_normal(x0, z0), ((y - hinge) / FRAME_PITCH, s / 0.5))
+             for (x, z), (x0, z0), s in zip(sec, prof, arc)]
             for y, sec in stations]
     for k, (r0, r1) in enumerate(zip(rows, rows[1:])):
         for i in range(len(prof) - 1):
@@ -245,42 +412,116 @@ def parts(length):
             if stations[k][0] == da and max(za, zb) <= DOOR_TOP and xa * xb > 0:
                 continue                                   # the doorway
             hull.quad(r0[i], r0[i + 1], r1[i + 1], r1[i])
-    for (y, sec), ny in ((stations[0], 1.0), (stations[-1], -1.0)):
-        cx = 0.0
+    for (y, sec), ny, m in ((stations[0], 1.0, hull), (stations[-1], -1.0, bulkhead)):
         cz = sum(z for _, z in sec) / len(sec)
-        c = hull.vert((cx, y, cz), (0, ny, 0), (cx / 2, cz / 2))
-        ring = [hull.vert((x, y, z), (0, ny, 0), (x / 2, z / 2)) for x, z in sec]
+        c = m.vert((0.0, y, cz), (0, ny, 0), (0.5, cz))
+        ring = [m.vert((x, y, z), (0, ny, 0), (x + 0.5, z)) for x, z in sec]
         for i in range(len(ring)):
-            hull.tri(c, ring[i], ring[(i + 1) % len(ring)])   # closes along the floor too
-    p["hull"] = ("hull", True, hull)
+            m.tri(c, ring[i], ring[(i + 1) % len(ring)])   # closes along the floor too
+    p["hull"] = ("quilt", True, hull)
+    p["bulkhead"] = ("bulkhead", True, bulkhead)
 
+    # Frames: bands standing proud of the blankets, every FRAME_PITCH from the hinge forward,
+    # up one wall, over the ceiling and down the other (none across the doorways).
+    frames = Mesh()
+    inner = []
+    for (x, z) in prof:
+        n = hull_normal(x, z)
+        inner.append(((x, z), (x + n[0] * FRAME_DEPTH, z + n[2] * FRAME_DEPTH), n))
+    y = hinge + FRAME_PITCH
+    while y < fwd - 0.05:
+        if not (da - 0.1 < y < db + 0.1):
+            y0, y1 = y - FRAME_W / 2, y + FRAME_W / 2
+            for (pa, qa, na), (pb, qb, nb) in zip(inner, inner[1:]):
+                frames.quad(frames.vert((qa[0], y0, qa[1]), na), frames.vert((qb[0], y0, qb[1]), nb),
+                            frames.vert((qb[0], y1, qb[1]), nb), frames.vert((qa[0], y1, qa[1]), na))
+                for yy, ny in ((y0, -1.0), (y1, 1.0)):
+                    frames.quad(*[frames.vert((pt[0], yy, pt[1]), (0, ny, 0)) for pt in (pa, pb, qb, qa)])
+        y += FRAME_PITCH
+    p["frames"] = ("frame", False, frames)
+
+    # Floor and ramp: the floor texture tiles every 1.016 m, a tie-down ring in each.
     floor, ramp = Mesh(), Mesh()
-    floor.box(-hw, hinge, -0.1, hw, fwd, 0.002, "t")
+    ft = 1.016
+    floor.quad(*[floor.vert((x, yy, 0.002), (0, 0, 1), (x / ft + 0.5, yy / ft))
+                 for x, yy in ((-hw, hinge), (hw, hinge), (hw, fwd), (-hw, fwd))])
     up = (0.0, -math.sin(math.radians(RAMP_ANGLE)), math.cos(math.radians(RAMP_ANGLE)))
     aw = hw * AFT_WIDTH
-    ramp.quad(*[ramp.vert(v, up) for v in ((-hw, hinge, 0.002), (hw, hinge, 0.002),
-                                           (aw, aft, rise + 0.002), (-aw, aft, rise + 0.002))])
+    ramp.quad(*[ramp.vert(v, up, (v[0] / ft + 0.5, s / ft)) for v, s in
+                (((-hw, hinge, 0.002), 0), ((hw, hinge, 0.002), 0),
+                 ((aw, aft, rise + 0.002), -RAMP_L), ((-aw, aft, rise + 0.002), -RAMP_L))])
     p["floor"] = ("floor", True, floor)
-    p["ramp"] = ("ramp", True, ramp)
+    p["ramp"] = ("floor", True, ramp)
 
     # Troop seats, from just forward of the doors to the flight deck steps.
-    y0 = hinge + DOOR_AFT + DOOR_W + SEAT_AFT_GAP
+    y0 = db + SEAT_AFT_GAP
     per_row = int((fwd - STEPS_L - 0.3 - y0) / SEAT_W)
     y1 = y0 + per_row * SEAT_W
-    seats, frame = Mesh(), Mesh()
+    pans, nets, metal, backs = Mesh(), Mesh(), Mesh(), Mesh()
+    legs_y = [y0 + 0.08 + k * 2 * SEAT_W for k in range(per_row // 2 + 1)]
+    legs_y[-1] = min(legs_y[-1], y1 - 0.08)
+    pan_t = 0.03
     for side in (-1, 1):
+        # Outboard: the pan along the wall, its front edge on a rail and legs; the net from the
+        # pan's back edge up the wall to a rail.
         wall = wall_x(SEAT_Z) - 0.01
         xa, xb = sorted((side * wall, side * (wall - SEAT_D)))
-        seats.box(xa, y0, SEAT_Z - 0.05, xb, y1, SEAT_Z)
+        pans.box(xa, y0, SEAT_Z - pan_t, xb, y1, SEAT_Z, tile=SEAT_W)
+        xf = side * (wall - SEAT_D + 0.03)
+        metal.tube((xf, y0, SEAT_Z - 0.04), (xf, y1, SEAT_Z - 0.04), 0.016)
+        for ly in legs_y:
+            metal.tube((xf, ly, 0.0), (xf, ly, SEAT_Z - 0.04), 0.014)
+        zs = [SEAT_Z + (WALL_NET_TOP - SEAT_Z) * i / 4 for i in range(5)]
+        col = [(side * (wall_x(z) - 0.04), z, (z - SEAT_Z) / (WALL_NET_TOP - SEAT_Z)) for z in zs]
+        n = (-side, 0, 0)
+        for (xa_, za, va), (xb_, zb, vb) in zip(col, col[1:]):
+            nets.quad(nets.vert((xa_, y0, za), n, (0, 1 - va)), nets.vert((xa_, y1, za), n, ((y1 - y0) / SEAT_W, 1 - va)),
+                      nets.vert((xb_, y1, zb), n, ((y1 - y0) / SEAT_W, 1 - vb)), nets.vert((xb_, y0, zb), n, (0, 1 - vb)))
+        xr = side * (wall_x(WALL_NET_TOP) - 0.05)
+        metal.tube((xr, y0 - 0.1, WALL_NET_TOP), (xr, y1 + 0.1, WALL_NET_TOP), 0.018)
+
+        # Centerline: pans each side of the middle, back to back.
         xa, xb = sorted((side * CENTER_BACK_W / 2, side * (CENTER_BACK_W / 2 + SEAT_D)))
-        seats.box(xa, y0, SEAT_Z - 0.05, xb, y1, SEAT_Z)
-    frame.box(-CENTER_BACK_W / 2, y0, 0, CENTER_BACK_W / 2, y1, CENTER_BACK_H)
-    p["seats"] = ("seat", True, seats)
-    p["centre_frame"] = ("frame", True, frame)
+        pans.box(xa, y0, SEAT_Z - pan_t, xb, y1, SEAT_Z, tile=SEAT_W)
+        xf = side * (CENTER_BACK_W / 2 + SEAT_D - 0.03)
+        metal.tube((xf, y0, SEAT_Z - 0.04), (xf, y1, SEAT_Z - 0.04), 0.016)
+        for ly in legs_y:
+            metal.tube((xf, ly, 0.0), (xf, ly, SEAT_Z - 0.04), 0.014)
+
+    # The centerline net, one sheet seen from both sides, from the pans up to its rail; the
+    # stanchions floor to ceiling; and a solid (invisible) backrest so no one walks through it.
+    nets.quad(nets.vert((0, y0, SEAT_Z), (1, 0, 0), (0, 1)), nets.vert((0, y1, SEAT_Z), (1, 0, 0), ((y1 - y0) / SEAT_W, 1)),
+              nets.vert((0, y1, CENTER_NET_TOP), (1, 0, 0), ((y1 - y0) / SEAT_W, 0)),
+              nets.vert((0, y0, CENTER_NET_TOP), (1, 0, 0), (0, 0)))
+    metal.tube((0, y0, CENTER_NET_TOP), (0, y1, CENTER_NET_TOP), 0.018)
+    sy = y0
+    while sy <= y1 + 0.01:
+        metal.tube((0, sy, 0.0), (0, sy, CABIN_H - 0.01), 0.03)
+        sy += STANCHION_PITCH
+    backs.box(-0.04, y0, 0.0, 0.04, y1, CENTER_NET_TOP)
+    p["seat_pans"] = ("fabric", True, pans)
+    p["seat_nets"] = ("webbing", False, nets)
+    p["seat_frames"] = ("aluminium", False, metal)
+    p["centre_backrest"] = (None, True, backs)
+
+    # A roller conveyor down the middle of each aisle: two rails and the rollers between them.
+    rollers, rails = Mesh(), Mesh()
+    aisle_in, aisle_out = CENTER_BACK_W / 2 + SEAT_D, wall_x(SEAT_Z) - 0.01 - SEAT_D
+    for side in (-1, 1):
+        xc = side * (aisle_in + aisle_out) / 2
+        r_end = fwd - (STEPS_L + 0.2 if side < 0 else 0.2)
+        for xr in (xc - 0.13, xc + 0.11):
+            rails.box(xr, hinge + 0.2, 0.0, xr + 0.02, r_end, 0.05, "tnsew")
+        ry = hinge + 0.3
+        while ry < r_end - 0.1:
+            rollers.tube((xc - 0.11, ry, 0.03), (xc + 0.11, ry, 0.03), ROLLER_R, steps=6)
+            ry += ROLLER_PITCH
+    p["rollers"] = ("aluminium", False, rollers)
+    p["roller_rails"] = ("dark", False, rails)
 
     # Round jump lights just forward of each door; portholes spaced down each side between the
     # seats' ends. The doors themselves are their own model (door_parts), for the activator.
-    rims, glass, reds, greens = Mesh(), Mesh(), Mesh(), Mesh()
+    rims, glass, reds, greens, domes = Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
     ports = [y0 + (y1 - y0) * (i + 0.5) / PORTHOLES for i in range(PORTHOLES)]
     for side in (-1, 1):
         for y in ports:
@@ -289,31 +530,46 @@ def parts(length):
         ly = db + 0.15 + LIGHT_D / 2
         reds.on_wall(circle(ly, 1.81, LIGHT_D / 2), side, 0.02)
         greens.on_wall(circle(ly, 1.61, LIGHT_D / 2), side, 0.02)
+        dy = hinge + DOME_PITCH / 2
+        while dy < fwd - 0.5:
+            domes.on_wall(circle(dy, DOME_Z, DOME_D / 2), side, FRAME_DEPTH + 0.01)
+            dy += DOME_PITCH
     p["porthole_rims"] = ("door", False, rims)
     p["portholes"] = ("glass", False, glass)
     p["light_red"] = ("red", False, reds)
     p["light_green"] = ("green", False, greens)
+    p["dome_lights"] = ("lamp", False, domes)
+
+    # Overhead: two air ducts down the ceiling, and conduits along the top of each wall.
+    ducts, conduits = Mesh(), Mesh()
+    for side in (-1, 1):
+        ducts.tube((side * DUCT_X, hinge - 0.2, DUCT_Z), (side * DUCT_X, fwd, DUCT_Z), DUCT_R, steps=12)
+        for k, z in enumerate((1.92, 1.98, 2.04)):
+            x = side * (wall_x(z) - FRAME_DEPTH - 0.025)
+            conduits.tube((x, hinge, z), (x, fwd, z), 0.012 + 0.004 * k, steps=6)
+    p["ducts"] = ("duct", False, ducts)
+    p["conduits"] = ("conduit", False, conduits)
 
     cables = Mesh()
     for side in (-1, 1):
-        cables.cylinder((side * CABLE_X, hinge - 0.3, CABLE_Z), (0, fwd, 0), CABLE_D / 2)
+        cables.tube((side * CABLE_X, hinge - 0.3, CABLE_Z), (side * CABLE_X, fwd, CABLE_Z), CABLE_D / 2)
     p["anchor_cables"] = ("cable", False, cables)
 
     steps = Mesh()
-    steps.box(-hw, fwd - STEPS_L, 0, -hw + STEPS_W, fwd, STEPS_H, "tsew")
-    p["flight_deck_steps"] = ("frame", True, steps)
+    steps.box(-hw, fwd - STEPS_L, 0, -hw + STEPS_W, fwd, STEPS_H, "tsew", tile=1.016)
+    p["flight_deck_steps"] = ("floor", True, steps)
     return p, per_row
 
 
 def door_parts(length):
     """The starboard paratroop doorway, open for the jump, as its own model for the jump door
-    activator: ({name: (colour, collides, Mesh)}, origin). The origin is where the door's centre
-    line meets the wall at the floor; the port door is the same model turned 180 degrees.
+    activator: ({name: (material, collides, Mesh)}, origin). The origin is where the door's
+    centre line meets the wall at the floor; the port door is the same model turned 180 degrees.
       jambs     the doorway's edges and top, the hull's thickness, in bright aluminium
       door      the door itself, slid up on its tracks to lie against the upper wall and ceiling
       platform  the jump platform, out over the slipstream at the sill
-    Nothing outside: the cabin flies in the Sicily worldspace, so the real land and sky show.
-      activation an invisible slab filling the doorway: walking into it stops you, using it jumps"""
+      activation an invisible slab filling the doorway: walking into it stops you, using it jumps
+    Nothing outside: the cabin flies in the Sicily worldspace, so the real land and sky show."""
     hinge = -length / 2
     da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
     origin = (wall_x(0), (da + db) / 2, 0.0)
@@ -338,7 +594,7 @@ def door_parts(length):
 
     block.box(origin[0] - 0.04, da, 0.0, origin[0] + JAMB, db, DOOR_TOP)
     parts = {"jambs": ("door", False, jambs), "door": ("door", False, panel),
-             "door_porthole": ("glass", False, glass), "platform": ("frame", False, platform),
+             "door_porthole": ("glass", False, glass), "platform": ("aluminium", False, platform),
              "activation": (None, True, block)}
     for _, _, m in parts.values():
         m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
@@ -346,15 +602,18 @@ def door_parts(length):
 
 
 def write_nif(path, root_name, built, s, tex, pyn):
-    """One static model from {name: (colour, collides, Mesh)}: colour None is collision only."""
+    """One static model from {name: (material, collides, Mesh)}: material None is collision only."""
     NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, \
-        PhysicsProps, pack_shapes, HAVOC_SCALE_FACTOR = pyn
+        PhysicsProps, pack_shapes, HAVOC_SCALE_FACTOR, SF1, SF2 = pyn
     nif = NifFile()
     nif.initialize("FO4", str(path), root_type="BSFadeNode", root_name=root_name)
     coll_verts, coll_tris = [], []
-    for name, (colour, collides, m) in built.items():
+    for name, (mat, collides, m) in built.items():
+        if not m.tris:
+            continue
         verts = [tuple(c * s for c in v) for v in m.verts]
-        if colour:
+        if mat:
+            opts = MATERIALS[mat][1]
             props = NiShapeBuf()
             props.bufType = PynBufferTypes.BSTriShapeBufType
             props.hasFullPrecision = 1
@@ -362,10 +621,23 @@ def write_nif(path, root_name, built, s, tex, pyn):
                                             props=props, parent=nif.root)
             shape.shader._checked_for_materials = True
             shape.shader._materials = None
-            shape.shader.properties.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
-            shape.set_texture("Diffuse", f"{tex}\\blockout_{colour}.dds")
-            shape.set_texture("Normal", f"{tex}\\flat_n.dds")
+            sp = shape.shader.properties
+            sp.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
+            if opts.get("double_sided"):
+                sp.shaderflags2_set(SF2.DOUBLE_SIDED)
+            if opts.get("emit"):
+                sp.shaderflags1_set(SF1.OWN_EMIT)
+                sp.Emissive_Color[0], sp.Emissive_Color[1], sp.Emissive_Color[2] = 1.0, 0.96, 0.85
+                sp.Emissive_Color[3] = 1.0
+                sp.Emissive_Mult = 1.5
+            shape.set_texture("Diffuse", f"{tex}\\c130_{mat}.dds")
+            shape.set_texture("Normal", f"{tex}\\c130_{mat}_n.dds")
             shape.save_shader_attributes()
+            if opts.get("alpha"):
+                shape.has_alpha_property = True
+                shape.alpha_property.properties.flags = 4844          # alpha test
+                shape.alpha_property.properties.threshold = 128
+                shape.save_alpha_property()
         if collides:
             base = len(coll_verts)
             coll_verts += [tuple(c / HAVOC_SCALE_FACTOR for c in v) for v in verts]
@@ -397,23 +669,18 @@ def main():
     from pyn.pynifly import BSXFlags, bhkPhysicsSystem
     from pyn.bhk_autounpack import CollisionShape, PhysicsProps
     from pyn.bhk_autopack import pack_shapes
-    from pyn.nifconstants import HAVOC_SCALE_FACTOR
+    from pyn.nifconstants import HAVOC_SCALE_FACTOR, ShaderFlags1FO4, ShaderFlags2FO4
 
     s = args.scale / UNIT_M          # metres -> game units
     mod = out_dir("c130") / "mod"
     mesh_dir, tex_dir = mod / "Meshes" / MOD_PATH, mod / "Textures" / MOD_PATH
     mesh_dir.mkdir(parents=True, exist_ok=True)
     tex_dir.mkdir(parents=True, exist_ok=True)
-    tex_files = [tex_dir / "flat_n.dds"]
-    Image.new("RGB", (4, 4), (128, 128, 255)).save(tex_files[0], pixel_format="DXT1")
-    for name, rgb in COLOURS.items():
-        f = tex_dir / f"blockout_{name}.dds"
-        Image.new("RGB", (16, 16), rgb).save(f, pixel_format="DXT1")
-        tex_files.append(f)
+    tex_files = write_textures(tex_dir)
     tex = "textures\\" + MOD_PATH.replace("/", "\\")
 
     pyn = (NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape,
-           PhysicsProps, pack_shapes, HAVOC_SCALE_FACTOR)
+           PhysicsProps, pack_shapes, HAVOC_SCALE_FACTOR, ShaderFlags1FO4, ShaderFlags2FO4)
     built, per_row = parts(args.length)
     nif_path = mesh_dir / "C130_Blockout.nif"
     write_nif(nif_path, "C130_Blockout", built, s, tex, pyn)
@@ -423,22 +690,23 @@ def main():
 
     aisle = wall_x(SEAT_Z) - SEAT_D - (CENTER_BACK_W / 2 + SEAT_D)
     sc = args.scale
-    print(f"{nif_path.relative_to(ROOT)} (length {args.length} m, scale {sc})")
+    tris = sum(len(m.tris) for _, _, m in built.values())
+    print(f"{nif_path.relative_to(ROOT)} (length {args.length} m, scale {sc}, {tris} triangles)")
     print(f"  cabin {args.length * sc:.1f} m + ramp {RAMP_L * sc:.1f} m; widest "
           f"{2 * (FLOOR_W / 2 + BULGE) * sc:.2f} m; ceiling {CABIN_H * sc:.2f} m; "
           f"aisle {aisle * sc:.2f} m ({aisle * s:.0f} units); {per_row} seats a row, {4 * per_row} in all")
-    print("  place in an interior cell at 0, 0, 0; the floor is z 0, forward is +Y")
+    print("  placed at 0, 0, 0 in its cell, or anywhere with the doors offset to match; floor z 0, forward +Y")
     ox, oy = door_origin[0] * s, door_origin[1] * s
-    print(f"{door_path.relative_to(ROOT)}: the jump door activator, placed twice:")
-    print(f"  starboard X {ox:.0f}  Y {oy:.0f}  Z 0, rotation Z 0")
-    print(f"  port      X {-ox:.0f}  Y {oy:.0f}  Z 0, rotation Z 180")
+    print(f"{door_path.relative_to(ROOT)}: the jump door activator, placed twice, from the cabin's origin:")
+    print(f"  starboard X {ox:+.0f}  Y {oy:+.0f}  Z 0, rotation Z 0")
+    print(f"  port      X {-ox:+.0f}  Y {oy:+.0f}  Z 0, rotation Z 180")
     if args.install:
         data = Path(args.install)
         for f in [nif_path, door_path] + tex_files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
-            print(f"  installed {dest}")
+        print(f"  installed {2 + len(tex_files)} files under {data}")
 
 
 if __name__ == "__main__":

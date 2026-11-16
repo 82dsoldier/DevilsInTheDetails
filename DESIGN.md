@@ -621,8 +621,15 @@ about airborne operations have heard of. It's the second worldspace.
     **round** red and green jump lights;
     **porthole windows** down each side (six a side, a guess); an anchor cable each side
     overhead; steps up to the flight deck at the front on the left. `--scale` enlarges it all.
-  - Seats and cables are plain shapes in flat colours for now. The real model gets webbing on
-    tube frames and steel cable, modelled and textured; the block-out is for size and feel.
+  - **Detail pass (2026-11-16), from the author's reference photos** (`data/reference/`, not in
+    git): quilted insulation blankets, pale khaki-grey, one pillow per frame bay; fuselage frames
+    every 20 in up the walls and over the ceiling; a dark aluminium floor with tie-down rings and
+    a roller conveyor down each aisle; red seat pans on aluminium legs, with red webbing nets for
+    backs (see-through, alpha-tested), hung from a tube rail on the walls and back to back down
+    the centerline between floor-to-ceiling stanchions; two air ducts overhead, conduits along the
+    upper walls, glowing dome lights; a panelled pale-green forward bulkhead. All made in code
+    (`make_c130_blockout.py`, textures too), so it's still a stand-in for a real model, but it
+    reads as a Herc. The mesh keeps the name `C130_Blockout.nif` so placed references still work.
   - **The aisle is 0.76 m** between the outboard and centerline seats. **Tested 2026-11-16 in
     power armor: perfect,** easy to get through. Keep it.
   - **Power armor can't sit,** so Nate can't take a seat. **Decided: he boards last and stands by
