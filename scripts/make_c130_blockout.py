@@ -77,8 +77,6 @@ COLOURS = {
     "red": (230, 30, 25),
     "green": (40, 210, 60),
     "cable": (190, 190, 190),
-    "sky": (170, 196, 222),     # out the open doors
-    "ground": (96, 112, 70),
 }
 MOD_PATH = "DevilsInTheDetails/Aircraft"
 
@@ -314,12 +312,12 @@ def door_parts(length):
       jambs     the doorway's edges and top, the hull's thickness, in bright aluminium
       door      the door itself, slid up on its tracks to lie against the upper wall and ceiling
       platform  the jump platform, out over the slipstream at the sill
-      outside   sky and ground a few metres out, so the doorway isn't a black hole
+    Nothing outside: the cabin flies in the Sicily worldspace, so the real land and sky show.
       activation an invisible slab filling the doorway: walking into it stops you, using it jumps"""
     hinge = -length / 2
     da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
     origin = (wall_x(0), (da + db) / 2, 0.0)
-    jambs, panel, glass, platform, sky, ground, block = (Mesh() for _ in range(7))
+    jambs, panel, glass, platform, block = (Mesh() for _ in range(5))
 
     zs = [DOOR_TOP * i / WALL_STEPS for i in range(WALL_STEPS + 1)]
     for y, ny in ((da, 1.0), (db, -1.0)):           # the aft and forward edges, facing in
@@ -334,20 +332,13 @@ def door_parts(length):
 
     panel.on_wall(rounded_rect(da, DOOR_TOP + 0.08, db, DOOR_TOP + 0.75, DOOR_R), 1, 0.06)
     glass.on_wall(circle((da + db) / 2, DOOR_TOP + 0.41, PORTHOLE_D / 2), 1, 0.08)
-    x0 = origin[0] + JAMB
-    platform.box(x0, da, -0.04, x0 + 0.55, db, 0.0, "tnsew")
-
-    # Out the door: ground below eye height, sky above, far enough out to look like distance.
-    xo, w, eye = origin[0] + 6.0, 30.0, 1.4
-    for m, z0, z1 in ((ground, -12.0, eye), (sky, eye, 14.0)):
-        m.quad(*[m.vert(p, (-1, 0, 0)) for p in
-                 ((xo, origin[1] - w, z0), (xo, origin[1] + w, z0),
-                  (xo, origin[1] + w, z1), (xo, origin[1] - w, z1))])
+    # The platform runs on from the cargo floor's edge, across the sill, out past the hull.
+    x0 = origin[0] - 0.01
+    platform.box(x0, da, -0.04, origin[0] + JAMB + 0.55, db, 0.002, "tnsew")
 
     block.box(origin[0] - 0.04, da, 0.0, origin[0] + JAMB, db, DOOR_TOP)
     parts = {"jambs": ("door", False, jambs), "door": ("door", False, panel),
              "door_porthole": ("glass", False, glass), "platform": ("frame", False, platform),
-             "outside_ground": ("ground", False, ground), "outside_sky": ("sky", False, sky),
              "activation": (None, True, block)}
     for _, _, m in parts.values():
         m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]

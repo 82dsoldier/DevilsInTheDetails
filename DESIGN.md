@@ -690,12 +690,17 @@ about airborne operations have heard of. It's the second worldspace.
   - **The doors are already open when the scene starts** (the author, 2026-11-16, with a photo of
     an open C-130 troop door: `data/reference/`, not in git). The door is slid up on its tracks
     against the upper wall and ceiling, the doorway has a bright aluminium frame, and the jump
-    platform sticks out at the sill. `C130_Door.nif` is now that open doorway (frame, raised door,
-    platform, and a flat sky and ground a few metres out so the doorway isn't a black hole), with
+    platform sticks out at the sill, flush with the cargo floor. `C130_Door.nif` is now that open
+    doorway (frame, raised door, platform), with
     an invisible slab filling the doorway: walking into it stops you, using it jumps. The hull has
     a hole there.
   - **The last command before the lights is "Stand in the door!",** not "Stand by!" (the author).
     The stick doesn't echo it in the stand-in; it's the first jumper's cue, not the whole stick's.
+  - **The cabin flies in the Sicily worldspace, not an interior cell (tested 2026-11-16).** A flat
+    sky-and-ground backdrop outside the doors looked wrong (too close, so its horizon moved, and
+    the interior fog washed it out). Placed at jump height beside the jump marker in
+    `DevilsSicilyWorld` cell -4, -5 (hull X -13650, Y -20430, Z 24300), the doors show real sky:
+    "pretty much OK" (the author). Still to settle: where on the run-in it hangs, and cabin lights.
   - **The jumpmaster stands aft of the starboard door,** not in front of it (in front, he blocked
     it). He faces forward, toward the stick.
   - **Hand signals:** the jumpmaster signals each command as he shouts it (the engines drown the
