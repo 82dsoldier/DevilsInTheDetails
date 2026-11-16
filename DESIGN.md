@@ -603,16 +603,22 @@ about airborne operations have heard of. It's the second worldspace.
   **centerline row**, back to back down the middle. Every seat full, **packed in like sardines**:
   the cabin should feel crowded, not roomy. Jumpers go out **both side paratroop doors**, two
   sticks; the ramp stays shut (ramp jumps were special, not normal).
-- **Block-out:** `scripts/make_c130_blockout.py` builds the cargo compartment at true size as
-  coloured boxes with collision (`Meshes\DevilsInTheDetails\Aircraft\C130_Blockout.nif`): 12.2 m
-  of floor plus the 3 m closed ramp, 3.12 m wide, 2.74 m high; four rows of 16 red troop seats
-  (64 jumpers), outboard against the walls and centerline back to back; a closed paratroop door
-  each side just forward of the ramp hinge, with a red and a green jump light; an anchor cable
-  each side overhead; steps up to the flight deck at the front on the left. Placed at 0, 0, 0 in
-  an interior cell (`DevilsC130Interior`), forward is +Y. `--scale` enlarges it all if true size
-  is too tight.
-  - **The aisle is 0.71 m** between the outboard and centerline seats. Fine for a soldier, maybe
-    not for power armor: the first thing to test.
+- **Block-out:** `scripts/make_c130_blockout.py` builds the cargo compartment in plain colours
+  with collision (`Meshes\DevilsInTheDetails\Aircraft\C130_Blockout.nif`), placed at 0, 0, 0 in
+  the interior cell `DevilsC130Interior`, forward +Y:
+  - **The hull is curved:** the side walls bow gently outward as they rise (3.12 m wide at the
+    floor, 3.36 m at the widest), then round over into an arched ceiling 2.74 m high.
+  - **Longer than true size:** the real 12.2 m floor felt too short in game (the author, after
+    the first block-out), so it's 15 m (`--length`), plus the 3 m closed ramp.
+  - Four rows of red troop seats filling the length (22 a row), outboard against the walls and
+    centerline back to back; a closed paratroop door each side just forward of the ramp hinge,
+    with **rounded corners and a porthole**, and **round** red and green jump lights;
+    **porthole windows** down each side (six a side, a guess); an anchor cable each side
+    overhead; steps up to the flight deck at the front on the left. `--scale` enlarges it all.
+  - Seats and cables are plain shapes in flat colours for now. The real model gets webbing on
+    tube frames and steel cable, modelled and textured; the block-out is for size and feel.
+  - **The aisle is 0.76 m** between the outboard and centerline seats. Fine for a soldier, maybe
+    not for power armor: still to test.
   - **Power armor can't sit,** so Nate can't take a seat. **Decided: he boards last and stands by
     the door** (last on, first out: he's first in the stick, right in the jumpmaster's face for
     every command).
