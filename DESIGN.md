@@ -677,6 +677,16 @@ about airborne operations have heard of. It's the second worldspace.
     version, from "Stand by!" on.
   - **Voice:** needs real recordings, since nothing vanilla sounds like a jumpmaster. Open: who
     voices him (and the echoing stick).
+  - **First build (2026-11-16): a scripted sequence, not a CK dialogue scene.**
+    `scripts/make_jump_audio.py` makes stand-in audio with Windows text-to-speech (the stick's
+    echo a rough chorus of the same voice) in three pieces, `Sound\FX\DevilsInTheDetails\Jump\
+    commands_1..3.wav`, and writes `DevilsJumpmaster.psc` from `DevilsJumpmaster.psc.in` with
+    each line's subtitle timed to the audio. The script, on the jumpmaster's reference, runs when
+    the cabin loads: piece 1, the sound-off choice (a two-button Message), piece 2, the red light,
+    a pause of 3 to 6 seconds, the green light, "GO!". The doors work only once the green light is
+    on (global `DevilsJumpGreenLight`). Real recordings replace the WAVs without touching the
+    script; a proper dialogue scene with lip sync can come later if it's worth it.
+  - The "stand up" and "hook up" parts for the player are still to do.
 - **Out the door** is a teleport to a marker about **1,000 ft above Sicily DZ**. The loading screen in between can be its own art.
 - **The jump marker (worked out 2026-11-13):** an `XMarkerHeading`, `DevilsSicilyJumpMarker`,
   at **X -13650, Y -20430, Z 24300**,
