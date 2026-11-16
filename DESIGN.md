@@ -708,7 +708,9 @@ about airborne operations have heard of. It's the second worldspace.
     units of the first red light, then puts him on his mark (`MoveToMyEditorLocation`) and enables
     him before the commands start. Still to do: cabin lights.
   - **The jumpmaster stands aft of the starboard door,** not in front of it (in front, he blocked
-    it). He faces forward, toward the stick.
+    it). He faces forward, toward the stick. He holds his spot and doesn't greet the player: no
+    voice type, AI package `DefaultStayAtEditorLocationNoInterrupt`.
+  - **The red light is on the whole flight** and changes to green for the go (the author).
   - **Hand signals:** the jumpmaster signals each command as he shouts it (the engines drown the
     voice). Until he's animated, each subtitle says the signal: ten fingers for "Ten minutes!",
     a crooked finger pumped overhead for "Hook up!", hands cupped behind the ears for "Sound off",

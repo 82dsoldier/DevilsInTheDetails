@@ -34,7 +34,8 @@ Event OnLoad()
 	; keeps this from starting twice.
 	Disable()
 	GreenLight.SetValue(0)
-	SetLights(False, False)
+	SetLights(True, False)            ; red the whole way, till the green
+
 	Cell plane = GetParentCell()
 	While !PlayerAboard()
 		If !plane.IsAttached()        ; the player went elsewhere
@@ -59,7 +60,6 @@ Event OnLoad()
 	Utility.Wait(1.5)
 
 	Play_commands_2()
-	SetLights(True, False)
 	Utility.Wait(Utility.RandomFloat(3.0, 6.0))
 	SetLights(False, True)
 	GreenLight.SetValue(1)
