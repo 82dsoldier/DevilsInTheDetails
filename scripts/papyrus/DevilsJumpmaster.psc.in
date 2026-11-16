@@ -30,6 +30,20 @@ Event OnLoad()
 	running = True
 	GreenLight.SetValue(0)
 	SetLights(False, False)
+
+	; The plane hangs at jump height in Sicily. He can load a moment before its floor does and
+	; drop, so put him back on his mark; and wait for the player to be aboard (arriving by
+	; coc/cow for a test lands on the ground below first).
+	MoveToMyEditorLocation()
+	Actor player = Game.GetPlayer()
+	While Is3DLoaded() && player.GetDistance(Self) > 1500.0
+		Utility.Wait(1.0)
+	EndWhile
+	If !Is3DLoaded()
+		running = False
+		Return
+	EndIf
+	MoveToMyEditorLocation()
 	Utility.Wait(3.0)
 
 	Play_commands_1()

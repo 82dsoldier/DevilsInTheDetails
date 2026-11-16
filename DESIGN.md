@@ -698,9 +698,14 @@ about airborne operations have heard of. It's the second worldspace.
     The stick doesn't echo it in the stand-in; it's the first jumper's cue, not the whole stick's.
   - **The cabin flies in the Sicily worldspace, not an interior cell (tested 2026-11-16).** A flat
     sky-and-ground backdrop outside the doors looked wrong (too close, so its horizon moved, and
-    the interior fog washed it out). Placed at jump height beside the jump marker in
-    `DevilsSicilyWorld` cell -4, -5 (hull X -13650, Y -20430, Z 24300), the doors show real sky:
-    "pretty much OK" (the author). Still to settle: where on the run-in it hangs, and cabin lights.
+    the interior fog washed it out). At jump height in `DevilsSicilyWorld`, the doors show real
+    sky: "pretty much OK" (the author). **Where:** cell 4, -7, hull at X 17390, Y -26770, Z 24300,
+    pointing north. That's about 8 cells east-southeast of the jump marker, back along the run-in,
+    so the plane's cells aren't loaded when the jumper arrives at the marker (no plane hanging
+    still overhead). **The whole plane must sit in one cell:** the jumpmaster was in the next cell
+    from the floor, loaded first, and fell 350 m. `DevilsJumpmaster` also puts him back on his
+    mark (`MoveToMyEditorLocation`) and waits until the player is within 1,500 units before the
+    commands start. Still to do: cabin lights.
   - **The jumpmaster stands aft of the starboard door,** not in front of it (in front, he blocked
     it). He faces forward, toward the stick.
   - **Hand signals:** the jumpmaster signals each command as he shouts it (the engines drown the
