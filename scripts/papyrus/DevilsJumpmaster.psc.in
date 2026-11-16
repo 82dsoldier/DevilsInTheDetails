@@ -28,22 +28,25 @@ Event OnLoad()
 		Return
 	EndIf
 	running = True
+	; The plane hangs at jump height in Sicily. With no one aboard, he can load before its floor
+	; does and fall, so he's disabled (a disabled actor doesn't fall) until the player is aboard,
+	; then put back on his mark. Disabling and enabling fire OnUnload and OnLoad again; `running`
+	; keeps this from starting twice.
+	Disable()
 	GreenLight.SetValue(0)
 	SetLights(False, False)
-
-	; The plane hangs at jump height in Sicily. He can load a moment before its floor does and
-	; drop, so put him back on his mark; and wait for the player to be aboard (arriving by
-	; coc/cow for a test lands on the ground below first).
-	MoveToMyEditorLocation()
-	Actor player = Game.GetPlayer()
-	While Is3DLoaded() && player.GetDistance(Self) > 1500.0
+	Cell plane = GetParentCell()
+	While !PlayerAboard()
+		If !plane.IsAttached()        ; the player went elsewhere
+			MoveToMyEditorLocation()
+			Enable()
+			running = False
+			Return
+		EndIf
 		Utility.Wait(1.0)
 	EndWhile
-	If !Is3DLoaded()
-		running = False
-		Return
-	EndIf
 	MoveToMyEditorLocation()
+	Enable()
 	Utility.Wait(3.0)
 
 	Play_commands_1()
@@ -67,6 +70,20 @@ EndEvent
 Event OnUnload()
 	GreenLight.SetValue(0)
 EndEvent
+
+Bool Function PlayerAboard()
+	{Within 1,500 units of the first red light, by the doors: anywhere in the cabin, and nowhere
+	on the ground 350 m below. Measured from a light, not from him, since he may have fallen.}
+	If !RedLights
+		Return True
+	EndIf
+	ObjectReference mark = RedLights[0]
+	Actor player = Game.GetPlayer()
+	Float dx = player.GetPositionX() - mark.GetPositionX()
+	Float dy = player.GetPositionY() - mark.GetPositionY()
+	Float dz = player.GetPositionZ() - mark.GetPositionZ()
+	Return dx * dx + dy * dy + dz * dz < 1500.0 * 1500.0
+EndFunction
 
 Function SetLights(Bool red, Bool green)
 	SetAll(RedLights, red)
