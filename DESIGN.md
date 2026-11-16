@@ -615,7 +615,7 @@ about airborne operations have heard of. It's the second worldspace.
   - **Length confirmed:** 15 m is fine; it felt short only because power armor takes big steps.
     Six portholes a side is fine too.
   - **Longer than true size:** the real 12.2 m floor felt too short in game (the author, after
-    the first block-out), so it's 15 m (`--length`), plus the 3 m closed ramp.
+    the first block-out), so it's 15 m (`--length`), plus the closed ramp stretched the same way, 3 m to 3.7 m.
   - Four rows of red troop seats filling the length (22 a row), outboard against the walls and
     centerline back to back; a closed paratroop door each side just forward of the ramp hinge,
     with **rounded corners and a porthole**, and **round** red and green jump lights;
