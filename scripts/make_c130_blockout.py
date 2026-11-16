@@ -108,10 +108,15 @@ def tex_quilt():
     u, v = _uv()
     h = np.sqrt(np.clip(np.sin(np.pi * u) * np.sin(np.pi * v), 0, 1))
     d = np.minimum(np.abs(((u + v) * 2) % 1 - 0.5), np.abs(((u - v) * 2) % 1 - 0.5))
-    h = h - 0.12 * np.exp(-((0.5 - d) / 0.03) ** 2)
-    shade = 0.72 + 0.28 * np.clip(h, 0, 1) + _noise(1, scale=0.015)
-    rgb = np.array([186, 186, 166])[None, None, :] * shade[..., None]
-    return rgb, h * 6
+    stitch = np.exp(-((0.5 - d) / 0.025) ** 2)
+    h = h - 0.25 * stitch
+    # Shading baked in, so the pillows read even in flat light: dark seams round each pillow and
+    # along the stitches, crowns lit a little from above.
+    shade = (0.5 + 0.5 * np.clip(h, 0, 1) ** 0.7) * (1 - 0.25 * stitch)
+    shade *= 1 + 0.12 * (0.5 - v) * np.clip(h, 0, 1)
+    shade += _noise(1, scale=0.015)
+    rgb = np.array([196, 196, 176])[None, None, :] * shade[..., None]
+    return rgb, h
 
 
 def tex_floor():
@@ -143,7 +148,7 @@ def tex_fabric():
     weave = 0.5 + 0.5 * np.sin(u * TEX_SIZE * np.pi / 2) * np.sin(v * TEX_SIZE * np.pi / 2)
     seam = np.exp(-(np.minimum(u, 1 - u) / 0.015) ** 2)
     shade = (0.88 + 0.12 * weave + _noise(3, scale=0.03)) * (1 - 0.45 * seam)
-    return np.array([150, 30, 32])[None, None, :] * shade[..., None], weave * 0.5 - seam
+    return np.array([150, 30, 32])[None, None, :] * shade[..., None], weave * 0.004 - seam * 0.02
 
 
 def tex_webbing():
@@ -200,13 +205,16 @@ MATERIALS = {
 }
 
 
-def normal_map(h, strength=2.0):
-    """Tangent-space normal map from a height map (tiling)."""
+def normal_map(h, strength=0.5):
+    """Tangent-space normal map from a height map (tiling). Heights are in units of the tile's
+    width times `strength`: a pillow rising 1 across half a tile tilts the surface about 15-35
+    degrees, enough to catch the light."""
     if h is None:
         h = np.zeros((TEX_SIZE, TEX_SIZE))
-    dx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) * strength / 2
-    dy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) * strength / 2
-    n = np.dstack([-dx, dy, np.ones_like(h)])
+    k = strength * TEX_SIZE / 2                  # central difference over 2 pixels, in tile units
+    dx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) * k
+    dy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) * k
+    n = np.dstack([-dx, -dy, np.ones_like(h)])     # DirectX style: green points down the image
     n /= np.linalg.norm(n, axis=2, keepdims=True)
     return (n * 0.5 + 0.5) * 255
 
