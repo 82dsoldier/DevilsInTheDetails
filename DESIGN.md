@@ -617,8 +617,8 @@ about airborne operations have heard of. It's the second worldspace.
   - **Longer than true size:** the real 12.2 m floor felt too short in game (the author, after
     the first block-out), so it's 15 m (`--length`), plus the closed ramp stretched the same way, 3 m to 3.7 m.
   - Four rows of red troop seats filling the length (22 a row), outboard against the walls and
-    centerline back to back; a closed paratroop door each side just forward of the ramp hinge,
-    with **rounded corners and a porthole**, and **round** red and green jump lights;
+    centerline back to back; a paratroop door each side just forward of the ramp hinge, and
+    **round** red and green jump lights;
     **porthole windows** down each side (six a side, a guess); an anchor cable each side
     overhead; steps up to the flight deck at the front on the left. `--scale` enlarges it all.
   - Seats and cables are plain shapes in flat colours for now. The real model gets webbing on
@@ -661,8 +661,8 @@ about airborne operations have heard of. It's the second worldspace.
   5. "Check static lines!"
   6. "Check equipment!"
   7. "Sound off for equipment check!" (passed down the stick: "OK!", "OK!", "All OK, jumpmaster!")
-  8. The jumpmaster opens the door: wind roar, light pours in. "Six minutes!", "One minute!",
-     "Thirty seconds!", "Stand by!"
+  8. The doors are already open: wind roar, light pouring in. "Six minutes!", "One minute!",
+     "Thirty seconds!", "Stand in the door!"
   9. Red light, green light, **"GO!"**, and the stick shuffles toward the door.
   - **Order confirmed by the author.**
   - **Length:** about a minute, with the gaps between commands squeezed. That's short for how much
@@ -674,7 +674,7 @@ about airborne operations have heard of. It's the second worldspace.
     that they shouted. Either way he gives the same nod and carries on; the jumper next to
     Nate grins or laughs, and that's the only sign anyone heard.
   - **Skippable after the first time:** later flights (going home, the Sanctuary jump) get a short
-    version, from "Stand by!" on.
+    version, from "Stand in the door!" on.
   - **Voice:** needs real recordings, since nothing vanilla sounds like a jumpmaster. Open: who
     voices him (and the echoing stick).
   - **First build (2026-11-16): a scripted sequence, not a CK dialogue scene.**
@@ -687,6 +687,23 @@ about airborne operations have heard of. It's the second worldspace.
     on (global `DevilsJumpGreenLight`). Real recordings replace the WAVs without touching the
     script; a proper dialogue scene with lip sync can come later if it's worth it.
   - The "stand up" and "hook up" parts for the player are still to do.
+  - **The doors are already open when the scene starts** (the author, 2026-11-16, with a photo of
+    an open C-130 troop door: `data/reference/`, not in git). The door is slid up on its tracks
+    against the upper wall and ceiling, the doorway has a bright aluminium frame, and the jump
+    platform sticks out at the sill. `C130_Door.nif` is now that open doorway (frame, raised door,
+    platform, and a flat sky and ground a few metres out so the doorway isn't a black hole), with
+    an invisible slab filling the doorway: walking into it stops you, using it jumps. The hull has
+    a hole there.
+  - **The last command before the lights is "Stand in the door!",** not "Stand by!" (the author).
+    The stick doesn't echo it in the stand-in; it's the first jumper's cue, not the whole stick's.
+  - **The jumpmaster stands aft of the starboard door,** not in front of it (in front, he blocked
+    it). He faces forward, toward the stick.
+  - **Hand signals:** the jumpmaster signals each command as he shouts it (the engines drown the
+    voice). Until he's animated, each subtitle says the signal: ten fingers for "Ten minutes!",
+    a crooked finger pumped overhead for "Hook up!", hands cupped behind the ears for "Sound off",
+    and so on (`PIECES` in `make_jump_audio.py`). They're written from memory of FM 3-21.220 and
+    are **for the author to check**. Animating them for real needs custom animations (HKX), a job
+    for later or for community help.
 - **Out the door** is a teleport to a marker about **1,000 ft above Sicily DZ**. The loading screen in between can be its own art.
 - **The jump marker (worked out 2026-11-13):** an `XMarkerHeading`, `DevilsSicilyJumpMarker`,
   at **X -13650, Y -20430, Z 24300**,

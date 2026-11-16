@@ -9,7 +9,7 @@ Goes on the jumpmaster's reference in DevilsC130Interior, standing by the door.}
 Sound Property commands_1 Auto Const Mandatory
 {"Ten minutes!" through "Sound off for equipment check!" and the stick's OKs.}
 Sound Property commands_2 Auto Const Mandatory
-{"Six minutes!" through "Stand by!"}
+{"Six minutes!" through "Stand in the door!"}
 Sound Property commands_3 Auto Const Mandatory
 {"GO!"}
 Message Property SoundOffMessage Auto Const Mandatory
@@ -79,21 +79,21 @@ EndFunction
 Function Play_commands_1()
 	Int id = commands_1.Play(Self)
 	Utility.Wait(0.30)
-	Debug.Notification("Jumpmaster: Ten minutes!")
+	Debug.Notification("Jumpmaster (both hands up, all ten fingers spread): Ten minutes!")
 	Utility.Wait(2.50)
-	Debug.Notification("Jumpmaster: Get ready!")
+	Debug.Notification("Jumpmaster (both arms out toward the stick): Get ready!")
 	Utility.Wait(2.22)
-	Debug.Notification("Jumpmaster: Outboard personnel, stand up!")
+	Debug.Notification("Jumpmaster (arms to the outboard seats, palms up, raised): Outboard personnel, stand up!")
 	Utility.Wait(5.06)
-	Debug.Notification("Jumpmaster: Inboard personnel, stand up!")
+	Debug.Notification("Jumpmaster (arms to the centre seats, palms up, raised): Inboard personnel, stand up!")
 	Utility.Wait(4.97)
-	Debug.Notification("Jumpmaster: Hook up!")
+	Debug.Notification("Jumpmaster (arm overhead, finger crooked like a hook, pumping): Hook up!")
 	Utility.Wait(1.84)
-	Debug.Notification("Jumpmaster: Check static lines!")
+	Debug.Notification("Jumpmaster (OK rings with both hands, drawn to his eyes): Check static lines!")
 	Utility.Wait(3.29)
-	Debug.Notification("Jumpmaster: Check equipment!")
+	Debug.Notification("Jumpmaster (fingertips tapping his chest): Check equipment!")
 	Utility.Wait(2.59)
-	Debug.Notification("Jumpmaster: Sound off for equipment check!")
+	Debug.Notification("Jumpmaster (hands cupped behind his ears): Sound off for equipment check!")
 	Utility.Wait(4.16)
 	Debug.Notification("The stick: OK! OK! OK!")
 	Utility.Wait(2.37)
@@ -102,14 +102,14 @@ EndFunction
 Function Play_commands_2()
 	Int id = commands_2.Play(Self)
 	Utility.Wait(0.30)
-	Debug.Notification("Jumpmaster: Six minutes!")
+	Debug.Notification("Jumpmaster (six fingers up): Six minutes!")
 	Utility.Wait(2.74)
-	Debug.Notification("Jumpmaster: One minute!")
+	Debug.Notification("Jumpmaster (one finger up): One minute!")
 	Utility.Wait(2.21)
-	Debug.Notification("Jumpmaster: Thirty seconds!")
+	Debug.Notification("Jumpmaster (thumb and forefinger an inch apart): Thirty seconds!")
 	Utility.Wait(2.88)
-	Debug.Notification("Jumpmaster: Stand by!")
-	Utility.Wait(1.68)
+	Debug.Notification("Jumpmaster (points the first jumper into the door): Stand in the door!")
+	Utility.Wait(1.09)
 EndFunction
 
 Function Play_commands_3()

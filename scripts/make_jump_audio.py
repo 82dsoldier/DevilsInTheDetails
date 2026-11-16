@@ -9,7 +9,7 @@ choice, and for the red light before the green.
 
   commands_1   "Ten minutes!" through "Sound off for equipment check!" and the OKs passed up
                the stick; then the player sounds off (a choice)
-  commands_2   "Six minutes!" through "Stand by!"; then red light, a pause, green light
+  commands_2   "Six minutes!" through "Stand in the door!"; then red light, a pause, green light
   commands_3   "GO!"
 
 Writes to out/jump/:
@@ -34,26 +34,27 @@ RATE = 44100
 GAP = 1.0           # seconds of quiet after each echo, before the next command
 ECHO_GAP = 0.15     # the jumpmaster's line to the stick's echo
 
-# (jumpmaster's command, echoed by the stick?)
+# (jumpmaster's command, echoed by the stick?, his hand signal). Until he's animated, the hand
+# signal is shown with the line. The signals are from memory of FM 3-21.220; the author checks them.
 PIECES = {
     "commands_1": [
-        ("Ten minutes!", True),
-        ("Get ready!", True),
-        ("Outboard personnel, stand up!", True),
-        ("Inboard personnel, stand up!", True),
-        ("Hook up!", True),
-        ("Check static lines!", True),
-        ("Check equipment!", True),
-        ("Sound off for equipment check!", True),
+        ("Ten minutes!", True, "both hands up, all ten fingers spread"),
+        ("Get ready!", True, "both arms out toward the stick"),
+        ("Outboard personnel, stand up!", True, "arms to the outboard seats, palms up, raised"),
+        ("Inboard personnel, stand up!", True, "arms to the centre seats, palms up, raised"),
+        ("Hook up!", True, "arm overhead, finger crooked like a hook, pumping"),
+        ("Check static lines!", True, "OK rings with both hands, drawn to his eyes"),
+        ("Check equipment!", True, "fingertips tapping his chest"),
+        ("Sound off for equipment check!", True, "hands cupped behind his ears"),
     ],
     "commands_2": [
-        ("Six minutes!", True),
-        ("One minute!", True),
-        ("Thirty seconds!", True),
-        ("Stand by!", True),
+        ("Six minutes!", True, "six fingers up"),
+        ("One minute!", True, "one finger up"),
+        ("Thirty seconds!", True, "thumb and forefinger an inch apart"),
+        ("Stand in the door!", False, "points the first jumper into the door"),
     ],
     "commands_3": [
-        ("Go!", False),
+        ("Go!", False, None),
     ],
 }
 SOUND_OFF = ["OK!", "OK!", "OK!"]   # passed forward up the stick, at the end of commands_1
@@ -148,7 +149,7 @@ def main():
     mod = out / "mod"
     texts = {}
     for piece, cmds in PIECES.items():
-        for i, (text, _) in enumerate(cmds):
+        for i, (text, _, _) in enumerate(cmds):
             texts[f"{piece}_{i}"] = text
     texts["ok"] = "OK!"
     voice = tts(texts, out / "tts")
@@ -157,9 +158,9 @@ def main():
     for n, (piece, cmds) in enumerate(PIECES.items()):
         audio, cues = [silence(0.3)], []
         t = 0.3
-        for i, (text, echo) in enumerate(cmds):
+        for i, (text, echo, signal) in enumerate(cmds):
             line = shout(voice[f"{piece}_{i}"])
-            cues.append((t, f"Jumpmaster: {text}"))
+            cues.append((t, f"Jumpmaster ({signal}): {text}" if signal else f"Jumpmaster: {text}"))
             audio.append(line)
             t += len(line) / RATE
             if echo:

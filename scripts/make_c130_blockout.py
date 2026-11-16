@@ -10,8 +10,9 @@ forward bulkhead and the ramp hinge):
                 over into an arched ceiling; flat floor; the closed ramp (RAMP_L) aft
   troop seats   four rows, red webbing: outboard along each side wall facing in, and the
                 centerline rows back to back down the middle, packed in like sardines
-  doors         one paratroop door in each side wall, just forward of the ramp hinge, closed,
-                with rounded corners and a porthole; round red and green jump lights forward of it
+  doors         one paratroop doorway in each side wall, just forward of the ramp hinge, open
+                for the jump (the doors themselves are C130_Door.nif, the activator); round red
+                and green jump lights forward of each
   portholes     round windows down each side
   anchor cables one each side, overhead, running aft to the doors
   forward end   the bulkhead, with steps up to the flight deck on the left (port) side
@@ -60,6 +61,10 @@ CABLE_Z, CABLE_X, CABLE_D = 2.25, 0.75, 0.03   # anchor cables
 STEPS_W, STEPS_L, STEPS_H = 0.8, 1.0, 1.0   # up to the flight deck, port side forward
 LIGHT_D = 0.12                 # jump light diameter
 ARC_STEPS, WALL_STEPS, ROUND_STEPS = 12, 6, 24
+# The open doorway's top: the arch's first profile point, 1.88 m, near enough the door's 1.83 m
+# plus its sill.
+DOOR_TOP = WALL_TOP + (CABIN_H - WALL_TOP) * math.sin(math.pi / 2 / ARC_STEPS) + 1e-6
+JAMB = 0.12                    # the hull's thickness, shown at the doorway's edges
 
 COLOURS = {
     "hull": (104, 110, 92),     # insulation blankets, drab green-grey
@@ -72,6 +77,8 @@ COLOURS = {
     "red": (230, 30, 25),
     "green": (40, 210, 60),
     "cable": (190, 190, 190),
+    "sky": (170, 196, 222),     # out the open doors
+    "ground": (96, 112, 70),
 }
 MOD_PATH = "DevilsInTheDetails/Aircraft"
 
@@ -227,11 +234,18 @@ def parts(length):
         m = math.hypot(nx, nz)
         return (nx / m, 0.0, nz / m)
 
-    stations = [(aft, section(1.0)), (hinge, section(0.0)), (fwd, section(0.0))]
+    # The paratroop doors are open (slid up inside, as for a jump): a hole in each side wall
+    # from the floor to the first profile point of the arch, which sits at the door's top.
+    da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
+    stations = [(aft, section(1.0)), (hinge, section(0.0)), (da, section(0.0)),
+                (db, section(0.0)), (fwd, section(0.0))]
     rows = [[hull.vert((x, y, z), normal(x0, z0)) for (x, z), (x0, z0) in zip(sec, prof)]
             for y, sec in stations]
-    for r0, r1 in zip(rows, rows[1:]):
+    for k, (r0, r1) in enumerate(zip(rows, rows[1:])):
         for i in range(len(prof) - 1):
+            (xa, za), (xb, zb) = prof[i], prof[i + 1]
+            if stations[k][0] == da and max(za, zb) <= DOOR_TOP and xa * xb > 0:
+                continue                                   # the doorway
             hull.quad(r0[i], r0[i + 1], r1[i + 1], r1[i])
     for (y, sec), ny in ((stations[0], 1.0), (stations[-1], -1.0)):
         cx = 0.0
@@ -268,7 +282,6 @@ def parts(length):
 
     # Round jump lights just forward of each door; portholes spaced down each side between the
     # seats' ends. The doors themselves are their own model (door_parts), for the activator.
-    da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
     rims, glass, reds, greens = Mesh(), Mesh(), Mesh(), Mesh()
     ports = [y0 + (y1 - y0) * (i + 0.5) / PORTHOLES for i in range(PORTHOLES)]
     for side in (-1, 1):
@@ -295,18 +308,46 @@ def parts(length):
 
 
 def door_parts(length):
-    """The starboard paratroop door, closed, as its own model for the jump door activator:
-    ({name: (colour, collides, Mesh)}, origin). The origin is where the door's centre line meets
-    the wall at the floor; the port door is the same model turned 180 degrees."""
+    """The starboard paratroop doorway, open for the jump, as its own model for the jump door
+    activator: ({name: (colour, collides, Mesh)}, origin). The origin is where the door's centre
+    line meets the wall at the floor; the port door is the same model turned 180 degrees.
+      jambs     the doorway's edges and top, the hull's thickness, in bright aluminium
+      door      the door itself, slid up on its tracks to lie against the upper wall and ceiling
+      platform  the jump platform, out over the slipstream at the sill
+      outside   sky and ground a few metres out, so the doorway isn't a black hole
+      activation an invisible slab filling the doorway: walking into it stops you, using it jumps"""
     hinge = -length / 2
     da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
     origin = (wall_x(0), (da + db) / 2, 0.0)
-    panel, glass, block = Mesh(), Mesh(), Mesh()
-    panel.on_wall(rounded_rect(da, 0.05, db, 0.05 + DOOR_H, DOOR_R), 1, 0.03)
-    glass.on_wall(circle((da + db) / 2, PORTHOLE_Z, PORTHOLE_D / 2), 1, 0.05)
-    # Something solid to activate: a slab just inboard of the door, through to the wall.
-    block.box(origin[0] - 0.04, da, 0.05, origin[0] + 0.15, db, 0.05 + DOOR_H)
-    parts = {"door": ("door", False, panel), "door_porthole": ("glass", False, glass),
+    jambs, panel, glass, platform, sky, ground, block = (Mesh() for _ in range(7))
+
+    zs = [DOOR_TOP * i / WALL_STEPS for i in range(WALL_STEPS + 1)]
+    for y, ny in ((da, 1.0), (db, -1.0)):           # the aft and forward edges, facing in
+        col = [(jambs.vert((wall_x(z), y, z), (0, ny, 0)),
+                jambs.vert((wall_x(z) + JAMB, y, z), (0, ny, 0))) for z in zs]
+        for (a, b), (c, d) in zip(col, col[1:]):
+            jambs.quad(a, b, d, c)
+    xt = wall_x(DOOR_TOP)
+    jambs.quad(*[jambs.vert(p, (0, 0, -1)) for p in
+                 ((xt, da, DOOR_TOP), (xt + JAMB, da, DOOR_TOP),
+                  (xt + JAMB, db, DOOR_TOP), (xt, db, DOOR_TOP))])
+
+    panel.on_wall(rounded_rect(da, DOOR_TOP + 0.08, db, DOOR_TOP + 0.75, DOOR_R), 1, 0.06)
+    glass.on_wall(circle((da + db) / 2, DOOR_TOP + 0.41, PORTHOLE_D / 2), 1, 0.08)
+    x0 = origin[0] + JAMB
+    platform.box(x0, da, -0.04, x0 + 0.55, db, 0.0, "tnsew")
+
+    # Out the door: ground below eye height, sky above, far enough out to look like distance.
+    xo, w, eye = origin[0] + 6.0, 30.0, 1.4
+    for m, z0, z1 in ((ground, -12.0, eye), (sky, eye, 14.0)):
+        m.quad(*[m.vert(p, (-1, 0, 0)) for p in
+                 ((xo, origin[1] - w, z0), (xo, origin[1] + w, z0),
+                  (xo, origin[1] + w, z1), (xo, origin[1] - w, z1))])
+
+    block.box(origin[0] - 0.04, da, 0.0, origin[0] + JAMB, db, DOOR_TOP)
+    parts = {"jambs": ("door", False, jambs), "door": ("door", False, panel),
+             "door_porthole": ("glass", False, glass), "platform": ("frame", False, platform),
+             "outside_ground": ("ground", False, ground), "outside_sky": ("sky", False, sky),
              "activation": (None, True, block)}
     for _, _, m in parts.values():
         m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]

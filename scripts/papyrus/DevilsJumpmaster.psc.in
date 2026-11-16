@@ -9,7 +9,7 @@ Goes on the jumpmaster's reference in DevilsC130Interior, standing by the door.}
 Sound Property commands_1 Auto Const Mandatory
 {"Ten minutes!" through "Sound off for equipment check!" and the stick's OKs.}
 Sound Property commands_2 Auto Const Mandatory
-{"Six minutes!" through "Stand by!"}
+{"Six minutes!" through "Stand in the door!"}
 Sound Property commands_3 Auto Const Mandatory
 {"GO!"}
 Message Property SoundOffMessage Auto Const Mandatory
