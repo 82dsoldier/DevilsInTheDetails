@@ -608,6 +608,12 @@ about airborne operations have heard of. It's the second worldspace.
   the interior cell `DevilsC130Interior`, forward +Y:
   - **The hull is curved:** the side walls bow gently outward as they rise (3.12 m wide at the
     floor, 3.36 m at the widest), then round over into an arched ceiling 2.74 m high.
+  - **The tail sweeps up over the ramp** (as in `data/reference/ramp.jpg`, not in git): the
+    closed ramp rises aft from its hinge (12°), the upper cargo door slopes down to meet it, and
+    the sides draw in, so the aft wall is a smaller arch, higher up. The anchor cables end just
+    aft of the doors.
+  - **Length confirmed:** 15 m is fine; it felt short only because power armor takes big steps.
+    Six portholes a side is fine too.
   - **Longer than true size:** the real 12.2 m floor felt too short in game (the author, after
     the first block-out), so it's 15 m (`--length`), plus the 3 m closed ramp.
   - Four rows of red troop seats filling the length (22 a row), outboard against the walls and

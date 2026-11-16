@@ -46,6 +46,9 @@ CABIN_H = 2.74                 # 9 ft at the centreline
 WALL_TOP = 1.75                # where the side wall stops rising and rounds into the ceiling
 BULGE = 0.12                   # how far each wall bows out between the floor and WALL_TOP
 RAMP_L = 3.0                   # the closed ramp, aft of the hinge
+RAMP_ANGLE = 12.0              # degrees the closed ramp rises aft (data/reference/ramp.jpg)
+AFT_WIDTH = 0.85               # the tail's width at the ramp's end, against the cabin's
+AFT_HEIGHT = 1.75              # floor to ceiling at the ramp's end, metres (the cargo door slopes down)
 DOOR_W, DOOR_H, DOOR_R = 0.91, 1.83, 0.15   # paratroop doors, 36 x 72 in; corner radius
 DOOR_AFT = 0.15                # door's aft edge, forward of the ramp hinge
 PORTHOLE_D, PORTHOLE_Z = 0.30, 1.45         # diameter, centre height
@@ -203,35 +206,48 @@ def parts(length):
     p = {}
 
     # Hull: the cross-section run from the ramp's end to the forward bulkhead, seen from inside,
-    # with both end walls closing it.
+    # with both end walls closing it. Over the ramp the tail sweeps up: the closed ramp rises
+    # aft from its hinge, the upper cargo door slopes down to meet it, and the sides draw in,
+    # so the aft wall is a smaller arch, high up.
     hull = Mesh()
     prof = profile()
-    centre = (0.0, CABIN_H * 0.45)
-    rows = []
-    for y in (aft, fwd):
-        row = []
-        for x, z in prof:
-            if z <= WALL_TOP:     # the side walls
-                n = wall_normal(z, 1 if x > 0 else -1)
-            else:                 # the arch: the ellipse's normal, pointing in
-                top, b = hw + BULGE, CABIN_H - WALL_TOP
-                nx, nz = -x / (top * top), -(z - WALL_TOP) / (b * b)
-                m = math.hypot(nx, nz)
-                n = (nx / m, 0.0, nz / m)
-            row.append(hull.vert((x, y, z), n))
-        rows.append(row)
-    for i in range(len(prof) - 1):
-        hull.quad(rows[0][i], rows[0][i + 1], rows[1][i + 1], rows[1][i])
-    for y, ny in ((aft, 1.0), (fwd, -1.0)):
-        c = hull.vert((centre[0], y, centre[1]), (0, ny, 0), (centre[0] / 2, centre[1] / 2))
-        ring = [hull.vert((x, y, z), (0, ny, 0), (x / 2, z / 2)) for x, z in prof]
+    rise = RAMP_L * math.tan(math.radians(RAMP_ANGLE))
+
+    def section(t):
+        """The profile t of the way from the hinge (0) to the ramp's end (1): (x, z) pairs."""
+        w = 1 - t * (1 - AFT_WIDTH)
+        h = 1 - t * (1 - AFT_HEIGHT / CABIN_H)
+        return [(x * w, rise * t + z * h) for x, z in prof]
+
+    def normal(x, z):
+        if z <= WALL_TOP:         # the side walls
+            return wall_normal(z, 1 if x > 0 else -1)
+        top, b = hw + BULGE, CABIN_H - WALL_TOP     # the arch: the ellipse's normal, pointing in
+        nx, nz = -x / (top * top), -(z - WALL_TOP) / (b * b)
+        m = math.hypot(nx, nz)
+        return (nx / m, 0.0, nz / m)
+
+    stations = [(aft, section(1.0)), (hinge, section(0.0)), (fwd, section(0.0))]
+    rows = [[hull.vert((x, y, z), normal(x0, z0)) for (x, z), (x0, z0) in zip(sec, prof)]
+            for y, sec in stations]
+    for r0, r1 in zip(rows, rows[1:]):
+        for i in range(len(prof) - 1):
+            hull.quad(r0[i], r0[i + 1], r1[i + 1], r1[i])
+    for (y, sec), ny in ((stations[0], 1.0), (stations[-1], -1.0)):
+        cx = 0.0
+        cz = sum(z for _, z in sec) / len(sec)
+        c = hull.vert((cx, y, cz), (0, ny, 0), (cx / 2, cz / 2))
+        ring = [hull.vert((x, y, z), (0, ny, 0), (x / 2, z / 2)) for x, z in sec]
         for i in range(len(ring)):
             hull.tri(c, ring[i], ring[(i + 1) % len(ring)])   # closes along the floor too
     p["hull"] = ("hull", True, hull)
 
     floor, ramp = Mesh(), Mesh()
     floor.box(-hw, hinge, -0.1, hw, fwd, 0.002, "t")
-    ramp.box(-hw, aft, -0.1, hw, hinge, 0.002, "t")
+    up = (0.0, -math.sin(math.radians(RAMP_ANGLE)), math.cos(math.radians(RAMP_ANGLE)))
+    aw = hw * AFT_WIDTH
+    ramp.quad(*[ramp.vert(v, up) for v in ((-hw, hinge, 0.002), (hw, hinge, 0.002),
+                                           (aw, aft, rise + 0.002), (-aw, aft, rise + 0.002))])
     p["floor"] = ("floor", True, floor)
     p["ramp"] = ("ramp", True, ramp)
 
@@ -271,7 +287,7 @@ def parts(length):
 
     cables = Mesh()
     for side in (-1, 1):
-        cables.cylinder((side * CABLE_X, aft + RAMP_L * 0.6, CABLE_Z), (0, fwd, 0), CABLE_D / 2)
+        cables.cylinder((side * CABLE_X, hinge - 0.3, CABLE_Z), (0, fwd, 0), CABLE_D / 2)
     p["anchor_cables"] = ("cable", False, cables)
 
     steps = Mesh()
