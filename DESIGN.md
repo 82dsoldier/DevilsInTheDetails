@@ -617,8 +617,8 @@ about airborne operations have heard of. It's the second worldspace.
     overhead; steps up to the flight deck at the front on the left. `--scale` enlarges it all.
   - Seats and cables are plain shapes in flat colours for now. The real model gets webbing on
     tube frames and steel cable, modelled and textured; the block-out is for size and feel.
-  - **The aisle is 0.76 m** between the outboard and centerline seats. Fine for a soldier, maybe
-    not for power armor: still to test.
+  - **The aisle is 0.76 m** between the outboard and centerline seats. **Tested 2026-11-16 in
+    power armor: perfect,** easy to get through. Keep it.
   - **Power armor can't sit,** so Nate can't take a seat. **Decided: he boards last and stands by
     the door** (last on, first out: he's first in the stick, right in the jumpmaster's face for
     every command).
