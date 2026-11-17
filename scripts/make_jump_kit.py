@@ -116,13 +116,27 @@ def band(m, pts, width, across, tile=0.25):
 
 
 
-def plate(m, outline, y, t):
+def plate(m, outline, y, t, lift=None):
     """A flat panel on a face looking +Y: outline [(x, z)] (convex, any winding), its back at y,
-    t thick, with edges."""
-    cx = sum(p[0] for p in outline) / len(outline)
-    cz = sum(p[1] for p in outline) / len(outline)
-    f = m.vert((cx, y + t, cz), (0, 1, 0))
-    ring = [m.vert((x, y + t, z), (0, 1, 0)) for x, z in outline]
+    t thick, with edges; lift [dy] raises its face at each outline point, tilting it."""
+    lift = lift or [0.0] * len(outline)
+    top = [(x, y + t + d, z) for (x, z), d in zip(outline, lift)]
+    # The face's normal (Newell), facing +Y.
+    n = [0.0, 0.0, 0.0]
+    for i in range(len(top)):
+        a, b = top[i], top[(i + 1) % len(top)]
+        n[0] += (a[1] - b[1]) * (a[2] + b[2])
+        n[1] += (a[2] - b[2]) * (a[0] + b[0])
+        n[2] += (a[0] - b[0]) * (a[1] + b[1])
+    if n[1] < 0:
+        n = [-k for k in n]
+    ln = math.sqrt(sum(k * k for k in n)) or 1.0
+    n = tuple(k / ln for k in n)
+    cx = sum(p[0] for p in top) / len(top)
+    cy = sum(p[1] for p in top) / len(top)
+    cz = sum(p[2] for p in top) / len(top)
+    f = m.vert((cx, cy, cz), n)
+    ring = [m.vert(p, n) for p in top]
     for i in range(len(ring)):
         m.tri(f, ring[i], ring[(i + 1) % len(ring)])
     for i in range(len(outline)):
@@ -131,9 +145,9 @@ def plate(m, outline, y, t):
         if nx * (x0 - cx) + nz * (z0 - cz) < 0:
             nx, nz = -nx, -nz
         ln = math.hypot(nx, nz) or 1.0
-        n = (nx / ln, 0.0, nz / ln)
-        m.quad(m.vert((x0, y, z0), n), m.vert((x1, y, z1), n), m.vert((x1, y + t, z1), n),
-               m.vert((x0, y + t, z0), n))
+        e = (nx / ln, 0.0, nz / ln)
+        m.quad(m.vert((x0, y, z0), e), m.vert((x1, y, z1), e), m.vert(top[(i + 1) % len(top)], e),
+               m.vert(top[i], e))
 
 
 W = 0.044                          # webbing width (1.75 in)
@@ -197,14 +211,16 @@ def kit_parts():
     (rx, ry, rz), (ra, rb, rh) = RESERVE
     yf = ry + rb - 0.004                                      # its front face
     ex, ez = ra * 0.86, rh * 0.80                             # flaps reach this far from the middle
-    T = 0.012                                                 # thick enough for its edges to show
-    plate(flaps, [(rx - ex, rz - ez), (rx - 0.03, rz - 0.035), (rx - 0.03, rz + 0.035), (rx - ex, rz + ez)], yf, T)
-    plate(flaps, [(rx + ex, rz - ez), (rx + 0.03, rz - 0.035), (rx + 0.03, rz + 0.035), (rx + ex, rz + ez)], yf, T)
-    plate(flaps, [(rx - ex, rz + ez), (rx + ex, rz + ez), (rx + 0.03, rz + 0.012), (rx - 0.03, rz + 0.012)],
-          yf + T, T)
-    plate(flaps, [(rx - ex, rz - ez), (rx + ex, rz - ez), (rx + 0.03, rz - 0.012), (rx - 0.03, rz - 0.012)],
-          yf + T, T)
-    yp = yf + 2 * T                                           # on top of the flaps
+    # Each flap rises toward the pin, padded over the packed canopy, so each catches the light
+    # its own way and the four read apart.
+    T, R = 0.008, 0.016                                       # thickness; the rise to the middle
+    side = [(ex, -ez), (0.03, -0.035), (0.03, 0.035), (ex, ez)]
+    for sx in (-1, 1):
+        plate(flaps, [(rx + sx * px, rz + pz) for px, pz in side], yf, T, [0, R, R, 0])
+    tb = [(-ex, ez), (ex, ez), (0.03, 0.012), (-0.03, 0.012)]
+    for sz in (-1, 1):
+        plate(flaps, [(rx + px, rz + sz * pz) for px, pz in tb], yf + T, T, [0, 0, R, R])
+    yp = yf + 2 * T + R                                         # on top of the flaps
     steel.tube((rx, yp - 0.006, rz), (rx, yp + 0.006, rz), 0.012, steps=10, caps=True)        # the cone
     steel.tube((rx - 0.03, yp + 0.009, rz), (rx + 0.01, yp + 0.009, rz), 0.003, steps=6)       # the pin
     hx = rx + 0.10                                            # the handle, on his right of the pin
