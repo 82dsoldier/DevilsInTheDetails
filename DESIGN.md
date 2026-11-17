@@ -708,7 +708,9 @@ about airborne operations have heard of. It's the second worldspace.
       root was added after it, and the back half stuck out sideways: add every bone first.)
       **Tested: "That looks amazing now."**
     - The stick's layout lives in `make_c130_blockout.py` (`stick_places`, `stick_aisle`), for
-      the models and the plugin both. Not yet: Nate's own static line, the shuffle to the door.
+      the models and the plugin both. **Not wanted (the author):** a static line for Nate (he
+      jumps in power armor, so one would only confuse), or the stick shuffling to the door
+      (Nate goes first, so he's out of the bird and never sees it).
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
