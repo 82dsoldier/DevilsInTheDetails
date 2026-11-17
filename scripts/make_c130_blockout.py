@@ -30,7 +30,7 @@ through in power armor.
 
 Writes to out/c130/mod/ (the layout of the game's Data folder):
   Meshes/DevilsInTheDetails/Aircraft/C130_Blockout.nif, C130_Door.nif
-  Textures/DevilsInTheDetails/Aircraft/c130_<material>.dds, c130_<material>_n.dds
+  Textures/DevilsInTheDetails/Aircraft/c130_<material>.dds, _n.dds (normal), _s.dds (specular)
 The cabin keeps the name C130_Blockout.nif so references placed in the Creation Kit still find it.
 """
 import argparse
@@ -219,6 +219,14 @@ def normal_map(h, strength=0.5):
     return (n * 0.5 + 0.5) * 255
 
 
+# Specular (the _s map): (shine, smoothness), 0-1. Cloth is dull; bare metal and glass gleam.
+# Without these the shader's default shine made the blankets look like aluminium.
+SPECULAR = {"quilt": (0.03, 0.1), "fabric": (0.04, 0.12), "webbing": (0.04, 0.12),
+            "floor": (0.3, 0.35), "aluminium": (0.5, 0.55), "glass": (0.6, 0.8),
+            "dark": (0.25, 0.3), "red": (0.3, 0.5), "green": (0.3, 0.5), "lamp": (0.3, 0.5)}
+SPECULAR_PAINT = (0.12, 0.25)    # everything else: painted metal, ducting, cable
+
+
 def write_textures(tex_dir):
     files = []
     for name, (make, opts) in MATERIALS.items():
@@ -229,7 +237,10 @@ def write_textures(tex_dir):
         Image.fromarray(img, mode).save(f, pixel_format="DXT5" if mode == "RGBA" else "DXT1")
         fn = tex_dir / f"c130_{name}_n.dds"
         Image.fromarray(np.clip(normal_map(h), 0, 255).astype(np.uint8), "RGB").save(fn, pixel_format="DXT1")
-        files += [f, fn]
+        shine, smooth = SPECULAR.get(name, SPECULAR_PAINT)
+        fs = tex_dir / f"c130_{name}_s.dds"
+        Image.new("RGB", (64, 64), (round(shine * 255), round(smooth * 255), 0)).save(fs, pixel_format="DXT1")
+        files += [f, fn, fs]
     return files
 
 
@@ -640,6 +651,8 @@ def write_nif(path, root_name, built, s, tex, pyn):
                 sp.Emissive_Mult = 1.5
             shape.set_texture("Diffuse", f"{tex}\\c130_{mat}.dds")
             shape.set_texture("Normal", f"{tex}\\c130_{mat}_n.dds")
+            shape.set_texture("Specular", f"{tex}\\c130_{mat}_s.dds")
+            sp.Spec_Str, sp.Glossiness = 1.0, 1.0      # the _s map sets each material's shine
             shape.save_shader_attributes()
             if opts.get("alpha"):
                 shape.has_alpha_property = True

@@ -634,6 +634,12 @@ about airborne operations have heard of. It's the second worldspace.
     (`DevilsC130CabinLight`: warm white, radius 300, no shadows, fade 0.8) hang down the
     centerline under the ceiling, 2.5 m apart, from 5 m aft of the cabin's middle to 5 m forward, so the
     aftmost stays clear of the doors and doesn't wash out the red jump lights by the doors.
+    **That's a daytime jump.** A night jump flies dark, with red cabin lights: five
+    `DevilsC130CabinLightNight` refs (red, radius 250, fade 0.45) sit on the same spots, Initially
+    Disabled, and the jumpmaster's script turns on one set or the other by the game hour when the
+    cabin loads (night is 8 pm to 6 am). All ten are persistent, as the jump lights are.
+  - **Materials have their own shine** (`_s` maps, red shine and green smoothness): the cloth
+    almost none, metal and glass some. Without them the blankets shone like aluminium.
   - **The aisle is 0.76 m** between the outboard and centerline seats. **Tested 2026-11-16 in
     power armor: perfect,** easy to get through. Keep it.
   - **Power armor can't sit,** so Nate can't take a seat. **Decided: he boards last and stands by

@@ -20,6 +20,10 @@ ObjectReference[] Property RedLights Auto Const
 {The red jump lights (light references, Initially Disabled), one by each door.}
 ObjectReference[] Property GreenLights Auto Const
 {The green jump lights, the same.}
+ObjectReference[] Property DayLights Auto Const
+{The cabin lights for a daytime jump: warm white.}
+ObjectReference[] Property NightLights Auto Const
+{The cabin lights for a night jump: dim red (Initially Disabled).}
 
 Bool running = False
 
@@ -35,6 +39,9 @@ Event OnLoad()
 	Disable()
 	GreenLight.SetValue(0)
 	SetLights(True, False)            ; red the whole way, till the green
+	Bool night = IsNight()            ; a night jump flies with the cabin dark and red
+	SetAll(DayLights, !night)
+	SetAll(NightLights, night)
 
 	Cell plane = GetParentCell()
 	While !PlayerAboard()
@@ -83,6 +90,13 @@ Bool Function PlayerAboard()
 	Float dy = player.GetPositionY() - mark.GetPositionY()
 	Float dz = player.GetPositionZ() - mark.GetPositionZ()
 	Return dx * dx + dy * dy + dz * dz < 1500.0 * 1500.0
+EndFunction
+
+Bool Function IsNight()
+	{From 8 in the evening to 6 in the morning, game time.}
+	Float days = Utility.GetCurrentGameTime()
+	Float hour = (days - Math.Floor(days)) * 24.0
+	Return hour >= 20.0 || hour < 6.0
 EndFunction
 
 Function SetLights(Bool red, Bool green)
