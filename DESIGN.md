@@ -630,6 +630,10 @@ about airborne operations have heard of. It's the second worldspace.
     upper walls, glowing dome lights; a panelled pale-green forward bulkhead. All made in code
     (`make_c130_blockout.py`, textures too), so it's still a stand-in for a real model, but it
     reads as a Herc. The mesh keeps the name `C130_Blockout.nif` so placed references still work.
+  - **Cabin lights (2026-11-17):** the dome lights only glow, so five placed lights
+    (`DevilsC130CabinLight`: warm white, radius 300, no shadows, fade 0.8) hang down the
+    centerline under the ceiling, 2.5 m apart, from 5 m aft of the cabin's middle to 5 m forward, so the
+    aftmost stays clear of the doors and doesn't wash out the red jump lights by the doors.
   - **The aisle is 0.76 m** between the outboard and centerline seats. **Tested 2026-11-16 in
     power armor: perfect,** easy to get through. Keep it.
   - **Power armor can't sit,** so Nate can't take a seat. **Decided: he boards last and stands by
