@@ -70,6 +70,10 @@ Armor Property StaticLineRight Auto Const Mandatory
 the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
 Armor Property StaticLineLeft Auto Const Mandatory
 {DevilsStaticLineLeft: the same over the left shoulder, for the port men.}
+Armor Property StaticLineJM Auto Const Mandatory
+{DevilsStaticLineJM: the jumpmaster's own static line (slot 56), hooked up before he starts the
+commands (the author): over his left shoulder to the starboard cable ahead of him, built for
+where he stands (on the ramp aft of the door, facing forward).}
 Armor Property JumpKit Auto Const Mandatory
 {DevilsJumpKit: each man's parachutes, worn (body slot 57): T-10C main, harness, T-10R reserve.
 He wears it from boarding.}
@@ -381,8 +385,37 @@ Function DressJumpmaster()
 	If GetItemCount(GearStanding) == 0
 		AddItem(GearStanding, 1, True)
 	EndIf
+	If GetItemCount(StaticLineJM) == 0
+		AddItem(StaticLineJM, 1, True)
+	EndIf
 	EquipItem(JumpKit, True, True)
 	EquipItem(GearStanding, True, True)
+	EquipItem(StaticLineJM, True, True)
+	CallFunctionNoWait("HoldJumpmaster", new Var[0])
+EndFunction
+
+Function HoldJumpmaster()
+	{Hooked up, he stays put so his hook stays on the cable: no turning to look about, and if he
+	turns or drifts off his spot he's put back on it. For the flight (`running`).}
+	SetRestrained(True)
+	SetHeadTracking(False)
+	Float heading = GetAngleZ()           ; just put on his editor spot (OnLoad)
+	Float px = GetPositionX()
+	Float py = GetPositionY()
+	While running && Is3DLoaded()
+		Float turn = Math.Abs(GetAngleZ() - heading)
+		If turn > 180.0
+			turn = 360.0 - turn
+		EndIf
+		Float dx = GetPositionX() - px
+		Float dy = GetPositionY() - py
+		If turn > HoldDegrees || Math.Sqrt(dx * dx + dy * dy) > HoldDistance
+			MoveToMyEditorLocation()
+		EndIf
+		Utility.Wait(0.5)
+	EndWhile
+	SetRestrained(False)
+	SetHeadTracking(True)
 EndFunction
 
 Function ClearStick()

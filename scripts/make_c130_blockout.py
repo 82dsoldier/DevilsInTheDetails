@@ -765,7 +765,7 @@ def _half_disc(m, cx, cy, cz, r, t, steps=8):
         m.quad(*q)
 
 
-def static_line_parts(mirror=False):
+def static_line_parts(mirror=False, cable=None):
     """One man's static line, hooked up, in his own frame: his feet at the origin, facing +Y, his
     right +X. The snap hook hangs on the anchor cable ahead of him (toward the door); the webbing
     runs from its tail down over his inboard shoulder and down his back to the pack. His inboard
@@ -778,6 +778,9 @@ def static_line_parts(mirror=False):
     sx = -1 if mirror else 1
     cx = sx * (stick_aisle() - CABLE_X)              # the cable, from his middle: inboard of him
     cy, cz = 0.45, CABLE_Z
+    if cable is not None:                            # anyone else: the cable (x to his right, z up)
+        cx, cz = cable
+        sx = 1 if cx >= 0 else -1
     W, T = 0.036, 0.007
     hook = Mesh()
     hook.box(cx - W / 2, cy - T / 2, cz - 0.035, cx + W / 2, cy + T / 2, cz - 0.025)      # under the slot

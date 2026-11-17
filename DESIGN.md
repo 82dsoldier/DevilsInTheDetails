@@ -759,6 +759,13 @@ about airborne operations have heard of. It's the second worldspace.
       Can't be perfect on an imperfect game engine."
     - **The jumpmaster jumps too** (the author), so he wears the same: the kit and the
       standing ruck and case, put on as he's enabled at boarding.
+    - **And he's hooked up** before he starts the commands (the author). (Really he'd also
+      check the door as it opens and watch for landmarks to time his calls; the author: "that
+      would be a bit much".) His own line, `C130_StaticLineJM` / `DevilsStaticLineJM`, is built
+      for where he stands: on the ramp just aft of the hinge (0.17 m up its 25° slope),
+      facing forward, the starboard cable 0.46 m to his left, so over his left shoulder. The
+      script puts it on at boarding and holds him on his spot as the stick is held: no head
+      tracking, put back if he turns or drifts, for the flight.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
