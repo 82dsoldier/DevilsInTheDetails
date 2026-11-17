@@ -704,7 +704,9 @@ about airborne operations have heard of. It's the second worldspace.
       the strap blends from root to chest between 2.05 m and 1.68 m up its front. The
       chest-bound hook had missed because the idle pose isn't the bind pose. Settled men have
       head tracking off, and a watch puts anyone back on his mark who turns more than 3° or
-      drifts more than 4 units.
+      drifts more than 4 units. (Building it, pynifly reset the chest's skin-to-bone when the
+      root was added after it, and the back half stuck out sideways: add every bone first.)
+      **Tested: "That looks amazing now."**
     - The stick's layout lives in `make_c130_blockout.py` (`stick_places`, `stick_aisle`), for
       the models and the plugin both. Not yet: Nate's own static line, the shuffle to the door.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
