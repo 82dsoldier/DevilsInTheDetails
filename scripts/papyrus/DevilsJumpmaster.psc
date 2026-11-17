@@ -71,9 +71,14 @@ the anchor cable ahead of him. The starboard men's: facing aft, their inboard sh
 Armor Property StaticLineLeft Auto Const Mandatory
 {DevilsStaticLineLeft: the same over the left shoulder, for the port men.}
 Armor Property JumpKit Auto Const Mandatory
-{DevilsJumpKit: each man's combat equipment, worn (body slot 57): T-10C main, harness, T-10R
-reserve, the ALICE ruck hung in front of his thighs (in his lap seated), the weapons case down
-his left side. He wears it from boarding.}
+{DevilsJumpKit: each man's parachutes, worn (body slot 57): T-10C main, harness, T-10R reserve.
+He wears it from boarding.}
+Armor Property GearSeated Auto Const Mandatory
+{DevilsJumpGearSeated: his ALICE ruck and weapons case as he sits (body slot 58): the ruck in his
+lap, the case tipped forward clear of the seat.}
+Armor Property GearStanding Auto Const Mandatory
+{DevilsJumpGearStanding: the same as he stands (slot 58): the ruck right under the reserve, the
+case straight down his left side. He changes into it as he gets up.}
 Float Property DoorRaise = 140.0 Auto Const
 {How far the closed door slides up to be out of sight in the wall above the doorway.}
 Float Property TaxiSeconds = 20.0 Auto Const
@@ -88,6 +93,8 @@ ObjectReference[] Property NightLights Auto Const
 Bool running = False
 Int engine = 0                        ; the engine sound playing (its instance), 0 for none
 Bool holding = False                  ; the stick is held on their marks (SettleHalf)
+Bool hooked = False                   ; "Hook up!" has been given
+Bool[] up                             ; each man (by Stick's order) is out of his seat
 
 Event OnLoad()
 	If running
@@ -196,6 +203,8 @@ Function SeatStick()
 	EndIf
 	OutboardUp.SetValue(0)
 	InboardUp.SetValue(0)
+	hooked = False
+	up = new Bool[Stick.Length]
 	Int i = 0
 	While i < Stick.Length
 		Stick[i].SetRestrained(False)
@@ -210,10 +219,7 @@ Function SeatStick()
 			Utility.Wait(0.1)
 			tries += 1
 		EndWhile
-		If Stick[i].GetItemCount(JumpKit) == 0
-			Stick[i].AddItem(JumpKit, 1, True)
-		EndIf
-		Stick[i].EquipItem(JumpKit, True, True)
+		Dress(i)
 		Stick[i].SnapIntoInteraction(StickSeats[i])
 		i += 1
 	EndWhile
@@ -256,6 +262,10 @@ Function SettleHalf(Bool outboard)
 		Int i = 0
 		While i < Stick.Length
 			Actor man = Stick[i]
+			If (i < OutboardCount) == outboard && !up[i] && man.GetSitState() == 0
+				up[i] = True                     ; out of his seat: his ruck and case as he stands
+				Dress(i)
+			EndIf
 			If (i < OutboardCount) == outboard && !settled[i]
 				If man.GetSitState() == 0 && (man.GetDistance(StickStands[i]) < SettleDistance || waited >= SettleSeconds)
 					man.MoveTo(StickStands[i])
@@ -303,18 +313,52 @@ Function HookUp()
 	If !Stick
 		Return
 	EndIf
+	hooked = True
 	Int i = 0
 	While i < Stick.Length
-		Armor line = StaticLineLeft
-		If i % 4 < 2                  ; Stick's order: outboard stbd 1-2, port 1-2; inboard the same
-			line = StaticLineRight
-		EndIf
-		Stick[i].AddItem(line, 1, True)
-		Stick[i].EquipItem(line, True, True)
-		; Equipping the line took his kit off (tested): on again.
-		Stick[i].EquipItem(JumpKit, True, True)
+		Dress(i)
 		i += 1
 	EndWhile
+EndFunction
+
+Armor Function LineFor(Int i)
+	{His static line: over the inboard shoulder, his right on the starboard side.}
+	If i % 4 < 2                      ; Stick's order: outboard stbd 1-2, port 1-2; inboard the same
+		Return StaticLineRight
+	EndIf
+	Return StaticLineLeft
+EndFunction
+
+Function Dress(Int i)
+	{Everything he wears where he is now: his parachutes, his ruck and case as he sits or stands,
+	and his static line once hooked up. Giving him an item took off what the script had put on
+	(tested: the line took the kit off), so it all goes into his inventory first, then on.}
+	Actor man = Stick[i]
+	Armor gear = GearSeated
+	Armor other = GearStanding
+	If up && up[i]
+		gear = GearStanding
+		other = GearSeated
+	EndIf
+	Armor line = None
+	If hooked
+		line = LineFor(i)
+	EndIf
+	man.RemoveItem(other, -1, True)
+	If man.GetItemCount(JumpKit) == 0
+		man.AddItem(JumpKit, 1, True)
+	EndIf
+	If man.GetItemCount(gear) == 0
+		man.AddItem(gear, 1, True)
+	EndIf
+	If line && man.GetItemCount(line) == 0
+		man.AddItem(line, 1, True)
+	EndIf
+	man.EquipItem(JumpKit, True, True)
+	man.EquipItem(gear, True, True)
+	If line
+		man.EquipItem(line, True, True)
+	EndIf
 EndFunction
 
 Function Unhook(Actor man)
@@ -332,6 +376,8 @@ Function ClearStick()
 	While i < Stick.Length
 		Unhook(Stick[i])
 		Stick[i].RemoveItem(JumpKit, -1, True)
+		Stick[i].RemoveItem(GearSeated, -1, True)
+		Stick[i].RemoveItem(GearStanding, -1, True)
 		Stick[i].SetRestrained(False)
 		Stick[i].SetHeadTracking(True)
 		Stick[i].Disable()

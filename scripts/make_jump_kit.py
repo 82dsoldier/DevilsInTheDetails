@@ -7,22 +7,29 @@ equipment, period gear, not today's), as one skinned model so it goes where he g
                  loops (data/reference/1_958e...jpg)
   harness        olive drab webbing: main lift webs over his shoulders and down his front, a
                  chest strap, steel hardware
-  T-10R reserve  across his belly on the harness, olive drab, the steel ripcord grip on his right
-                 (data/reference/T-10R reserve troop parachute-500x500w.png)
-  ALICE ruck     hung under the reserve, low in front of his legs and as wide as them (the
-                 author): it rides his thighs, so seated it lies in his lap out toward his knees
-                 (the author: hooked up, the ruck on his lap)
+  T-10R reserve  across his belly on the harness, olive drab: four flaps closed over its front,
+                 the ripcord pin where they meet, its cable to the silver handle (the author;
+                 data/reference/T-10R reserve troop parachute-500x500w.png)
+  ALICE ruck     under the reserve, as wide as his legs (the author). Seated it rides his
+                 thighs, low on them, so it lies in his lap out toward his knees; standing it
+                 hangs right under the reserve.
   M1950 case     the weapons case, flat, pale grey quilted canvas, armpit to mid-shin down his
-                 left side (data/reference/1_bacd...jpg): his torso above the hip, his left
-                 thigh below
+                 left side (data/reference/1_bacd...jpg), rigid on his pelvis: standing, forward
+                 of where his arm hangs; seated, tipped forward so its foot clears the seat.
+
+The ruck and case differ seated and standing, which one skinned model can't do (on the thighs,
+the ruck that sits right in his lap hangs too low standing; the case mustn't bend). So two
+models, and the script swaps them as he gets up.
 
 Built in his own frame (worn.py) and fitted to the vanilla male body in fatigues, measured off
 FatiguesM.nif in its bind pose: his front about 0.11 m ahead of his middle at the chest (1.5 m
 up), 0.17 at the belly (1.2-1.3 m), 0.14 at the hips (1.0 m); his back 0.17 behind at the
 shoulder blades, 0.13 at the waist; his thighs about 0.21 m out each side.
 
-Writes out/c130/mod/Meshes/DevilsInTheDetails/Aircraft/C130_JumpKit.nif. The plugin's armor
-(DevilsJumpKit) points at it; the jumpmaster's script gives it to each man as he's seated.
+Writes out/c130/mod/Meshes/DevilsInTheDetails/Aircraft/C130_JumpKit.nif (main, harness, reserve)
+and C130_JumpGearSeated.nif / ...Standing.nif (the ruck and case, as he sits and as he stands).
+The plugin's armor (DevilsJumpKit, body slot 57; DevilsJumpGearSeated / ...Standing, both slot
+58) points at them; the jumpmaster's script dresses each man as he's seated and as he stands.
 """
 import argparse
 import math
@@ -107,20 +114,48 @@ def band(m, pts, width, across, tile=0.25):
         last, prev = (a, b), p
 
 
+
+
+def plate(m, outline, y, t):
+    """A flat panel on a face looking +Y: outline [(x, z)] (convex, any winding), its back at y,
+    t thick, with edges."""
+    cx = sum(p[0] for p in outline) / len(outline)
+    cz = sum(p[1] for p in outline) / len(outline)
+    f = m.vert((cx, y + t, cz), (0, 1, 0))
+    ring = [m.vert((x, y + t, z), (0, 1, 0)) for x, z in outline]
+    for i in range(len(ring)):
+        m.tri(f, ring[i], ring[(i + 1) % len(ring)])
+    for i in range(len(outline)):
+        (x0, z0), (x1, z1) = outline[i], outline[(i + 1) % len(outline)]
+        nx, nz = z1 - z0, -(x1 - x0)
+        if nx * (x0 - cx) + nz * (z0 - cz) < 0:
+            nx, nz = -nx, -nz
+        ln = math.hypot(nx, nz) or 1.0
+        n = (nx / ln, 0.0, nz / ln)
+        m.quad(m.vert((x0, y, z0), n), m.vert((x1, y, z1), n), m.vert((x1, y + t, z1), n),
+               m.vert((x0, y + t, z0), n))
+
+
 W = 0.044                          # webbing width (1.75 in)
 MAIN = ((0.0, -0.275, 1.29), (0.19, 0.095, 0.25))        # centre, half extents
 RESERVE = ((0.0, 0.222, 1.15), (0.17, 0.072, 0.11))   # snug on the harness at his belly
-# The ruck as wide as his legs and low on them, down by his knees (the author): seated, in his
-# lap out toward his knees, clear of the reserve (the first try, high on his thighs, swallowed it).
-RUCK = ((0.0, 0.185, 0.49), (0.21, 0.10, 0.19))
-# The weapons case: flat, armpit to mid-shin down his left side (the author; his left is -X).
-CASE = ((-0.258, 0.0, 0.80), (0.032, 0.10, 0.50))
+# The ruck, as wide as his legs. Seated it rides his thighs, low on them so it lies in his lap
+# out toward his knees, clear of the reserve (the author: "the ruck position looks good");
+# standing it hangs right under the reserve (the author: the seated one hung "entirely too low").
+RUCK_SEATED = ((0.0, 0.185, 0.49), (0.21, 0.10, 0.19))
+RUCK_STANDING = ((0.0, 0.225, 0.80), (0.21, 0.10, 0.19))
+# The weapons case: flat, armpit to mid-shin down his left side (his left is -X), and rigid, "like
+# trying to carry a crutch under your arm" (the author). Standing, forward of where his arm hangs;
+# seated, tipped forward from the hip so its foot clears the front of the seat.
+CASE = ((-0.245, 0.085, 0.80), (0.032, 0.10, 0.50))
+CASE_TILT = math.radians(38)       # seated: its foot forward
+HIP_Z = 0.95
 CASE_TILE = 0.2                    # its quilting: one tile is two 10 cm squares
 
 
 def kit_parts():
-    """{shape: (material, Mesh, weights)}."""
-    main, harness, steel, stowed, reserve, ruck, case, case_straps, case_steel = (c.Mesh() for _ in range(9))
+    """The kit he wears throughout: main, harness, reserve. {shape: (material, Mesh, weights)}."""
+    main, harness, steel, stowed, reserve, flaps = (c.Mesh() for _ in range(6))
 
     # The main, on his back, its closing bands and the static line stowed on it.
     pillow(main, *MAIN)
@@ -155,30 +190,76 @@ def kit_parts():
                    (0.16, front_y(zw) + LIE - 0.02, zw), (0.19, 0.02, zw)], W, (0, 0, 1))
     steel.box(-0.025, 0.147 + LIE, zc - 0.02, 0.025, 0.147 + LIE + 0.012, zc + 0.02)
 
-    # The reserve, its ripcord grip on his right.
+    # The reserve: four flaps closed over its front, meeting at the middle where the ripcord pin
+    # holds them; the pin's cable runs to the silver ripcord handle on his right of it (the
+    # author). Pull the handle, the pin comes out, the flaps spring open.
     pillow(reserve, *RESERVE)
     (rx, ry, rz), (ra, rb, rh) = RESERVE
-    for k in range(9):                                        # a D-shaped grip, out from the side
+    yf = ry + rb - 0.004                                      # its front face
+    ex, ez = ra * 0.86, rh * 0.80                             # flaps reach this far from the middle
+    T = 0.012                                                 # thick enough for its edges to show
+    plate(flaps, [(rx - ex, rz - ez), (rx - 0.03, rz - 0.035), (rx - 0.03, rz + 0.035), (rx - ex, rz + ez)], yf, T)
+    plate(flaps, [(rx + ex, rz - ez), (rx + 0.03, rz - 0.035), (rx + 0.03, rz + 0.035), (rx + ex, rz + ez)], yf, T)
+    plate(flaps, [(rx - ex, rz + ez), (rx + ex, rz + ez), (rx + 0.03, rz + 0.012), (rx - 0.03, rz + 0.012)],
+          yf + T, T)
+    plate(flaps, [(rx - ex, rz - ez), (rx + ex, rz - ez), (rx + 0.03, rz - 0.012), (rx - 0.03, rz - 0.012)],
+          yf + T, T)
+    yp = yf + 2 * T                                           # on top of the flaps
+    steel.tube((rx, yp - 0.006, rz), (rx, yp + 0.006, rz), 0.012, steps=10, caps=True)        # the cone
+    steel.tube((rx - 0.03, yp + 0.009, rz), (rx + 0.01, yp + 0.009, rz), 0.003, steps=6)       # the pin
+    hx = rx + 0.10                                            # the handle, on his right of the pin
+    steel.tube((rx + 0.01, yp + 0.009, rz), (hx - 0.02, yp + 0.012, rz - 0.01), 0.002, steps=6)  # cable
+    for k in range(9):                                        # a D-shaped grip, standing off the flaps
         a0, a1 = math.pi * k / 9 - math.pi / 2, math.pi * (k + 1) / 9 - math.pi / 2
-        steel.tube((ra + 0.004 + 0.035 * math.cos(a0), ry + 0.035 * math.sin(a0), rz),
-                   (ra + 0.004 + 0.035 * math.cos(a1), ry + 0.035 * math.sin(a1), rz), 0.005, steps=6)
+        steel.tube((hx - 0.02 + 0.035 * math.cos(a0), yp + 0.014, rz - 0.01 + 0.035 * math.sin(a0)),
+                   (hx - 0.02 + 0.035 * math.cos(a1), yp + 0.014, rz - 0.01 + 0.035 * math.sin(a1)),
+                   0.005, steps=6)
+    steel.tube((hx - 0.02, yp + 0.014, rz - 0.045), (hx - 0.02, yp + 0.014, rz + 0.025), 0.005, steps=6)
 
-    # The ALICE ruck, low in front of his legs: its flap, three pockets, and the straps that
-    # hang it from the harness under the reserve.
-    pillow(ruck, *RUCK, e=0.45)
-    (kx, ky, kz), (ka, kb, kh) = RUCK
+    return {"main": ("nylon", main, worn.torso_weights),
+            "stowed_line": ("static_line", stowed, worn.torso_weights),
+            "reserve": ("nylon", reserve, worn.torso_weights),
+            "reserve_flaps": ("nylon", flaps, worn.torso_weights),
+            "harness": ("harness", harness, worn.torso_weights),
+            "hardware": ("snap_hook", steel, worn.torso_weights)}
+
+
+def _tilt(m, pivot_z, angle):
+    """Tip a mesh forward about a line across him at pivot_z: below it moves forward (+Y)."""
+    ca, sa = math.cos(angle), math.sin(angle)
+    def rot(y, z):
+        dz = z - pivot_z
+        return y * ca - dz * sa, pivot_z + y * sa + dz * ca
+    out = []
+    for x, y, z in m.verts:
+        y2, z2 = rot(y, z)
+        out.append((x, y2, z2))
+    m.verts = out
+    m.norms = [(nx, ny * ca - nz * sa, ny * sa + nz * ca) for nx, ny, nz in m.norms]
+
+
+def gear_parts(seated):
+    """The ruck and the weapons case, as he wears them seated or standing (the script swaps them
+    as he gets up). {shape: (material, Mesh, weights)}."""
+    ruck, straps, case, case_straps, case_steel = (c.Mesh() for _ in range(5))
+
+    # The ALICE ruck: its flap, three pockets, the straps that hang it under the reserve.
+    (kx, ky, kz), (ka, kb, kh) = RUCK_SEATED if seated else RUCK_STANDING
+    pillow(ruck, (kx, ky, kz), (ka, kb, kh), e=0.45)
     front = ky + kb
     pillow(ruck, (0.0, ky + 0.01, kz + kh - 0.02), (ka * 0.96, kb * 0.96, 0.05), e=0.5)   # top flap
     for px in (-0.14, 0.0, 0.14):
         pillow(ruck, (px, front + 0.02, kz - 0.04), (0.06, 0.03, 0.08), e=0.5, steps=(16, 10))
     rb = RESERVE[0][2] - RESERVE[1][2]                        # the reserve's bottom
     for s in (-1, 1):
-        band(harness, [(s * 0.12, RESERVE[0][1], rb + 0.02), (s * 0.12, front - 0.03, kz + kh + 0.04),
-                       (s * 0.12, front + 0.006, kz + kh - 0.03), (s * 0.12, front + 0.006, kz - kh + 0.05)],
-             0.03, (1, 0, 0))
+        pts = [(s * 0.12, RESERVE[0][1], rb + 0.02)]
+        if kz + kh + 0.06 < rb:
+            pts.append((s * 0.12, front - 0.03, kz + kh + 0.04))
+        pts += [(s * 0.12, front + 0.006, kz + kh - 0.03), (s * 0.12, front + 0.006, kz - kh + 0.05)]
+        band(straps, pts, 0.03, (1, 0, 0))
 
-    # The M1950 weapons case down his left side (data/reference/1_bacd...jpg): flat, pale grey
-    # canvas quilted in squares, a strap with its quick-release buckle, a tie-down strap.
+    # The M1950 weapons case (data/reference/1_bacd...jpg): flat, pale grey canvas quilted in
+    # squares, a strap with its quick-release buckle, a tie-down strap.
     pillow(case, *CASE, e=0.5, steps=(20, 24), tile=CASE_TILE)
     (cx, cy, cz), (ca, cb, ch) = CASE
     for z, buckle in ((cz + 0.22, True), (cz - 0.28, False)):
@@ -186,32 +267,33 @@ def kit_parts():
              0.025, (0, 0, 1))
         if buckle:
             case_steel.box(cx - ca - 0.012, cy + 0.01, z - 0.02, cx - ca - 0.004, cy + 0.06, z + 0.02)
+    if seated:
+        for m in (case, case_straps, case_steel):
+            _tilt(m, HIP_Z, CASE_TILT)
 
     thighs = lambda v: {"LLeg_Thigh": 0.5, "RLeg_Thigh": 0.5}      # noqa: E731
 
-    def harness_weights(v):
-        if v[2] < 0.93 and v[1] > 0.2:                        # the ruck's straps
-            return thighs(v)
-        return worn.torso_weights(v)
-
-    def case_weights(v):
-        """His torso above the hip, his left thigh below (it bends there as he sits)."""
-        if v[2] >= 1.05:
+    def strap_weights(v):
+        """From the reserve (his torso) down to the ruck (his thighs)."""
+        if v[2] >= rb:
             return worn.torso_weights(v)
-        if v[2] <= 0.90:
-            return {"LLeg_Thigh": 1.0}
-        t = (v[2] - 0.90) / 0.15
-        return {"Pelvis": t, "LLeg_Thigh": 1.0 - t}
+        top = kz + kh
+        if v[2] <= top:
+            return thighs(v)
+        t = (v[2] - top) / max(rb - top, 1e-3)
+        return {"Pelvis": t, "LLeg_Thigh": (1 - t) / 2, "RLeg_Thigh": (1 - t) / 2}
 
-    return {"main": ("nylon", main, worn.torso_weights),
-            "stowed_line": ("static_line", stowed, worn.torso_weights),
-            "reserve": ("nylon", reserve, worn.torso_weights),
-            "ruck": ("alice", ruck, thighs),
-            "weapons_case": ("weapons_case", case, case_weights),
-            "case_straps": ("harness", case_straps, case_weights),
-            "case_buckle": ("snap_hook", case_steel, case_weights),
-            "harness": ("harness", harness, harness_weights),
-            "hardware": ("snap_hook", steel, worn.torso_weights)}
+    rigid = worn.rigid("Pelvis")                              # the case doesn't bend
+    return {"ruck": ("alice", ruck, thighs),
+            "ruck_straps": ("harness", straps, strap_weights),
+            "weapons_case": ("weapons_case", case, rigid),
+            "case_straps": ("harness", case_straps, rigid),
+            "case_buckle": ("snap_hook", case_steel, rigid)}
+
+
+MODELS = {"C130_JumpKit": kit_parts,
+          "C130_JumpGearSeated": lambda: gear_parts(True),
+          "C130_JumpGearStanding": lambda: gear_parts(False)}
 
 
 def main():
@@ -223,15 +305,16 @@ def main():
     mesh_dir = mod / "Meshes" / c.MOD_PATH
     mesh_dir.mkdir(parents=True, exist_ok=True)
     tex = "textures\\" + c.MOD_PATH.replace("/", "\\")
-    path = mesh_dir / "C130_JumpKit.nif"
-    parts = kit_parts()
-    worn.write_worn(path, "C130_JumpKit", parts, tex, pyn, c.MATERIALS)
-    print(f"{path}: {sum(len(m.verts) for _, m, _ in parts.values())} vertices")
-    if args.install:
-        dest = Path(args.install) / path.relative_to(mod)
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, dest)
-        print(f"  installed {dest}")
+    for name, make in MODELS.items():
+        path = mesh_dir / f"{name}.nif"
+        parts = make()
+        worn.write_worn(path, name, parts, tex, pyn, c.MATERIALS)
+        print(f"{path}: {sum(len(m.verts) for _, m, _ in parts.values())} vertices")
+        if args.install:
+            dest = Path(args.install) / path.relative_to(mod)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, dest)
+            print(f"  installed {dest}")
 
 
 if __name__ == "__main__":

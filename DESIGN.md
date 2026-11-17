@@ -734,6 +734,20 @@ about airborne operations have heard of. It's the second worldspace.
       out toward his knees; the case flat, pale grey quilted canvas, armpit to mid-shin, his
       torso above the hip and his left thigh below; the OD textures plain (big grime blotches
       read as camouflage); and the script puts the kit back on after equipping the line.
+    - **Second test:** it worked as described (the author: "not particularly happy", partly
+      the engine). But the case mustn't bend as he sits ("like trying to carry a crutch under
+      your arm"), his arm went through it standing, the ruck (right seated) hung "entirely too
+      low" standing, and the reserve wanted its detail: four flaps, the ripcord pin on the
+      front, the silver handle on the pin.
+    - **So the ruck and case are a second worn item that changes as he gets up**
+      (`DevilsJumpGearSeated` / `DevilsJumpGearStanding`, both slot 58, so one replaces the
+      other): seated, the ruck rides his thighs low as before and the case is tipped forward
+      38° from the hip so its foot clears the seat; standing, the ruck hangs right under the
+      reserve and the case is straight down his left side and forward of his arm. The case is
+      rigid on his pelvis in both. The script's `Dress` puts on everything he should wear for
+      where he is (kit, gear, line once hooked up), all into his inventory first, then on.
+      `DevilsJumpKit` is now the main, harness and reserve, the reserve with four flaps, the
+      pin's cone where they meet, and its cable to a silver D handle on his right of it.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
