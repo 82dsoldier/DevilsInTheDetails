@@ -58,6 +58,11 @@ PIECES = {
     ],
 }
 SOUND_OFF = ["OK!", "OK!", "OK!"]   # passed forward up the stick, at the end of commands_1
+# What the scene does as the stick echoes a command: a call into DevilsJumpmaster.psc.in.
+ACTIONS = {
+    "Outboard personnel, stand up!": "StandUp(True)",
+    "Inboard personnel, stand up!": "StandUp(False)",
+}
 
 PS_TTS = r"""
 Add-Type -AssemblyName System.Speech
@@ -133,11 +138,14 @@ def papyrus_piece(name, cues):
     lines = [f"Function Play_{name}()",
              f"\tInt id = {name}.Play(Self)"]
     t = 0.0
-    for at, text in cues:
+    for at, text, action in cues:          # (seconds, text or None, Papyrus call or None)
         if at > t:
             lines.append(f"\tUtility.Wait({at - t:.2f})")
             t = at
-        lines.append(f'\tDebug.Notification("{text}")')
+        if text:
+            lines.append(f'\tDebug.Notification("{text}")')
+        if action:
+            lines.append(f"\t{action}")
     return lines, t
 
 
@@ -160,9 +168,11 @@ def main():
         t = 0.3
         for i, (text, echo, signal) in enumerate(cmds):
             line = shout(voice[f"{piece}_{i}"])
-            cues.append((t, f"Jumpmaster ({signal}): {text}" if signal else f"Jumpmaster: {text}"))
+            cues.append((t, f"Jumpmaster ({signal}): {text}" if signal else f"Jumpmaster: {text}", None))
             audio.append(line)
             t += len(line) / RATE
+            if text in ACTIONS:
+                cues.append((t, None, ACTIONS[text]))
             if echo:
                 audio.append(silence(ECHO_GAP))
                 e = chorus(line, seed=n * 100 + i)
@@ -172,7 +182,7 @@ def main():
                 audio.append(silence(GAP))
                 t += GAP
         if piece == "commands_1":           # the OKs come forward up the stick
-            cues.append((t, "The stick: OK! OK! OK!"))
+            cues.append((t, "The stick: OK! OK! OK!", None))
             for k, _ in enumerate(SOUND_OFF):
                 ok = shout(repitch(voice["ok"], (0.9, 1.0, 1.08)[k % 3])) * (0.45 + 0.15 * k)
                 audio += [ok, silence(0.35)]

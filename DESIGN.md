@@ -653,6 +653,19 @@ about airborne operations have heard of. It's the second worldspace.
   behind cargo pallets from the Boston run (the Devils don't have 64 jumpers, and a full cabin
   would cost too much). They sit through the flight, stand and hook up with the commands, and
   their echo is one recorded group shout, not lines for each.
+  - **Built (2026-11-17), first pass: 8 jumpers,** two outboard and two centerline seats each
+    side, the seats nearest the doors (two short sticks, one per door, as a C-130 jumps).
+    `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
+    vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
+    `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
+    by `DevilsSitLinkedSeatQuiet` (vanilla sit-in-linked-furniture, with hellos and chatter off)
+    through a `LinkCustom01` link the jumpmaster's script sets at boarding. On "Outboard
+    personnel, stand up!" and "Inboard personnel, stand up!" the script clears that half's
+    links: they get up and walk to their references' spots, a line down each aisle facing aft,
+    leaving room for Nate by the starboard door. They're Initially Disabled (so none can load
+    before the floor and fall) and enabled at boarding; after Nate goes out they're disabled.
+    Still to do: hooking up (no animation yet), shuffling to the door, landing on Sicily,
+    harnesses, the pallets forward.
   - **Out the door:** each jumper is disabled in the plane as he goes and enabled on Sicily. The
     stick lands behind its first jumper along the run, so the others come down **behind Nate**,
     who faces west-northwest: he never sees them appear. **Decided: this, not dropping them
