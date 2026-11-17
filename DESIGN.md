@@ -687,6 +687,14 @@ about airborne operations have heard of. It's the second worldspace.
       off when he goes out the door. The strap fits the vanilla male body in fatigues, measured
       off the mesh (shoulder top 1.62 m, back 0.17 m behind him). The hook sits at the cable's
       height ahead of him, so it meets the cable as long as he stands in the aisle's middle.
+      **Tested: "a LOT better"**, but the hooks floated everywhere: the men drifted and turned
+      off their spots as they jostled.
+    - **Stand markers (the author asked for a path to a set spot):** each man now walks to an
+      invisible standing marker on his own spot, facing aft (`DevilsC130StandMarker`, from the
+      vanilla `NPCStandingInvGuardPost`), and locks into it as he does his seat, which fixes his
+      place and heading exactly and stops the shoving. `DevilsStandOutboard` / `Inboard` are
+      the sit packages on `LinkCustom02`, run while the half's global is 1; the script links
+      each man to his marker (`StickStands`) at boarding. Untested: the guard-post standing pose.
     - The stick's layout lives in `make_c130_blockout.py` (`stick_places`, `stick_aisle`), for
       the models and the plugin both. Not yet: Nate's own static line, the shuffle to the door.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the

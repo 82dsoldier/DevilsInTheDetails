@@ -53,6 +53,12 @@ GlobalVariable Property OutboardUp Auto Const Mandatory
 stands them up, and they walk to their places in the aisle.}
 GlobalVariable Property InboardUp Auto Const Mandatory
 {DevilsStickInboardUp: the same for the centerline seats.}
+ObjectReference[] Property StickStands Auto Const
+{Each jumper's place in line (DevilsC130StandMarker, an invisible standing marker on his own
+reference's spot, facing aft), in the same order as Stick. Up, his stand package walks him to it
+and holds him there, so he's on his mark and his hook on the cable, however the line jostles.}
+Keyword Property StandLink Auto Const Mandatory
+{LinkCustom02: a jumper's link to his stand marker, for DevilsStandOutboard / DevilsStandInboard.}
 Armor Property StaticLineRight Auto Const Mandatory
 {DevilsStaticLineRight: a hooked-up static line, worn (body slot 56), over the right shoulder to
 the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
@@ -182,6 +188,9 @@ Function SeatStick()
 	Int i = 0
 	While i < Stick.Length
 		Stick[i].SetLinkedRef(StickSeats[i], SeatLink)
+		If StickStands
+			Stick[i].SetLinkedRef(StickStands[i], StandLink)
+		EndIf
 		Stick[i].Enable()
 		i += 1
 	EndWhile
@@ -199,7 +208,7 @@ EndFunction
 
 Function StandUp(Bool outboard)
 	{"Outboard personnel, stand up!" or "Inboard...": that half of the stick gets up and lines up
-	in the aisles, facing aft.}
+	in the aisles, facing aft, each on his stand marker.}
 	If !Stick
 		Return
 	EndIf
