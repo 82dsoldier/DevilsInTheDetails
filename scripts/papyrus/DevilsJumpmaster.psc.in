@@ -125,6 +125,7 @@ Event OnLoad()
 	EndWhile
 	MoveToMyEditorLocation()
 	Enable()
+	DressJumpmaster()                 ; he jumps too
 	SeatStick()                       ; already aboard and seated: Nate boards last
 	Fly()                             ; taxi, takeoff, climb, the flight
 
@@ -364,6 +365,24 @@ EndFunction
 Function Unhook(Actor man)
 	man.RemoveItem(StaticLineRight, -1, True)
 	man.RemoveItem(StaticLineLeft, -1, True)
+EndFunction
+
+Function DressJumpmaster()
+	{The jumpmaster jumps too (the author): the same kit as the stick, his ruck and case as he
+	stands, for he stands the whole flight. Everything into his inventory first, then on.}
+	Int tries = 0
+	While !Is3DLoaded() && tries < 20
+		Utility.Wait(0.1)
+		tries += 1
+	EndWhile
+	If GetItemCount(JumpKit) == 0
+		AddItem(JumpKit, 1, True)
+	EndIf
+	If GetItemCount(GearStanding) == 0
+		AddItem(GearStanding, 1, True)
+	EndIf
+	EquipItem(JumpKit, True, True)
+	EquipItem(GearStanding, True, True)
 EndFunction
 
 Function ClearStick()

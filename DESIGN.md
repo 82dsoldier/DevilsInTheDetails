@@ -754,6 +754,11 @@ about airborne operations have heard of. It's the second worldspace.
       cm further forward (0.32 m in all), the seated case 6 cm further out, and the flaps
       moulded into the reserve's own face (padded between seams from the corners to the pin,
       the top and bottom flaps lapped over the sides) instead of panels laid on it.
+    - **Accepted (the author):** "pretty good". What clipping is left comes from their looking
+      about as they sit, and that stays: "I don't want them to sit there like statues ...
+      Can't be perfect on an imperfect game engine."
+    - **The jumpmaster jumps too** (the author), so he wears the same: the kit and the
+      standing ruck and case, put on as he's enabled at boarding.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
