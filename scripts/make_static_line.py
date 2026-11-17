@@ -76,13 +76,16 @@ def write_worn(path, name, parts, tex, pyn):
                                         parent=nif.rootNode)
         shape.skin()
         shape.set_global_to_skin(g2s)
-        for bone, bnode, bs2b, weights in (
-                (BONE, node, s2b, [(i, 1.0 - w) for i, w in enumerate(wr) if w < 1.0]),
-                (ROOT, root_node, root_s2b, [(i, w) for i, w in enumerate(wr) if w > 0.0])):
-            if weights:
-                shape.add_bone(bone, bnode)
-                shape.set_skin_to_bone_xform(bone, bs2b)
-                shape.setShapeWeights(bone, weights)
+        bones = [(bone, bnode, bs2b, weights) for bone, bnode, bs2b, weights in (
+                 (BONE, node, s2b, [(i, 1.0 - w) for i, w in enumerate(wr) if w < 1.0]),
+                 (ROOT, root_node, root_s2b, [(i, w) for i, w in enumerate(wr) if w > 0.0]))
+                 if weights]
+        # All the bones first: adding one resets the skin-to-bone of those already set.
+        for bone, bnode, _, _ in bones:
+            shape.add_bone(bone, bnode)
+        for bone, _, bs2b, weights in bones:
+            shape.set_skin_to_bone_xform(bone, bs2b)
+            shape.setShapeWeights(bone, weights)
         shape.shader._checked_for_materials = True
         shape.shader._materials = None
         sp = shape.shader.properties
