@@ -653,8 +653,13 @@ about airborne operations have heard of. It's the second worldspace.
   behind cargo pallets from the Boston run (the Devils don't have 64 jumpers, and a full cabin
   would cost too much). They sit through the flight, stand and hook up with the commands, and
   their echo is one recorded group shout, not lines for each.
-  - **Built (2026-11-17), first pass: 8 jumpers,** two outboard and two centerline seats each
-    side, the seats nearest the doors (two short sticks, one per door, as a C-130 jumps).
+  - **Built (2026-11-17), first pass: 8 jumpers,** four each side (two short sticks, one per
+    door, as a C-130 jumps). **Staggered (the author):** standing up, the stick goes outboard 1,
+    inboard 1, outboard 2, inboard 2. So the outboard men sit in outboard seats 1 and 3 from
+    the door, the inboard men in centerline seats 2 and 4, and each steps straight out into the
+    aisle in front of his seat (0.6 m apart). The first try sat them in opposite pairs with
+    their places forward of the seats, and the inboard men shoved the outboard men back into
+    their seats getting past.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
