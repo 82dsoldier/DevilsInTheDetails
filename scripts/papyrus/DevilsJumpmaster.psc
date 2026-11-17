@@ -70,6 +70,9 @@ Armor Property StaticLineRight Auto Const Mandatory
 the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
 Armor Property StaticLineLeft Auto Const Mandatory
 {DevilsStaticLineLeft: the same over the left shoulder, for the port men.}
+ObjectReference Property Tarmac Auto Const Mandatory
+{DevilsC130Tarmac: the apron under the plane, seen out of the open doors on the ground (the plane
+hangs at jump height, so otherwise it's all sky out there); gone as the doors close for takeoff.}
 Idle Property SignalHookUp Auto Const Mandatory
 {DevilsJMSignalHookUp: his "Hook up!" signal (make_jm_signals.py), arm overhead, finger hooked,
 pumping; a dynamic idle like the vanilla BOS_Salute.}
@@ -118,6 +121,7 @@ Event OnLoad()
 	GreenLight.SetValue(0)
 	SetLights(True, False)            ; red the whole way, till the green
 	SetDoors(True)                    ; open for boarding
+	Tarmac.Enable()                   ; on the ground
 	Bool night = IsNight()            ; a night jump flies with the cabin dark and red
 	SetAll(DayLights, !night)
 	SetAll(NightLights, night)
@@ -192,6 +196,7 @@ Function Fly()
 	Crossfade(engine, next, 2.0)      ; 0 to 2 s into the piece
 	engine = next
 	Utility.Wait(12.0)                ; brakes off at 14
+	Tarmac.Disable()                  ; the doors long shut: no one sees the ground go
 	Int i = 0
 	While i < 24                      ; the roll, 14 to 38
 		Game.ShakeCamera(None, 0.03 + 0.005 * i, 1.0)
@@ -613,7 +618,7 @@ Function Play_commands_1()
 	Signal(SignalHookUp)
 	Utility.Wait(0.28)
 	HookUp()
-	Utility.Wait(1.56)
+	Utility.Wait(3.72)
 	Debug.Notification("Jumpmaster (OK rings with both hands, drawn to his eyes): Check static lines!")
 	Utility.Wait(3.29)
 	Debug.Notification("Jumpmaster (fingertips tapping his chest): Check equipment!")

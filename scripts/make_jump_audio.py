@@ -69,6 +69,7 @@ ACTIONS = {
 SIGNALS = {
     "Hook up!": "SignalHookUp",
 }
+SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it
 
 PS_TTS = r"""
 Add-Type -AssemblyName System.Speech
@@ -174,6 +175,7 @@ def main():
         t = 0.3
         for i, (text, echo, signal) in enumerate(cmds):
             line = shout(voice[f"{piece}_{i}"])
+            start = t
             if text in SIGNALS:
                 cues.append((t, f"Jumpmaster: {text}", f"Signal({SIGNALS[text]})"))
             else:
@@ -187,6 +189,9 @@ def main():
                 e = chorus(line, seed=n * 100 + i)
                 audio.append(e * 0.7)
                 t += ECHO_GAP + len(e) / RATE
+            if text in SIGNALS and t < start + SIGNAL_SECONDS:     # his signal finishes first
+                audio.append(silence(start + SIGNAL_SECONDS - t))
+                t = start + SIGNAL_SECONDS
             if i < len(cmds) - 1 or piece == "commands_1":
                 audio.append(silence(GAP))
                 t += GAP

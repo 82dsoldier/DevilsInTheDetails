@@ -5,8 +5,8 @@
 The author knows the signals; this builds them in code (no Blender), each from the vanilla
 standing body and a hand-set right arm:
 
-  Hook up!   his right arm overhead, the index finger crooked like a hook, the forearm pumped up
-             and down (from memory of FM 3-21.220; the author checks it)
+  Hook up!   his right arm overhead, the index finger crooked like a hook, the whole arm pumped
+             down and up (the author): elbow out and bent, hand by his head, then up again
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -159,10 +159,14 @@ def hook_up_frames(base):
                      ("2", (15, 85, 75))):
         for k, deg in zip("123", curls):
             up.turn(f"RArm_Finger{f}{k}", (0, 0, 1), -deg)
-    straight, bent = (0.15, 0.05, 1.0), (-0.45, 0.25, 0.85)        # the forearm: up, and pumped in
+    # The whole arm pumps (the author): up straight overhead, then down, the upper arm out to the
+    # side and the elbow bent so the hand comes down beside his head, then up again.
+    upper_up, upper_down = (0.25, 0.05, 1.0), (1.0, 0.1, -0.05)
+    fore_up, fore_down = (0.15, 0.05, 1.0), (-0.45, 0.15, 0.9)
     def pose(arm_t, pump):
         b = Body(base.skel, up.local)
-        b.aim("RArm_ForeArm1", tuple(s + pump * (e - s) for s, e in zip(straight, bent)))
+        b.aim("RArm_UpperArm", tuple(s + pump * (e - s) for s, e in zip(upper_up, upper_down)))
+        b.aim("RArm_ForeArm1", tuple(s + pump * (e - s) for s, e in zip(fore_up, fore_down)))
         if arm_t < 1.0:                                           # raising or lowering: blend from rest
             for i in range(len(b.local)):
                 b.local[i][1] = qslerp(tuple(base.local[i][1]), tuple(b.local[i][1]), arm_t)

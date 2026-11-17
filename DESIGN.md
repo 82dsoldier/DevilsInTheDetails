@@ -779,6 +779,16 @@ about airborne operations have heard of. It's the second worldspace.
     starts the line (`SIGNALS` in `make_jump_audio.py`, whose subtitle then drops the written
     signal), letting him out of his hold for it. First, "Hook up!" (arm overhead, index finger
     crooked, the forearm pumped three times), to prove the chain before the other eleven.
+    - **First test:** it played (the chain works), but his arm "went straight up, no
+      pumping": the whole arm pumps (the author), so now the elbow comes down to his shoulder
+      and the hand to beside his head, 29 cm, three times. And there was no time for it
+      between commands (the author), so a command with a signal now waits for it to finish
+      (`SIGNAL_SECONDS` in `make_jump_audio.py`) before the next.
+  - **The ground before takeoff:** out of the open doors there was only sky, since the plane
+    hangs at jump height the whole time (the author). The doors are only open on the ground
+    before takeoff (and at altitude later), so an apron (`C130_Tarmac.nif`, 880 m of 7.5 m
+    concrete slabs, 1.03 m under the cargo floor, no collision; `DevilsC130Tarmac`) shows
+    from boarding until brakes-off, long after the doors are shut.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there

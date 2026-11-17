@@ -216,6 +216,20 @@ def tex_od_webbing():
     return np.array([70, 76, 50])[None, None, :] * shade[..., None], ribs * 0.003 - stitch * 0.004
 
 
+def tex_tarmac():
+    """The apron, one tile a 7.5 m concrete slab: pale weathered concrete, a dark sealed joint
+    round it, tyre and oil stains."""
+    u, v = _uv()
+    joint = (np.minimum(np.minimum(u, 1 - u), np.minimum(v, 1 - v)) * TARMAC_SLAB) < 0.02
+    patch = _smooth_noise(40, 0.04)
+    stain = np.clip(_smooth_noise(41, 0.02) - 1.2, 0, 1)
+    grit = _noise(42, scale=0.05)
+    shade = (0.92 + 0.05 * patch + grit) * (1 - 0.35 * stain)
+    rgb = np.array([150, 150, 144])[None, None, :] * shade[..., None]
+    rgb[joint] = [52, 52, 50]
+    return rgb, grit * 0.2 - joint * 0.4
+
+
 def tex_webbing():
     """Webbing net, one tile per seat (SEAT_W wide, the net's full height): red straps hanging
     from the rail, crossed by horizontal bands; transparent between them."""
@@ -271,7 +285,8 @@ MATERIALS = {
     # The stick's kit: early-90s olive drab (the author: period gear, not today's).
     "nylon": (tex_nylon(), {}),                   # T-10C main, T-10R reserve
     "alice": (tex_nylon((62, 68, 46), 30, 48), {}),   # the ALICE ruck, coarser and greener
-    "weapons_case": (tex_weapons_case, {}),       # M1950, pale grey quilted canvas (the author)
+    "weapons_case": (tex_weapons_case, {}),
+    "tarmac": (tex_tarmac, {}),                   # the apron under the plane, before takeoff       # M1950, pale grey quilted canvas (the author)
     "harness": (tex_od_webbing, {"double_sided": True}),
     "lamp": (_flat((255, 246, 222)), {"emit": True}),
 }
@@ -298,7 +313,7 @@ SPECULAR = {"quilt": (0.03, 0.1), "fabric": (0.04, 0.12), "webbing": (0.04, 0.12
             "dark": (0.25, 0.3), "red": (0.3, 0.5), "green": (0.3, 0.5), "lamp": (0.3, 0.5),
             "static_line": (0.05, 0.15), "snap_hook": (0.45, 0.45),
             "nylon": (0.05, 0.15), "alice": (0.05, 0.12), "harness": (0.05, 0.15),
-            "weapons_case": (0.03, 0.1)}
+            "weapons_case": (0.03, 0.1), "tarmac": (0.08, 0.2)}
 SPECULAR_PAINT = (0.12, 0.25)    # everything else: painted metal, ducting, cable
 
 
@@ -880,6 +895,28 @@ def door_panel_parts(length, closed):
     return parts, origin
 
 
+TARMAC_DROP = 1.03       # the cargo floor above the ground (a C-130H's, about 41 in)
+TARMAC_HALF = 440.0      # metres each way: the most a static's bounds hold (32767 units)
+TARMAC_SLAB = 7.5        # concrete apron slabs
+
+
+def tarmac_parts():
+    """The apron under the plane, seen out of the open doors on the ground: the plane flies at
+    jump height the whole time, so before takeoff it was all sky out there (the author). The
+    scene shows this until the doors close for takeoff. Concrete slabs, no collision, the
+    cabin's origin above its middle."""
+    m = Mesh()
+    n = 16
+    step = 2 * TARMAC_HALF / n
+    grid = [[m.vert((-TARMAC_HALF + i * step, -TARMAC_HALF + j * step, -TARMAC_DROP), (0, 0, 1),
+                    ((-TARMAC_HALF + i * step) / TARMAC_SLAB, (-TARMAC_HALF + j * step) / TARMAC_SLAB))
+             for i in range(n + 1)] for j in range(n + 1)]
+    for j in range(n):
+        for i in range(n):
+            m.quad(grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i])
+    return {"apron": ("tarmac", False, m)}
+
+
 def write_nif(path, root_name, built, s, tex, pyn):
     """One static model from {name: (material, collides, Mesh)}: material None is collision only."""
     NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, \
@@ -976,6 +1013,8 @@ def main():
         built, _ = door_panel_parts(args.length, closed)
         panel_paths.append(mesh_dir / f"{name}.nif")
         write_nif(panel_paths[-1], name, built, s, tex, pyn)
+    panel_paths.append(mesh_dir / "C130_Tarmac.nif")
+    write_nif(panel_paths[-1], "C130_Tarmac", tarmac_parts(), s, tex, pyn)
 
     aisle = wall_x(SEAT_Z) - SEAT_D - (CENTER_BACK_W / 2 + SEAT_D)
     sc = args.scale
