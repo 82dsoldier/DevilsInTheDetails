@@ -766,6 +766,19 @@ about airborne operations have heard of. It's the second worldspace.
       facing forward, the starboard cable 0.46 m to his left, so over his left shoulder. The
       script puts it on at boarding and holds him on his spot as the stick is held: no head
       tracking, put back if he turns or drifts, for the flight.
+  - **His hand signals, animated (2026-11-17).** He never gestured: the signals were only in
+    his subtitles. Vanilla has nothing like them, so they're made in code (the author: "even
+    something fiddly would probably be faster than my learning curve" in Blender).
+    `make_jm_signals.py` builds each as a Fallout 4 Havok animation with PyNifly's own writer
+    (`data/tools/io_scene_nifly/hkx/anim_fo4.py`, no Havok tools; the vanilla salute round-trips
+    through it to within 0.0002): his body held from the first frame of the vanilla
+    Brotherhood salute, his right arm aimed by a little inverse kinematics, the fingers curled
+    about their own axes; stick-figure previews to check. The plugin plays each through a
+    dynamic idle cloned from vanilla `BOS_Salute` (`dyn_Activation`, a plain path to our
+    file, `Actors\Character\Animations\DevilsInTheDetails\`); the script plays it as he
+    starts the line (`SIGNALS` in `make_jump_audio.py`, whose subtitle then drops the written
+    signal), letting him out of his hold for it. First, "Hook up!" (arm overhead, index finger
+    crooked, the forearm pumped three times), to prove the chain before the other eleven.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there

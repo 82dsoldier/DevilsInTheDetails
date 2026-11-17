@@ -70,6 +70,11 @@ Armor Property StaticLineRight Auto Const Mandatory
 the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
 Armor Property StaticLineLeft Auto Const Mandatory
 {DevilsStaticLineLeft: the same over the left shoulder, for the port men.}
+Idle Property SignalHookUp Auto Const Mandatory
+{DevilsJMSignalHookUp: his "Hook up!" signal (make_jm_signals.py), arm overhead, finger hooked,
+pumping; a dynamic idle like the vanilla BOS_Salute.}
+Float Property SignalSeconds = 3.0 Auto Const
+{How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
 {DevilsStaticLineJM: the jumpmaster's own static line (slot 56), hooked up before he starts the
 commands (the author): over his left shoulder to the starboard cable ahead of him, built for
@@ -394,6 +399,23 @@ Function DressJumpmaster()
 	CallFunctionNoWait("HoldJumpmaster", new Var[0])
 EndFunction
 
+Function Signal(Idle sig)
+	{His hand signal, as he starts the command; the commands carry on meanwhile.}
+	Var[] args = new Var[1]
+	args[0] = sig
+	CallFunctionNoWait("GiveSignal", args)
+EndFunction
+
+Function GiveSignal(Idle sig)
+	{Held (restrained) he may not animate: let him go for the signal, then hold him again.}
+	SetRestrained(False)
+	PlayIdle(sig)
+	Utility.Wait(SignalSeconds)
+	If running
+		SetRestrained(True)
+	EndIf
+EndFunction
+
 Function HoldJumpmaster()
 	{Hooked up, he stays put so his hook stays on the cable: no turning to look about, and if he
 	turns or drifts off his spot he's put back on it. For the flight (`running`).}
@@ -587,7 +609,8 @@ Function Play_commands_1()
 	Utility.Wait(1.76)
 	StandUp(False)
 	Utility.Wait(3.20)
-	Debug.Notification("Jumpmaster (arm overhead, finger crooked like a hook, pumping): Hook up!")
+	Debug.Notification("Jumpmaster: Hook up!")
+	Signal(SignalHookUp)
 	Utility.Wait(0.28)
 	HookUp()
 	Utility.Wait(1.56)

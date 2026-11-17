@@ -64,6 +64,11 @@ ACTIONS = {
     "Inboard personnel, stand up!": "StandUp(False)",
     "Hook up!": "HookUp()",
 }
+# The hand signals he's animated for (make_jm_signals.py): the jumpmaster's Idle property, played
+# as he starts the line; the subtitle then drops the written signal.
+SIGNALS = {
+    "Hook up!": "SignalHookUp",
+}
 
 PS_TTS = r"""
 Add-Type -AssemblyName System.Speech
@@ -169,7 +174,10 @@ def main():
         t = 0.3
         for i, (text, echo, signal) in enumerate(cmds):
             line = shout(voice[f"{piece}_{i}"])
-            cues.append((t, f"Jumpmaster ({signal}): {text}" if signal else f"Jumpmaster: {text}", None))
+            if text in SIGNALS:
+                cues.append((t, f"Jumpmaster: {text}", f"Signal({SIGNALS[text]})"))
+            else:
+                cues.append((t, f"Jumpmaster ({signal}): {text}" if signal else f"Jumpmaster: {text}", None))
             audio.append(line)
             t += len(line) / RATE
             if text in ACTIONS:
