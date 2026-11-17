@@ -46,8 +46,15 @@ ObjectReference[] Property StickSeats Auto Const
 {Each jumper's seat (DevilsC130SeatMarker), in the same order as Stick.}
 Int Property OutboardCount = 4 Auto Const
 Keyword Property SeatLink Auto Const Mandatory
-{LinkCustom01: a jumper's link to his seat. His sit package (DevilsSitLinkedSeatQuiet) sits him
-in it; clearing it stands him up, and he walks to his place in the aisle.}
+{LinkCustom01: a jumper's link to his seat, where his sit package (DevilsSitOutboard or
+DevilsSitInboard) sits him.}
+GlobalVariable Property OutboardUp Auto Const Mandatory
+{DevilsStickOutboardUp: the outboard sit package runs only while this is 0. Setting it to 1
+stands them up, and they walk to their places in the aisle.}
+GlobalVariable Property InboardUp Auto Const Mandatory
+{DevilsStickInboardUp: the same for the centerline seats.}
+Float Property DoorRaise = 140.0 Auto Const
+{How far the closed door slides up to be out of sight in the wall above the doorway.}
 Float Property TaxiSeconds = 20.0 Auto Const
 {From boarding to the run-up.}
 Float Property CruiseSeconds = 30.0 Auto Const
@@ -137,8 +144,9 @@ Function Fly()
 	engine = EnginesIdle.Play(Self)
 	Utility.Wait(TaxiSeconds)
 	Hydraulics.Play(Self)             ; the ramp and doors closing, right before takeoff
-	Utility.Wait(9.0)                 ; HYD_CLOSED: the locks clunk home
-	SetDoors(False)
+	Utility.Wait(4.6)
+	SlideDoorsClosed(4.2)             ; down as the pump labours, home at HYD_CLOSED (9 s)
+	Utility.Wait(0.2)
 	Utility.Wait(1.5)
 
 	Int next = EnginesTakeoff.Play(Self)
@@ -164,6 +172,8 @@ Function SeatStick()
 	If !Stick
 		Return
 	EndIf
+	OutboardUp.SetValue(0)
+	InboardUp.SetValue(0)
 	Int i = 0
 	While i < Stick.Length
 		Stick[i].SetLinkedRef(StickSeats[i], SeatLink)
@@ -188,10 +198,14 @@ Function StandUp(Bool outboard)
 	If !Stick
 		Return
 	EndIf
+	If outboard
+		OutboardUp.SetValue(1)
+	Else
+		InboardUp.SetValue(1)
+	EndIf
 	Int i = 0
 	While i < Stick.Length
 		If (i < OutboardCount) == outboard
-			Stick[i].SetLinkedRef(None, SeatLink)
 			Stick[i].EvaluatePackage()
 		EndIf
 		i += 1
@@ -215,16 +229,68 @@ Function LoadmasterOpensDoors()
 	{Run alongside the commands: the doors rattle up their tracks, and the wind comes in.}
 	Debug.Notification("The loadmaster opens the jump doors.")
 	DoorOpenSound.Play(Self)
-	Utility.Wait(1.6)                 ; the door bangs to the top of its tracks
-	SetDoors(True)
+	Utility.Wait(0.4)                 ; DOOR_SLIDE: unlatched, it starts up its tracks
+	SlideDoorsOpen(2.8)               ; and bangs to the top at DOOR_UP (3.2 s)
 	Int next = EnginesCruiseDoors.Play(Self)
 	Crossfade(engine, next, 1.5)
 	engine = next
 EndFunction
 
 Function SetDoors(Bool open)
+	{At once, no sliding: open for boarding.}
 	SetAll(DoorsOpen, open)
 	SetAll(DoorsClosed, !open)
+	Int i = 0
+	While DoorsClosed && i < DoorsClosed.Length
+		DoorsClosed[i].MoveToMyEditorLocation()
+		i += 1
+	EndWhile
+EndFunction
+
+Function SlideDoorsClosed(Float seconds)
+	{Each door comes down out of the wall above the doorway into place, over `seconds`.}
+	If !DoorsClosed
+		Return
+	EndIf
+	Int i = 0
+	While i < DoorsClosed.Length
+		ObjectReference d = DoorsClosed[i]
+		d.MoveToMyEditorLocation()
+		d.SetPosition(d.GetPositionX(), d.GetPositionY(), d.GetPositionZ() + DoorRaise)
+		d.Enable()
+		i += 1
+	EndWhile
+	SetAll(DoorsOpen, False)
+	i = 0
+	While i < DoorsClosed.Length
+		ObjectReference d = DoorsClosed[i]
+		Int tries = 0
+		While !d.Is3DLoaded() && tries < 20
+			Utility.Wait(0.05)
+			tries += 1
+		EndWhile
+		d.TranslateTo(d.GetPositionX(), d.GetPositionY(), d.GetPositionZ() - DoorRaise, \
+			d.GetAngleX(), d.GetAngleY(), d.GetAngleZ(), DoorRaise / seconds)
+		i += 1
+	EndWhile
+	Utility.Wait(seconds)
+EndFunction
+
+Function SlideDoorsOpen(Float seconds)
+	{Each door slides up out of the doorway into the wall above it over `seconds`, and is then
+	shown lying open on its tracks against the upper wall.}
+	If !DoorsClosed
+		Return
+	EndIf
+	Int i = 0
+	While i < DoorsClosed.Length
+		ObjectReference d = DoorsClosed[i]
+		d.TranslateTo(d.GetPositionX(), d.GetPositionY(), d.GetPositionZ() + DoorRaise, \
+			d.GetAngleX(), d.GetAngleY(), d.GetAngleZ(), DoorRaise / seconds)
+		i += 1
+	EndWhile
+	Utility.Wait(seconds)
+	SetDoors(True)
 EndFunction
 
 Function Crossfade(Int fromSound, Int toSound, Float seconds)

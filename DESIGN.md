@@ -658,10 +658,14 @@ about airborne operations have heard of. It's the second worldspace.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
-    by `DevilsSitLinkedSeatQuiet` (vanilla sit-in-linked-furniture, with hellos and chatter off)
-    through a `LinkCustom01` link the jumpmaster's script sets at boarding. On "Outboard
-    personnel, stand up!" and "Inboard personnel, stand up!" the script clears that half's
-    links: they get up and walk to their references' spots, a line down each aisle facing aft,
+    by a sit package (vanilla sit-in-linked-furniture, with hellos and chatter off) through a
+    `LinkCustom01` link the jumpmaster's script sets at boarding. **Clearing the link didn't
+    stand them up** (tested): the package just found the seat again. So each half has its own
+    package, `DevilsSitOutboard` / `DevilsSitInboard`, conditioned on a global
+    (`DevilsStickOutboardUp` / `DevilsStickInboardUp` == 0), and its own base
+    (`DevilsParatrooperOutboard` / `Inboard`). On "Outboard personnel, stand up!" and "Inboard
+    personnel, stand up!" the script sets that half's global: the package ends, they get up and
+    walk to their references' spots, a line down each aisle facing aft,
     leaving room for Nate by the starboard door. They're Initially Disabled (so none can load
     before the floor and fall) and enabled at boarding; after Nate goes out they're disabled.
     Still to do: hooking up (no animation yet), shuffling to the door, landing on Sicily,
@@ -759,6 +763,11 @@ about airborne operations have heard of. It's the second worldspace.
       `C130_DoorClosed.nif` (filling the doorway), swapped by enabling one and disabling the
       other; the jump door activator keeps the jambs, platform and jump slab. No loadmaster
       actor yet: a notification stands in for him.
+    - **The doors slide (2026-11-17):** a plain swap was too fast for the author. The closed door
+      (an activator, so it can move) slides: down out of the wall above the doorway over the
+      last 4 s of the hydraulics, and up into it over 2.8 s when the loadmaster opens it, the
+      rattle stretched to match (`DOOR_SLIDE`, `DOOR_UP` in make_engine_audio.py); then the open
+      door is shown lying on its tracks against the upper wall.
     - **Tested 2026-11-17: "Everything else is perfect."** The wait from boarding to "Ten
       minutes!" (about 2 minutes) may be a little long; left as is to see how players react.
       To shorten it, lower `TaxiSeconds` (20) or `CruiseSeconds` (30) on the jumpmaster's script

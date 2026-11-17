@@ -16,7 +16,8 @@ the rpm coming up from ground idle first.
   engines_cruise_doors.wav  loop: in flight with the jump doors open, the wind roaring in
   hydraulics.wav        one piece, HYD_LEN s: the pump closing the ramp and doors before
                         takeoff; the doors shut at HYD_CLOSED
-  door_open.wav         one piece, DOOR_LEN s: the loadmaster opening a jump door
+  door_open.wav         one piece, DOOR_LEN s: the loadmaster opening a jump door (it
+                        slides from DOOR_SLIDE to DOOR_UP)
 
 The loops are seamless: every tone fits a whole number of cycles in LOOP_LEN, and the noise is
 made periodic. The jumpmaster's script (DevilsJumpmaster.psc.in) plays them; its takeoff
@@ -50,7 +51,9 @@ PEAK = 0.5                          # the loudest moment (full power on the roll
 RUNUP, BRAKES_OFF, LIFTOFF, CLIMBED, TAKEOFF_LEN = 4.0, 14.0, 38.0, 53.0, 56.0
 # The hydraulics closing the ramp and doors: the locks clunk home at HYD_CLOSED.
 HYD_CLOSED, HYD_LEN = 9.0, 10.5
-DOOR_LEN = 3.0                      # a jump door opening, latch to wind
+# A jump door opening: unlatched at 0.1 s, sliding up its tracks from DOOR_SLIDE to DOOR_UP
+# (where it bangs to a stop), the wind coming in; DOOR_LEN long. The scene slides the door to match.
+DOOR_SLIDE, DOOR_UP, DOOR_LEN = 0.4, 3.2, 4.5
 
 
 def smooth(t, a, b):
@@ -171,12 +174,12 @@ def door_open():
     n = int(DOOR_LEN * RATE)
     t = np.arange(n) / RATE
     a = clunk(n, 0.1, 140, 0.18, 51, 0.06)
-    slide = (smooth(t, 0.35, 0.5) * (1 - smooth(t, 1.5, 1.6)))
+    slide = (smooth(t, DOOR_SLIDE - 0.05, DOOR_SLIDE + 0.1) * (1 - smooth(t, DOOR_UP - 0.1, DOOR_UP)))
     clicks = np.sin(2 * np.pi * 11 * t) ** 8                     # the rollers over the track joints
     a = a + noise(n, 52, band_shape(300, 3000)) * 0.08 * slide * (0.5 + clicks)
-    a = a + clunk(n, 1.6, 90, 0.25, 53, 0.15)
+    a = a + clunk(n, DOOR_UP, 90, 0.25, 53, 0.15)
     a = np.stack([a, a], 1)
-    return a + wind(n) * smooth(t, 0.4, DOOR_LEN - 0.3)[:, None]
+    return a + wind(n) * smooth(t, DOOR_SLIDE, DOOR_LEN - 0.3)[:, None]
 
 
 def write_wav(path, a):
