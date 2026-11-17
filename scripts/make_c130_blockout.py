@@ -152,6 +152,34 @@ def tex_fabric():
     return np.array([150, 30, 32])[None, None, :] * shade[..., None], weave * 0.004 - seam * 0.02
 
 
+def _smooth_noise(seed, cutoff):
+    """Tileable noise with features about 1/cutoff of the tile across, unit spread."""
+    f = np.fft.fft2(_noise(seed))
+    fy = np.fft.fftfreq(TEX_SIZE)[:, None]
+    fx = np.fft.fftfreq(TEX_SIZE)[None, :]
+    r = np.real(np.fft.ifft2(f * np.exp(-(fx ** 2 + fy ** 2) / (2 * cutoff ** 2))))
+    return r / r.std()
+
+
+def tex_static_line():
+    """Static line webbing, one tile per 25 cm along it (u), its width across (v): yellow nylon,
+    a tight weave across the strap, grimy and stained from use, one stitch line along it
+    (data/reference/1_3b9c...jpg)."""
+    u, v = _uv()
+    ribs = 0.5 + 0.5 * np.sin(2 * np.pi * u * 64)
+    twill = 0.5 + 0.5 * np.sin(2 * np.pi * (u * 64 + v * 8))
+    weave = 0.6 * ribs + 0.4 * twill
+    grime = np.clip(0.5 + 0.35 * _smooth_noise(7, 0.02), 0, 1)
+    stains = np.clip(_smooth_noise(8, 0.06) - 1.0, 0, 1)
+    edge = np.exp(-(np.minimum(v, 1 - v) / 0.06) ** 2)
+    stitch = np.exp(-((v - 0.80) / 0.02) ** 2) * (((u * 32) % 1) < 0.65)
+    shade = (0.84 + 0.16 * weave) * (1 - 0.35 * grime) * (1 - 0.4 * stains) * (1 - 0.3 * edge)
+    shade += _noise(9, scale=0.02)
+    rgb = np.array([218, 178, 42])[None, None, :] * shade[..., None]
+    rgb = rgb * (1 - stitch[..., None]) + np.array([60, 66, 36])[None, None, :] * stitch[..., None]
+    return rgb, weave * 0.003 - stitch * 0.008 - edge * 0.004
+
+
 def tex_webbing():
     """Webbing net, one tile per seat (SEAT_W wide, the net's full height): red straps hanging
     from the rail, crossed by horizontal bands; transparent between them."""
@@ -202,7 +230,8 @@ MATERIALS = {
     "red": (_flat((230, 30, 25)), {}),
     "green": (_flat((40, 210, 60)), {}),
     "cable": (_flat((190, 190, 190)), {}),
-    "static_line": (_flat((222, 188, 42)), {}),   # yellow webbing (the author)
+    "static_line": (tex_static_line, {"double_sided": True}),   # yellow webbing (the author)
+    "snap_hook": (_flat((168, 170, 172)), {}),    # stamped steel
     "lamp": (_flat((255, 246, 222)), {"emit": True}),
 }
 
@@ -225,7 +254,8 @@ def normal_map(h, strength=0.5):
 # Without these the shader's default shine made the blankets look like aluminium.
 SPECULAR = {"quilt": (0.03, 0.1), "fabric": (0.04, 0.12), "webbing": (0.04, 0.12),
             "floor": (0.3, 0.35), "aluminium": (0.5, 0.55), "glass": (0.6, 0.8),
-            "dark": (0.25, 0.3), "red": (0.3, 0.5), "green": (0.3, 0.5), "lamp": (0.3, 0.5)}
+            "dark": (0.25, 0.3), "red": (0.3, 0.5), "green": (0.3, 0.5), "lamp": (0.3, 0.5),
+            "static_line": (0.05, 0.15), "snap_hook": (0.45, 0.45)}
 SPECULAR_PAINT = (0.12, 0.25)    # everything else: painted metal, ducting, cable
 
 
@@ -601,6 +631,13 @@ STICK_GAP_SEATS = 1.5          # seats between one man and the next in line: at 
                                # collision bodies shove them about (tested)
 
 
+def stick_aisle():
+    """The middle of each side's aisle, from the centreline: where the stick stands."""
+    wall = wall_x(SEAT_Z) - 0.01
+    inner = CENTER_BACK_W / 2 + SEAT_D
+    return (inner + wall - SEAT_D) / 2
+
+
 def stick_places(length):
     """The stick's eight jumpers, four a side by the doors, staggered so they stand up into a line
     outboard 1, inboard 1, outboard 2, inboard 2 from the door: a list of dicts in the order the
@@ -625,22 +662,100 @@ def stick_places(length):
     return out
 
 
-def static_line_parts(length):
-    """The stick hooked up: each man's static line snapped to his side's anchor cable ahead of him
-    (toward the door), down over his inboard shoulder and down his back to the pack. One model in
-    the cabin's frame, shown on "Hook up!"."""
-    lines, snaps = Mesh(), Mesh()
-    for j in stick_places(length):
-        side = j["side"]
-        x, y = j["stand"]
-        cx = side * CABLE_X
-        sx = x - side * 0.17                       # his inboard shoulder (he faces aft, -Y)
-        pts = [(cx, y - 0.45, CABLE_Z - 0.04), (sx, y - 0.10, 1.52), (sx + side * 0.02, y + 0.12, 1.46),
-               (x - side * 0.05, y + 0.20, 1.15)]
-        for a, b in zip(pts, pts[1:]):
-            lines.tube(a, b, 0.012, steps=6, caps=True)
-        snaps.box(cx - 0.02, y - 0.50, CABLE_Z - 0.05, cx + 0.02, y - 0.40, CABLE_Z + 0.03)
-    return {"static_lines": ("static_line", False, lines), "snap_hooks": ("aluminium", False, snaps)}
+STATIC_LINE_W = 0.044           # 1-3/4 in webbing
+SHOULDER_Z, SHOULDER_X = 1.52, 0.17    # a Fallout man's shoulder top, and its offset from his middle
+BACK_Y = -0.15                 # his back, behind his middle
+
+
+def _catmull(pts, per=6):
+    """A smooth curve through pts (Catmull-Rom), `per` samples a span."""
+    p = [pts[0]] + list(pts) + [pts[-1]]
+    out = []
+    for i in range(1, len(p) - 2):
+        for k in range(per):
+            t = k / per
+            out.append(tuple(0.5 * (2 * p[i][j] + (-p[i - 1][j] + p[i + 1][j]) * t
+                                    + (2 * p[i - 1][j] - 5 * p[i][j] + 4 * p[i + 1][j] - p[i + 2][j]) * t * t
+                                    + (-p[i - 1][j] + 3 * p[i][j] - 3 * p[i + 1][j] + p[i + 2][j]) * t ** 3)
+                             for j in range(3)))
+    out.append(tuple(pts[-1]))
+    return out
+
+
+def _ribbon(m, pts, width, tile=0.25):
+    """A flat strap along pts, its width across X (across his shoulders); u runs along it, one
+    texture tile every `tile` metres, v across it."""
+    along = 0.0
+    prev = last = None
+    for i, p in enumerate(pts):
+        q = pts[min(i + 1, len(pts) - 1)]
+        r = pts[max(i - 1, 0)]
+        t = [q[j] - r[j] for j in range(3)]
+        n = (0.0, -t[2], t[1])                         # across (x) crossed with the tangent
+        ln = math.sqrt(sum(c * c for c in n)) or 1.0
+        n = tuple(c / ln for c in n)
+        if prev is not None:
+            along += math.dist(prev, p)
+        a = m.vert((p[0] - width / 2, p[1], p[2]), n, (along / tile, 0.0))
+        b = m.vert((p[0] + width / 2, p[1], p[2]), n, (along / tile, 1.0))
+        if last is not None:
+            m.quad(last[0], last[1], b, a)
+        last, prev = (a, b), p
+
+
+def _half_disc(m, cx, cy, cz, r, t, steps=8):
+    """The rounded nose of the snap hook: a half disc in the x-z plane, round side up, t thick."""
+    for face in (-1, 1):
+        n = (0, face, 0)
+        c = m.vert((cx, cy + face * t / 2, cz), n)
+        rim = [m.vert((cx + r * math.cos(math.pi * i / steps), cy + face * t / 2,
+                       cz + r * math.sin(math.pi * i / steps)), n) for i in range(steps + 1)]
+        for i in range(steps):
+            m.tri(c, rim[i], rim[i + 1])
+    for i in range(steps):
+        a0, a1 = math.pi * i / steps, math.pi * (i + 1) / steps
+        n = (math.cos((a0 + a1) / 2), 0, math.sin((a0 + a1) / 2))
+        q = [m.vert((cx + r * math.cos(ang), cy + f * t / 2, cz + r * math.sin(ang)), n)
+             for ang, f in ((a0, -1), (a1, -1), (a1, 1), (a0, 1))]
+        m.quad(*q)
+
+
+def static_line_parts(mirror=False):
+    """One man's static line, hooked up, in his own frame: his feet at the origin, facing +Y, his
+    right +X. The snap hook hangs on the anchor cable ahead of him (toward the door); the webbing
+    runs from its tail down over his inboard shoulder and down his back to the pack. His inboard
+    shoulder is his right on the starboard side; mirror=True for the port side (his left).
+    The script puts one on each man where he actually stands, and keeps it there.
+      the hook  from data/reference/UGK-009.jpg: a flat stamped steel plate, rounded at the nose,
+                the cable through a slot under it, a sliding gate with a round button, and a slot
+                at the tail the webbing loops through
+      the strap from data/reference/1_3b9c...jpg: flat yellow webbing, dirty, one stitch line"""
+    sx = -1 if mirror else 1
+    cx = sx * (stick_aisle() - CABLE_X)              # the cable, from his middle: inboard of him
+    cy, cz = 0.45, CABLE_Z
+    W, T = 0.036, 0.007
+    hook = Mesh()
+    hook.box(cx - W / 2, cy - T / 2, cz - 0.035, cx + W / 2, cy + T / 2, cz - 0.025)      # under the slot
+    for e in (-1, 1):
+        x0, x1 = sorted((cx + e * 0.008, cx + e * W / 2))                                  # beside the slot
+        hook.box(x0, cy - T / 2, cz - 0.025, x1, cy + T / 2, cz + 0.016)
+        x0, x1 = sorted((cx + e * 0.006, cx + e * W / 2))                                  # the tail slot
+        hook.box(x0, cy - T / 2, cz - 0.135, x1, cy + T / 2, cz - 0.115)
+    _half_disc(hook, cx, cy, cz + 0.016, W / 2, T)
+    hook.box(cx - W / 2, cy - T / 2, cz - 0.115, cx + W / 2, cy + T / 2, cz - 0.035)     # the body
+    hook.box(cx - W / 2, cy - T / 2, cz - 0.145, cx + W / 2, cy + T / 2, cz - 0.135)     # under the tail slot
+    gate = Mesh()
+    gate.box(cx - W / 2 + 0.002, cy - T / 2 - 0.003, cz - 0.09, cx + W / 2 - 0.002, cy - T / 2, cz - 0.03)
+    gate.tube((cx + 0.004, cy - T / 2 - 0.003, cz - 0.06), (cx + 0.004, cy - T / 2 - 0.007, cz - 0.06),
+              0.006, steps=10, caps=True)
+    strap = Mesh()
+    x = sx * SHOULDER_X
+    pts = _catmull([(cx, cy, cz - 0.14), (cx, cy - 0.05, cz - 0.30),
+                    (x, 0.11, SHOULDER_Z - 0.04), (x, 0.0, SHOULDER_Z + 0.015),
+                    (x * 0.95, BACK_Y + 0.03, SHOULDER_Z - 0.05), (x * 0.6, BACK_Y - 0.01, 1.15)])
+    _ribbon(strap, pts, STATIC_LINE_W)
+    return {"static_line": ("static_line", False, strap), "snap_hook": ("snap_hook", False, hook),
+            "snap_gate": ("snap_hook", False, gate)}
 
 
 def door_parts(length):
@@ -809,8 +924,9 @@ def main():
         built, _ = door_panel_parts(args.length, closed)
         panel_paths.append(mesh_dir / f"{name}.nif")
         write_nif(panel_paths[-1], name, built, s, tex, pyn)
-    panel_paths.append(mesh_dir / "C130_StaticLines.nif")
-    write_nif(panel_paths[-1], "C130_StaticLines", static_line_parts(args.length), s, tex, pyn)
+    for mirror, name in ((False, "C130_StaticLineR"), (True, "C130_StaticLineL")):
+        panel_paths.append(mesh_dir / f"{name}.nif")
+        write_nif(panel_paths[-1], name, static_line_parts(mirror), s, tex, pyn)
 
     aisle = wall_x(SEAT_Z) - SEAT_D - (CENTER_BACK_W / 2 + SEAT_D)
     sc = args.scale

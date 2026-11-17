@@ -664,13 +664,24 @@ about airborne operations have heard of. It's the second worldspace.
     still jostle some as they line up, but no one is pushed back into a seat. Possible polish:
     stand each man a beat apart instead of all at once, or space them a little wider. Left
     for beta: "If someone complains during beta, then we'll know."
-  - **Hooked up (2026-11-17):** on "Hook up!" the stick's static lines appear: one model
-    (`C130_StaticLines.nif`, yellow webbing) in the cabin's frame, each line snapped to its
-    side's anchor cable just aft of the man, toward the door, and run down over his inboard
-    shoulder and down his back to where the pack will be. Since the men stand still on their
-    marks, the lines can be fixed; they don't follow a man who's been jostled off his mark.
-    The stick's layout now lives in `make_c130_blockout.py` (`stick_places`), for the model and
-    the plugin both. Not yet: Nate's own static line, the shuffle to the door.
+  - **Hooked up (2026-11-17):** on "Hook up!" each man's static line appears, snapped to his
+    side's anchor cable just ahead of him (toward the door), down over his inboard shoulder and
+    down his back to where the pack will be.
+    - **The first try was wrong all over** (the author, with a screenshot): one fixed model
+      where the men were *meant* to stand floated a man's width from where they really stood;
+      the snap was a box; the line a round tube, and olive drab. **The static line is yellow**,
+      flat webbing, usually dirty, with one stitch line (`data/reference/1_3b9c...jpg`). **The
+      snap hook** is a flat stamped steel plate: rounded nose, the cable through a slot under
+      it, a sliding gate with a round button, a slot at the tail for the webbing
+      (`data/reference/UGK-009.jpg`).
+    - **Now each man has his own line** (`C130_StaticLineR.nif` over the right shoulder for the
+      starboard men, `C130_StaticLineL.nif` over the left for port: the inboard shoulder,
+      under the cable), modelled in his own frame; the jumpmaster's script puts it where he
+      actually stands and keeps it there (every quarter second) till he's out the door, so a
+      jostled man keeps his line, and the shuffle to the door can use the same. The fit to a
+      Fallout man's body (`SHOULDER_Z`, `SHOULDER_X`, `BACK_Y`) is a first guess, to tune in game.
+    - The stick's layout lives in `make_c130_blockout.py` (`stick_places`, `stick_aisle`), for
+      the models and the plugin both. Not yet: Nate's own static line, the shuffle to the door.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
