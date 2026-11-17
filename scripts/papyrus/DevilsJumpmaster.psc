@@ -54,11 +54,13 @@ stands them up, and they walk to their places in the aisle.}
 GlobalVariable Property InboardUp Auto Const Mandatory
 {DevilsStickInboardUp: the same for the centerline seats.}
 ObjectReference[] Property StickStands Auto Const
-{Each jumper's place in line (DevilsC130StandMarker, an invisible standing marker on his own
-reference's spot, facing aft), in the same order as Stick. Up, his stand package walks him to it
-and holds him there, so he's on his mark and his hook on the cable, however the line jostles.}
-Keyword Property StandLink Auto Const Mandatory
-{LinkCustom02: a jumper's link to his stand marker, for DevilsStandOutboard / DevilsStandInboard.}
+{Each jumper's mark in line (an XMarkerHeading on his own reference's spot, facing aft), in the
+same order as Stick. Up, he walks back to his spot; nearly there, he's set on his mark and held
+(restrained), so his hook is on the cable and no one shoves him off it.}
+Float Property SettleDistance = 45.0 Auto Const
+{How near his mark (game units) a jumper walks before he's set on it.}
+Float Property SettleSeconds = 10.0 Auto Const
+{The longest he's given to get there before he's set on it anyway.}
 Armor Property StaticLineRight Auto Const Mandatory
 {DevilsStaticLineRight: a hooked-up static line, worn (body slot 56), over the right shoulder to
 the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
@@ -187,10 +189,8 @@ Function SeatStick()
 	InboardUp.SetValue(0)
 	Int i = 0
 	While i < Stick.Length
+		Stick[i].SetRestrained(False)
 		Stick[i].SetLinkedRef(StickSeats[i], SeatLink)
-		If StickStands
-			Stick[i].SetLinkedRef(StickStands[i], StandLink)
-		EndIf
 		Stick[i].Enable()
 		i += 1
 	EndWhile
@@ -208,7 +208,7 @@ EndFunction
 
 Function StandUp(Bool outboard)
 	{"Outboard personnel, stand up!" or "Inboard...": that half of the stick gets up and lines up
-	in the aisles, facing aft, each on his stand marker.}
+	in the aisles, facing aft, each settled on his mark.}
 	If !Stick
 		Return
 	EndIf
@@ -223,6 +223,42 @@ Function StandUp(Bool outboard)
 			Stick[i].EvaluatePackage()
 		EndIf
 		i += 1
+	EndWhile
+	Var[] args = new Var[1]
+	args[0] = outboard
+	CallFunctionNoWait("SettleHalf", args)
+EndFunction
+
+Function SettleHalf(Bool outboard)
+	{Watch that half walk to their spots; as each comes near his mark (or runs out of time), set
+	him on it, facing aft, and hold him there.}
+	If !StickStands
+		Return
+	EndIf
+	Float waited = 0.0
+	Bool[] settled = new Bool[Stick.Length]
+	Int left = 1
+	While left > 0
+		left = 0
+		Int i = 0
+		While i < Stick.Length
+			Actor man = Stick[i]
+			If (i < OutboardCount) == outboard && !settled[i]
+				If man.GetSitState() == 0 && (man.GetDistance(StickStands[i]) < SettleDistance || waited >= SettleSeconds)
+					man.MoveTo(StickStands[i])
+					man.SetRestrained(True)
+					settled[i] = True
+				Else
+					left += 1
+				EndIf
+			EndIf
+			i += 1
+		EndWhile
+		If waited >= SettleSeconds + 5.0     ; still seated after all that: leave him be
+			Return
+		EndIf
+		Utility.Wait(0.25)
+		waited += 0.25
 	EndWhile
 EndFunction
 
@@ -256,6 +292,7 @@ Function ClearStick()
 	Int i = 0
 	While i < Stick.Length
 		Unhook(Stick[i])
+		Stick[i].SetRestrained(False)
 		Stick[i].Disable()
 		Stick[i].MoveToMyEditorLocation()
 		i += 1
