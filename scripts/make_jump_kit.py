@@ -9,10 +9,12 @@ equipment, period gear, not today's), as one skinned model so it goes where he g
                  chest strap, steel hardware
   T-10R reserve  across his belly on the harness, olive drab, the steel ripcord grip on his right
                  (data/reference/T-10R reserve troop parachute-500x500w.png)
-  ALICE ruck     hung under the reserve, in front of his thighs (where it hangs in the modern
-                 photos, 160804-F-BP133-218.jpg and others): it rides his thighs, so seated it
-                 lies in his lap (the author: hooked up, the ruck on his lap)
-  M1950 case     the weapons case, down his left side, riding his left thigh
+  ALICE ruck     hung under the reserve, low in front of his legs and as wide as them (the
+                 author): it rides his thighs, so seated it lies in his lap out toward his knees
+                 (the author: hooked up, the ruck on his lap)
+  M1950 case     the weapons case, flat, pale grey quilted canvas, armpit to mid-shin down his
+                 left side (data/reference/1_bacd...jpg): his torso above the hip, his left
+                 thigh below
 
 Built in his own frame (worn.py) and fitted to the vanilla male body in fatigues, measured off
 FatiguesM.nif in its bind pose: his front about 0.11 m ahead of his middle at the chest (1.5 m
@@ -108,13 +110,17 @@ def band(m, pts, width, across, tile=0.25):
 W = 0.044                          # webbing width (1.75 in)
 MAIN = ((0.0, -0.275, 1.29), (0.19, 0.095, 0.25))        # centre, half extents
 RESERVE = ((0.0, 0.222, 1.15), (0.17, 0.072, 0.11))   # snug on the harness at his belly
-RUCK = ((0.0, 0.245, 0.70), (0.20, 0.125, 0.22))
-CASE = ((-0.285, 0.0, 0.66), (0.05, 0.10, 0.34))         # his left is -X
+# The ruck as wide as his legs and low on them, down by his knees (the author): seated, in his
+# lap out toward his knees, clear of the reserve (the first try, high on his thighs, swallowed it).
+RUCK = ((0.0, 0.185, 0.49), (0.21, 0.10, 0.19))
+# The weapons case: flat, armpit to mid-shin down his left side (the author; his left is -X).
+CASE = ((-0.258, 0.0, 0.80), (0.032, 0.10, 0.50))
+CASE_TILE = 0.2                    # its quilting: one tile is two 10 cm squares
 
 
 def kit_parts():
     """{shape: (material, Mesh, weights)}."""
-    main, harness, steel, stowed, reserve, ruck, case = (c.Mesh() for _ in range(7))
+    main, harness, steel, stowed, reserve, ruck, case, case_straps, case_steel = (c.Mesh() for _ in range(9))
 
     # The main, on his back, its closing bands and the static line stowed on it.
     pillow(main, *MAIN)
@@ -157,42 +163,53 @@ def kit_parts():
         steel.tube((ra + 0.004 + 0.035 * math.cos(a0), ry + 0.035 * math.sin(a0), rz),
                    (ra + 0.004 + 0.035 * math.cos(a1), ry + 0.035 * math.sin(a1), rz), 0.005, steps=6)
 
-    # The ALICE ruck, under the reserve in front of his thighs: its flap, three pockets, and the
-    # straps that hang it from the harness.
+    # The ALICE ruck, low in front of his legs: its flap, three pockets, and the straps that
+    # hang it from the harness under the reserve.
     pillow(ruck, *RUCK, e=0.45)
     (kx, ky, kz), (ka, kb, kh) = RUCK
     front = ky + kb
-    pillow(ruck, (0.0, ky + 0.02, kz + kh - 0.02), (ka * 0.95, kb * 0.95, 0.05), e=0.5)   # top flap
-    for px in (-0.13, 0.0, 0.13):
-        pillow(ruck, (px, front + 0.02, kz - 0.06), (0.055, 0.035, 0.08), e=0.5, steps=(16, 10))
+    pillow(ruck, (0.0, ky + 0.01, kz + kh - 0.02), (ka * 0.96, kb * 0.96, 0.05), e=0.5)   # top flap
+    for px in (-0.14, 0.0, 0.14):
+        pillow(ruck, (px, front + 0.02, kz - 0.04), (0.06, 0.03, 0.08), e=0.5, steps=(16, 10))
+    rb = RESERVE[0][2] - RESERVE[1][2]                        # the reserve's bottom
     for s in (-1, 1):
-        band(harness, [(s * 0.12, ky + 0.05, kz + kh + 0.1), (s * 0.12, front - 0.01, kz + kh - 0.01),
-                       (s * 0.12, front + 0.006, kz + 0.1), (s * 0.12, front + 0.006, kz - kh + 0.05)],
+        band(harness, [(s * 0.12, RESERVE[0][1], rb + 0.02), (s * 0.12, front - 0.03, kz + kh + 0.04),
+                       (s * 0.12, front + 0.006, kz + kh - 0.03), (s * 0.12, front + 0.006, kz - kh + 0.05)],
              0.03, (1, 0, 0))
 
-    # The M1950 weapons case down his left side, its tie-down bands.
-    pillow(case, *CASE, e=0.4)
+    # The M1950 weapons case down his left side (data/reference/1_bacd...jpg): flat, pale grey
+    # canvas quilted in squares, a strap with its quick-release buckle, a tie-down strap.
+    pillow(case, *CASE, e=0.5, steps=(20, 24), tile=CASE_TILE)
     (cx, cy, cz), (ca, cb, ch) = CASE
-    for z in (cz - 0.18, cz + 0.12):
-        steps = 12
-        ring = [(cx + (ca + 0.006) * math.cos(2 * math.pi * k / steps),
-                 cy + (cb + 0.006) * math.sin(2 * math.pi * k / steps), z) for k in range(steps + 1)]
-        band(harness, ring, 0.03, (0, 0, 1))
+    for z, buckle in ((cz + 0.22, True), (cz - 0.28, False)):
+        band(case_straps, [(cx - ca - 0.004, cy + cb * 0.9, z), (cx - ca - 0.004, cy - cb * 0.9, z)],
+             0.025, (0, 0, 1))
+        if buckle:
+            case_steel.box(cx - ca - 0.012, cy + 0.01, z - 0.02, cx - ca - 0.004, cy + 0.06, z + 0.02)
 
     thighs = lambda v: {"LLeg_Thigh": 0.5, "RLeg_Thigh": 0.5}      # noqa: E731
 
     def harness_weights(v):
         if v[2] < 0.93 and v[1] > 0.2:                        # the ruck's straps
             return thighs(v)
-        if v[0] < -0.22 and v[2] < 0.93:                      # the case's bands
-            return {"LLeg_Thigh": 1.0}
         return worn.torso_weights(v)
+
+    def case_weights(v):
+        """His torso above the hip, his left thigh below (it bends there as he sits)."""
+        if v[2] >= 1.05:
+            return worn.torso_weights(v)
+        if v[2] <= 0.90:
+            return {"LLeg_Thigh": 1.0}
+        t = (v[2] - 0.90) / 0.15
+        return {"Pelvis": t, "LLeg_Thigh": 1.0 - t}
 
     return {"main": ("nylon", main, worn.torso_weights),
             "stowed_line": ("static_line", stowed, worn.torso_weights),
             "reserve": ("nylon", reserve, worn.torso_weights),
             "ruck": ("alice", ruck, thighs),
-            "weapons_case": ("nylon", case, worn.rigid("LLeg_Thigh")),
+            "weapons_case": ("weapons_case", case, case_weights),
+            "case_straps": ("harness", case_straps, case_weights),
+            "case_buckle": ("snap_hook", case_steel, case_weights),
             "harness": ("harness", harness, harness_weights),
             "hardware": ("snap_hook", steel, worn.torso_weights)}
 

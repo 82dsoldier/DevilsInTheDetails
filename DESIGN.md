@@ -726,8 +726,14 @@ about airborne operations have heard of. It's the second worldspace.
     - `worn.py` now holds the skinning for every worn model (bind poses for each bone used,
       from the vanilla skeleton); the static line uses it too, and its strap now runs over
       the top of the main to the stowed loops instead of down his back.
-    - Untested. Watch: the main may push into the cargo net and wall behind the outboard men
-      as they sit; the ruck may clip his knees or the reserve seated.
+    - **First test (the author, with screenshots):** the main went through the wall and seat;
+      seated, the ruck swallowed the reserve; the case should be grey, not camo, flatter, and
+      run armpit to mid-shin (`data/reference/1_bacd...jpg`); all the kit vanished at hook-up.
+      So: the seats moved 0.20 m forward (each man sits on the front edge, his main against
+      the net); the ruck low on his legs and as wide as them (the author), so seated it lies
+      out toward his knees; the case flat, pale grey quilted canvas, armpit to mid-shin, his
+      torso above the hip and his left thigh below; the OD textures plain (big grime blotches
+      read as camouflage); and the script puts the kit back on after equipping the line.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there

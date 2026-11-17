@@ -311,6 +311,8 @@ Function HookUp()
 		EndIf
 		Stick[i].AddItem(line, 1, True)
 		Stick[i].EquipItem(line, True, True)
+		; Equipping the line took his kit off (tested): on again.
+		Stick[i].EquipItem(JumpKit, True, True)
 		i += 1
 	EndWhile
 EndFunction

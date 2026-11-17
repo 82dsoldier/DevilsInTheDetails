@@ -180,17 +180,29 @@ def tex_static_line():
     return rgb, weave * 0.003 - stitch * 0.008 - edge * 0.004
 
 
-def tex_nylon(base=(84, 92, 58), seed=20, weave_n=96):
-    """Parachute packs and the weapons case, one tile 25 cm square: olive drab nylon duck, a
-    fine weave, worn and grimy, darker in the creases (data/reference/1_958e...jpg, T-10R...png)."""
+def tex_nylon(base=(66, 70, 50), seed=20, weave_n=96):
+    """Parachute packs, one tile 25 cm square: olive drab nylon duck, a fine weave, a little worn
+    (data/reference/1_958e...jpg, T-10R...png). Plain: big grime blotches read as camouflage in
+    the game (the author)."""
     def make():
         u, v = _uv()
         weave = 0.5 + 0.5 * np.sin(2 * np.pi * u * weave_n) * np.sin(2 * np.pi * v * weave_n)
-        grime = np.clip(0.5 + 0.35 * _smooth_noise(seed, 0.03), 0, 1)
-        fade = _smooth_noise(seed + 1, 0.015)
-        shade = (0.9 + 0.1 * weave) * (1 - 0.25 * grime) * (1 + 0.06 * fade) + _noise(seed + 2, scale=0.02)
+        wear = _smooth_noise(seed, 0.08)
+        shade = (0.92 + 0.08 * weave) * (1 + 0.04 * wear) + _noise(seed + 2, scale=0.015)
         return np.array(base)[None, None, :] * shade[..., None], weave * 0.002
     return make
+
+
+def tex_weapons_case():
+    """The M1950 weapons case, one tile 20 cm square: pale grey-olive canvas quilted in 10 cm
+    squares, the padding puffed between the stitching (data/reference/1_bacd...jpg)."""
+    u, v = _uv()
+    fu, fv = (u * 2) % 1, (v * 2) % 1
+    puff = np.sqrt(np.clip(np.sin(np.pi * fu) * np.sin(np.pi * fv), 0, 1))
+    seam = np.exp(-(np.minimum(np.minimum(fu, 1 - fu), np.minimum(fv, 1 - fv)) / 0.02) ** 2)
+    weave = 0.5 + 0.5 * np.sin(2 * np.pi * u * 80) * np.sin(2 * np.pi * v * 80)
+    shade = (0.8 + 0.2 * puff) * (1 - 0.25 * seam) * (0.95 + 0.05 * weave) + _noise(26, scale=0.015)
+    return np.array([128, 130, 108])[None, None, :] * shade[..., None], puff * 0.25 - seam * 0.05
 
 
 def tex_od_webbing():
@@ -257,8 +269,9 @@ MATERIALS = {
     "static_line": (tex_static_line, {"double_sided": True}),   # yellow webbing (the author)
     "snap_hook": (_flat((168, 170, 172)), {}),    # stamped steel
     # The stick's kit: early-90s olive drab (the author: period gear, not today's).
-    "nylon": (tex_nylon(), {}),                   # T-10C main, T-10R reserve, M1950 case
-    "alice": (tex_nylon((74, 82, 54), 30, 48), {}),   # the ALICE ruck, coarser and greener
+    "nylon": (tex_nylon(), {}),                   # T-10C main, T-10R reserve
+    "alice": (tex_nylon((62, 68, 46), 30, 48), {}),   # the ALICE ruck, coarser and greener
+    "weapons_case": (tex_weapons_case, {}),       # M1950, pale grey quilted canvas (the author)
     "harness": (tex_od_webbing, {"double_sided": True}),
     "lamp": (_flat((255, 246, 222)), {"emit": True}),
 }
@@ -284,7 +297,8 @@ SPECULAR = {"quilt": (0.03, 0.1), "fabric": (0.04, 0.12), "webbing": (0.04, 0.12
             "floor": (0.3, 0.35), "aluminium": (0.5, 0.55), "glass": (0.6, 0.8),
             "dark": (0.25, 0.3), "red": (0.3, 0.5), "green": (0.3, 0.5), "lamp": (0.3, 0.5),
             "static_line": (0.05, 0.15), "snap_hook": (0.45, 0.45),
-            "nylon": (0.05, 0.15), "alice": (0.05, 0.12), "harness": (0.05, 0.15)}
+            "nylon": (0.05, 0.15), "alice": (0.05, 0.12), "harness": (0.05, 0.15),
+            "weapons_case": (0.03, 0.1)}
 SPECULAR_PAINT = (0.12, 0.25)    # everything else: painted metal, ducting, cable
 
 
