@@ -746,6 +746,10 @@ about airborne operations have heard of. It's the second worldspace.
       `C130_DoorClosed.nif` (filling the doorway), swapped by enabling one and disabling the
       other; the jump door activator keeps the jambs, platform and jump slab. No loadmaster
       actor yet: a notification stands in for him.
+    - **Tested 2026-11-17: "Everything else is perfect."** The wait from boarding to "Ten
+      minutes!" (about 2 minutes) may be a little long; left as is to see how players react.
+      To shorten it, lower `TaxiSeconds` (20) or `CruiseSeconds` (30) on the jumpmaster's script
+      in the CK, no recompile needed.
   - **The jumpmaster stands aft of the starboard door,** not in front of it (in front, he blocked
     it). He faces forward, toward the stick. He holds his spot and doesn't greet the player: no
     voice type, AI package `DefaultStayAtEditorLocationNoInterrupt`.
