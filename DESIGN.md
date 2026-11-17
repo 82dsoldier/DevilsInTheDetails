@@ -662,7 +662,15 @@ about airborne operations have heard of. It's the second worldspace.
     from the door, the inboard men on the centerline between seats 2-3 and 5-6 (the seat
     markers are invisible, so they needn't sit on a seam). **Tested: "Much better."** They
     still jostle some as they line up, but no one is pushed back into a seat. Possible polish:
-    stand each man a beat apart instead of all at once, or space them a little wider.
+    stand each man a beat apart instead of all at once, or space them a little wider. Left
+    for beta: "If someone complains during beta, then we'll know."
+  - **Hooked up (2026-11-17):** on "Hook up!" the stick's static lines appear: one model
+    (`C130_StaticLines.nif`, olive drab webbing) in the cabin's frame, each line snapped to its
+    side's anchor cable just aft of the man, toward the door, and run down over his inboard
+    shoulder and down his back to where the pack will be. Since the men stand still on their
+    marks, the lines can be fixed; they don't follow a man who's been jostled off his mark.
+    The stick's layout now lives in `make_c130_blockout.py` (`stick_places`), for the model and
+    the plugin both. Not yet: Nate's own static line, the shuffle to the door.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there

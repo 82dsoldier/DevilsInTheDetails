@@ -53,6 +53,9 @@ GlobalVariable Property OutboardUp Auto Const Mandatory
 stands them up, and they walk to their places in the aisle.}
 GlobalVariable Property InboardUp Auto Const Mandatory
 {DevilsStickInboardUp: the same for the centerline seats.}
+ObjectReference Property StaticLines Auto Const
+{The stick's static lines snapped to the anchor cables (DevilsC130StaticLines, Initially
+Disabled): shown on "Hook up!".}
 Float Property DoorRaise = 140.0 Auto Const
 {How far the closed door slides up to be out of sight in the wall above the doorway.}
 Float Property TaxiSeconds = 20.0 Auto Const
@@ -212,8 +215,18 @@ Function StandUp(Bool outboard)
 	EndWhile
 EndFunction
 
+Function HookUp()
+	{"Hook up!": the stick snaps their static lines to the anchor cables.}
+	If StaticLines
+		StaticLines.Enable()
+	EndIf
+EndFunction
+
 Function ClearStick()
 	{Out the door after Nate: gone from the plane, and back on their marks for next time.}
+	If StaticLines
+		StaticLines.Disable()
+	EndIf
 	If !Stick
 		Return
 	EndIf

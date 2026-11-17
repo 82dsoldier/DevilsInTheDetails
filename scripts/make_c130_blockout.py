@@ -202,6 +202,7 @@ MATERIALS = {
     "red": (_flat((230, 30, 25)), {}),
     "green": (_flat((40, 210, 60)), {}),
     "cable": (_flat((190, 190, 190)), {}),
+    "static_line": (_flat((92, 96, 62)), {}),     # olive drab webbing
     "lamp": (_flat((255, 246, 222)), {"emit": True}),
 }
 
@@ -594,6 +595,54 @@ def parts(length):
     return p, per_row
 
 
+# --- The stick ------------------------------------------------------------------------
+
+STICK_GAP_SEATS = 1.5          # seats between one man and the next in line: at less, the game's
+                               # collision bodies shove them about (tested)
+
+
+def stick_places(length):
+    """The stick's eight jumpers, four a side by the doors, staggered so they stand up into a line
+    outboard 1, inboard 1, outboard 2, inboard 2 from the door: a list of dicts in the order the
+    jumpmaster's script holds them (outboard starboard 1, 2; outboard port 1, 2; then inboard),
+    each with outboard, side (+1 starboard), seat (x, y, facing +1 for +X) and stand (x, y),
+    in metres. Each stands straight out from his seat into his side's aisle, facing aft."""
+    hinge = -length / 2
+    db = hinge + DOOR_AFT + DOOR_W
+    y0 = db + SEAT_AFT_GAP
+    wall = wall_x(SEAT_Z) - 0.01
+    inner = CENTER_BACK_W / 2 + SEAT_D
+    aisle = (inner + wall - SEAT_D) / 2
+    out = []
+    for outboard in (True, False):
+        for side in (1, -1):
+            for k in (0, 1):
+                seat_no = 2 * STICK_GAP_SEATS * k + (0 if outboard else STICK_GAP_SEATS)
+                y = y0 + (seat_no + 0.5) * SEAT_W
+                x = side * (wall - SEAT_D / 2) if outboard else side * (inner - SEAT_D / 2)
+                out.append({"outboard": outboard, "side": side, "seat": (x, y, -side if outboard else side),
+                            "stand": (side * aisle, y)})
+    return out
+
+
+def static_line_parts(length):
+    """The stick hooked up: each man's static line snapped to his side's anchor cable ahead of him
+    (toward the door), down over his inboard shoulder and down his back to the pack. One model in
+    the cabin's frame, shown on "Hook up!"."""
+    lines, snaps = Mesh(), Mesh()
+    for j in stick_places(length):
+        side = j["side"]
+        x, y = j["stand"]
+        cx = side * CABLE_X
+        sx = x - side * 0.17                       # his inboard shoulder (he faces aft, -Y)
+        pts = [(cx, y - 0.45, CABLE_Z - 0.04), (sx, y - 0.10, 1.52), (sx + side * 0.02, y + 0.12, 1.46),
+               (x - side * 0.05, y + 0.20, 1.15)]
+        for a, b in zip(pts, pts[1:]):
+            lines.tube(a, b, 0.012, steps=6, caps=True)
+        snaps.box(cx - 0.02, y - 0.50, CABLE_Z - 0.05, cx + 0.02, y - 0.40, CABLE_Z + 0.03)
+    return {"static_lines": ("static_line", False, lines), "snap_hooks": ("aluminium", False, snaps)}
+
+
 def door_parts(length):
     """The starboard paratroop doorway, open for the jump, as its own model for the jump door
     activator: ({name: (material, collides, Mesh)}, origin). The origin is where the door's
@@ -760,6 +809,8 @@ def main():
         built, _ = door_panel_parts(args.length, closed)
         panel_paths.append(mesh_dir / f"{name}.nif")
         write_nif(panel_paths[-1], name, built, s, tex, pyn)
+    panel_paths.append(mesh_dir / "C130_StaticLines.nif")
+    write_nif(panel_paths[-1], "C130_StaticLines", static_line_parts(args.length), s, tex, pyn)
 
     aisle = wall_x(SEAT_Z) - SEAT_D - (CENTER_BACK_W / 2 + SEAT_D)
     sc = args.scale

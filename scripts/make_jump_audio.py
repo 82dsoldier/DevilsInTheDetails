@@ -62,6 +62,7 @@ SOUND_OFF = ["OK!", "OK!", "OK!"]   # passed forward up the stick, at the end of
 ACTIONS = {
     "Outboard personnel, stand up!": "StandUp(True)",
     "Inboard personnel, stand up!": "StandUp(False)",
+    "Hook up!": "HookUp()",
 }
 
 PS_TTS = r"""
