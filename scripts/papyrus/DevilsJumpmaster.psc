@@ -61,6 +61,10 @@ Float Property SettleDistance = 45.0 Auto Const
 {How near his mark (game units) a jumper walks before he's set on it.}
 Float Property SettleSeconds = 10.0 Auto Const
 {The longest he's given to get there before he's set on it anyway.}
+Float Property HoldDegrees = 3.0 Auto Const
+{Settled, how far he may turn from facing aft before he's put back.}
+Float Property HoldDistance = 4.0 Auto Const
+{Settled, how far (game units) he may drift off his mark before he's put back.}
 Armor Property StaticLineRight Auto Const Mandatory
 {DevilsStaticLineRight: a hooked-up static line, worn (body slot 56), over the right shoulder to
 the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
@@ -79,6 +83,7 @@ ObjectReference[] Property NightLights Auto Const
 
 Bool running = False
 Int engine = 0                        ; the engine sound playing (its instance), 0 for none
+Bool holding = False                  ; the stick is held on their marks (SettleHalf)
 
 Event OnLoad()
 	If running
@@ -247,6 +252,7 @@ Function SettleHalf(Bool outboard)
 				If man.GetSitState() == 0 && (man.GetDistance(StickStands[i]) < SettleDistance || waited >= SettleSeconds)
 					man.MoveTo(StickStands[i])
 					man.SetRestrained(True)
+					man.SetHeadTracking(False)   ; eyes front: no turning to look about
 					settled[i] = True
 				Else
 					left += 1
@@ -255,10 +261,32 @@ Function SettleHalf(Bool outboard)
 			i += 1
 		EndWhile
 		If waited >= SettleSeconds + 5.0     ; still seated after all that: leave him be
-			Return
+			left = 0
+		Else
+			Utility.Wait(0.25)
+			waited += 0.25
 		EndIf
-		Utility.Wait(0.25)
-		waited += 0.25
+	EndWhile
+
+	; Hold them there: anyone who turns or drifts off his mark is put back on it, so his hook
+	; stays on the cable. Until they follow Nate out (ClearStick ends `holding`).
+	holding = True
+	While holding
+		Int i = 0
+		While i < Stick.Length && holding
+			If settled[i]
+				Actor man = Stick[i]
+				Float turn = Math.Abs(man.GetAngleZ() - StickStands[i].GetAngleZ())
+				If turn > 180.0
+					turn = 360.0 - turn
+				EndIf
+				If turn > HoldDegrees || man.GetDistance(StickStands[i]) > HoldDistance
+					man.MoveTo(StickStands[i])
+				EndIf
+			EndIf
+			i += 1
+		EndWhile
+		Utility.Wait(0.5)
 	EndWhile
 EndFunction
 
@@ -286,6 +314,7 @@ EndFunction
 
 Function ClearStick()
 	{Out the door after Nate: gone from the plane, and back on their marks for next time.}
+	holding = False
 	If !Stick
 		Return
 	EndIf
@@ -293,6 +322,7 @@ Function ClearStick()
 	While i < Stick.Length
 		Unhook(Stick[i])
 		Stick[i].SetRestrained(False)
+		Stick[i].SetHeadTracking(True)
 		Stick[i].Disable()
 		Stick[i].MoveToMyEditorLocation()
 		i += 1

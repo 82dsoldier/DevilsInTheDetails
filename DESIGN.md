@@ -696,7 +696,15 @@ about airborne operations have heard of. It's the second worldspace.
       spots), and the script watches them: as each comes within `SettleDistance` (45 units) of
       his mark, an `XMarkerHeading` on his spot facing aft (`StickStands`), or after
       `SettleSeconds`, he's set on it and restrained, so he stays put, facing aft, his hook on
-      the cable. Unrestrained when he's cleared or seated again.
+      the cable. Unrestrained when he's cleared or seated again. **Tested: lined up well**,
+      but the hooks hung a little off the cables, and the men twitched and turned, swinging
+      the whole line.
+    - **The hook rides the root bone now:** `Root` (at his feet) moves only when he moves or
+      turns, not with idles or breathing, so the hook stays where it's built, on the cable;
+      the strap blends from root to chest between 2.05 m and 1.68 m up its front. The
+      chest-bound hook had missed because the idle pose isn't the bind pose. Settled men have
+      head tracking off, and a watch puts anyone back on his mark who turns more than 3° or
+      drifts more than 4 units.
     - The stick's layout lives in `make_c130_blockout.py` (`stick_places`, `stick_aisle`), for
       the models and the plugin both. Not yet: Nate's own static line, the shuffle to the door.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
