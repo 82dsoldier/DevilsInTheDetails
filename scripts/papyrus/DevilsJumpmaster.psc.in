@@ -70,6 +70,10 @@ Armor Property StaticLineRight Auto Const Mandatory
 the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
 Armor Property StaticLineLeft Auto Const Mandatory
 {DevilsStaticLineLeft: the same over the left shoulder, for the port men.}
+Armor Property JumpKit Auto Const Mandatory
+{DevilsJumpKit: each man's combat equipment, worn (body slot 57): T-10C main, harness, T-10R
+reserve, the ALICE ruck hung in front of his thighs (in his lap seated), the weapons case down
+his left side. He wears it from boarding.}
 Float Property DoorRaise = 140.0 Auto Const
 {How far the closed door slides up to be out of sight in the wall above the doorway.}
 Float Property TaxiSeconds = 20.0 Auto Const
@@ -206,6 +210,10 @@ Function SeatStick()
 			Utility.Wait(0.1)
 			tries += 1
 		EndWhile
+		If Stick[i].GetItemCount(JumpKit) == 0
+			Stick[i].AddItem(JumpKit, 1, True)
+		EndIf
+		Stick[i].EquipItem(JumpKit, True, True)
 		Stick[i].SnapIntoInteraction(StickSeats[i])
 		i += 1
 	EndWhile
@@ -321,6 +329,7 @@ Function ClearStick()
 	Int i = 0
 	While i < Stick.Length
 		Unhook(Stick[i])
+		Stick[i].RemoveItem(JumpKit, -1, True)
 		Stick[i].SetRestrained(False)
 		Stick[i].SetHeadTracking(True)
 		Stick[i].Disable()

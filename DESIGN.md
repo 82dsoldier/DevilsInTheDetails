@@ -711,6 +711,23 @@ about airborne operations have heard of. It's the second worldspace.
       the models and the plugin both. **Not wanted (the author):** a static line for Nate (he
       jumps in power armor, so one would only confuse), or the stick shuffling to the door
       (Nate goes first, so he's out of the bird and never sees it).
+  - **Combat equipment (2026-11-17):** every man jumps with it (the author), early-90s gear
+    (the author: period gear; the modern photos in `data/reference` only show where it hangs):
+    a T-10C main on his back with the rest of his static line stowed on it in yellow loops; an
+    olive drab harness (main lift webs over his shoulders and down his front, chest strap,
+    steel hardware); a T-10R reserve on his belly, the steel ripcord grip on his right; an
+    ALICE ruck hung under the reserve in front of his thighs; an M1950 weapons case down his
+    left side. Seated, it's already hooked up, the ruck in his lap (the author).
+    - One worn model, `C130_JumpKit.nif` (`make_jump_kit.py`), armor `DevilsJumpKit`, body
+      slot 57, put on each man as he's seated. The main, reserve and harness ride his spine
+      (shared between Pelvis, SPINE1, SPINE2 and Chest by height, so they bend with him); the
+      ruck rides both thighs, so seated it tips into his lap; the case rides his left thigh.
+      Fitted to the fatigues body by raycasting its mesh where the straps run.
+    - `worn.py` now holds the skinning for every worn model (bind poses for each bone used,
+      from the vanilla skeleton); the static line uses it too, and its strap now runs over
+      the top of the main to the stowed loops instead of down his back.
+    - Untested. Watch: the main may push into the cargo net and wall behind the outboard men
+      as they sit; the ruck may clip his knees or the reserve seated.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there

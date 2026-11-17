@@ -180,6 +180,30 @@ def tex_static_line():
     return rgb, weave * 0.003 - stitch * 0.008 - edge * 0.004
 
 
+def tex_nylon(base=(84, 92, 58), seed=20, weave_n=96):
+    """Parachute packs and the weapons case, one tile 25 cm square: olive drab nylon duck, a
+    fine weave, worn and grimy, darker in the creases (data/reference/1_958e...jpg, T-10R...png)."""
+    def make():
+        u, v = _uv()
+        weave = 0.5 + 0.5 * np.sin(2 * np.pi * u * weave_n) * np.sin(2 * np.pi * v * weave_n)
+        grime = np.clip(0.5 + 0.35 * _smooth_noise(seed, 0.03), 0, 1)
+        fade = _smooth_noise(seed + 1, 0.015)
+        shade = (0.9 + 0.1 * weave) * (1 - 0.25 * grime) * (1 + 0.06 * fade) + _noise(seed + 2, scale=0.02)
+        return np.array(base)[None, None, :] * shade[..., None], weave * 0.002
+    return make
+
+
+def tex_od_webbing():
+    """Harness webbing, one tile 25 cm along (u) by its width (v): olive drab nylon, ribbed along,
+    stitched down both edges."""
+    u, v = _uv()
+    ribs = 0.5 + 0.5 * np.sin(2 * np.pi * v * 24)
+    stitch = (np.exp(-((v - 0.12) / 0.02) ** 2) + np.exp(-((v - 0.88) / 0.02) ** 2)) * (((u * 40) % 1) < 0.6)
+    grime = np.clip(0.5 + 0.3 * _smooth_noise(23, 0.03), 0, 1)
+    shade = (0.85 + 0.15 * ribs) * (1 - 0.25 * grime) * (1 - 0.3 * stitch) + _noise(24, scale=0.02)
+    return np.array([70, 76, 50])[None, None, :] * shade[..., None], ribs * 0.003 - stitch * 0.004
+
+
 def tex_webbing():
     """Webbing net, one tile per seat (SEAT_W wide, the net's full height): red straps hanging
     from the rail, crossed by horizontal bands; transparent between them."""
@@ -232,6 +256,10 @@ MATERIALS = {
     "cable": (_flat((190, 190, 190)), {}),
     "static_line": (tex_static_line, {"double_sided": True}),   # yellow webbing (the author)
     "snap_hook": (_flat((168, 170, 172)), {}),    # stamped steel
+    # The stick's kit: early-90s olive drab (the author: period gear, not today's).
+    "nylon": (tex_nylon(), {}),                   # T-10C main, T-10R reserve, M1950 case
+    "alice": (tex_nylon((74, 82, 54), 30, 48), {}),   # the ALICE ruck, coarser and greener
+    "harness": (tex_od_webbing, {"double_sided": True}),
     "lamp": (_flat((255, 246, 222)), {"emit": True}),
 }
 
@@ -255,7 +283,8 @@ def normal_map(h, strength=0.5):
 SPECULAR = {"quilt": (0.03, 0.1), "fabric": (0.04, 0.12), "webbing": (0.04, 0.12),
             "floor": (0.3, 0.35), "aluminium": (0.5, 0.55), "glass": (0.6, 0.8),
             "dark": (0.25, 0.3), "red": (0.3, 0.5), "green": (0.3, 0.5), "lamp": (0.3, 0.5),
-            "static_line": (0.05, 0.15), "snap_hook": (0.45, 0.45)}
+            "static_line": (0.05, 0.15), "snap_hook": (0.45, 0.45),
+            "nylon": (0.05, 0.15), "alice": (0.05, 0.12), "harness": (0.05, 0.15)}
 SPECULAR_PAINT = (0.12, 0.25)    # everything else: painted metal, ducting, cable
 
 
@@ -755,8 +784,10 @@ def static_line_parts(mirror=False):
     lie = 0.012                                       # the strap lies on his fatigues, not in them
     pts = _catmull([(cx, cy, cz - 0.14), (cx, cy - 0.05, cz - 0.30),
                     (x, 0.11 + lie, SHOULDER_Z - 0.05), (x, -0.05, SHOULDER_Z + lie),
-                    (x * 0.95, BACK_HIGH[0] - lie, BACK_HIGH[1]),
-                    (x * 0.6, BACK_LOW[0] - lie, BACK_LOW[1])])
+                    # over the top of his main (make_jump_kit.MAIN: its top 1.54 m up, its back
+                    # 0.37 behind him) to where the rest of the line is stowed on it
+                    (x * 0.9, -0.17, 1.585), (x * 0.55, -0.26, 1.56), (x * 0.25, -0.345, 1.535),
+                    (x * 0.1, -0.385, 1.46), (0.0, -0.387, 1.40)])
     _ribbon(strap, pts, STATIC_LINE_W)
     return {"static_line": ("static_line", False, strap), "snap_hook": ("snap_hook", False, hook),
             "snap_gate": ("snap_hook", False, gate)}
