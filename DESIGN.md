@@ -674,12 +674,19 @@ about airborne operations have heard of. It's the second worldspace.
       snap hook** is a flat stamped steel plate: rounded nose, the cable through a slot under
       it, a sliding gate with a round button, a slot at the tail for the webbing
       (`data/reference/UGK-009.jpg`).
-    - **Now each man has his own line** (`C130_StaticLineR.nif` over the right shoulder for the
-      starboard men, `C130_StaticLineL.nif` over the left for port: the inboard shoulder,
-      under the cable), modelled in his own frame; the jumpmaster's script puts it where he
-      actually stands and keeps it there (every quarter second) till he's out the door, so a
-      jostled man keeps his line, and the shuffle to the door can use the same. The fit to a
-      Fallout man's body (`SHOULDER_Z`, `SHOULDER_X`, `BACK_Y`) is a first guess, to tune in game.
+    - **Second try: a line per man, moved onto him by script.** It failed: statics don't move
+      once loaded, so all eight sat at the reference's spot mid-cabin (two showed: the left and
+      right models overlapping).
+    - **Now it's part of his kit (the author's idea): worn,** so it goes where he goes, jostled
+      or shuffling. `make_static_line.py` binds the model to the chest bone (bind pose from the
+      vanilla `FatiguesM.nif`, kept as constants so the build needs no game archives):
+      `C130_StaticLineR.nif` over the right shoulder for the starboard men,
+      `C130_StaticLineL.nif` over the left for port (facing aft, the inboard shoulder, under
+      the cable). Armor `DevilsStaticLineRight` / `Left`, body slot 56 (free under fatigues and
+      helmet). On "Hook up!" the jumpmaster's script adds and equips each man's; it's taken
+      off when he goes out the door. The strap fits the vanilla male body in fatigues, measured
+      off the mesh (shoulder top 1.62 m, back 0.17 m behind him). The hook sits at the cable's
+      height ahead of him, so it meets the cable as long as he stands in the aisle's middle.
     - The stick's layout lives in `make_c130_blockout.py` (`stick_places`, `stick_aisle`), for
       the models and the plugin both. Not yet: Nate's own static line, the shuffle to the door.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the

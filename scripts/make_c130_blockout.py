@@ -663,8 +663,10 @@ def stick_places(length):
 
 
 STATIC_LINE_W = 0.044           # 1-3/4 in webbing
-SHOULDER_Z, SHOULDER_X = 1.52, 0.17    # a Fallout man's shoulder top, and its offset from his middle
-BACK_Y = -0.15                 # his back, behind his middle
+# A Fallout man in fatigues, measured off the vanilla FatiguesM.nif (metres, his feet at the origin,
+# facing +Y): the top of his shoulder, its offset from his middle, and his back at two heights.
+SHOULDER_Z, SHOULDER_X = 1.62, 0.17
+BACK_HIGH, BACK_LOW = (-0.169, 1.50), (-0.132, 1.20)
 
 
 def _catmull(pts, per=6):
@@ -725,7 +727,7 @@ def static_line_parts(mirror=False):
     right +X. The snap hook hangs on the anchor cable ahead of him (toward the door); the webbing
     runs from its tail down over his inboard shoulder and down his back to the pack. His inboard
     shoulder is his right on the starboard side; mirror=True for the port side (his left).
-    The script puts one on each man where he actually stands, and keeps it there.
+    Worn: make_static_line.py binds it to his chest bone, so it goes where he goes.
       the hook  from data/reference/UGK-009.jpg: a flat stamped steel plate, rounded at the nose,
                 the cable through a slot under it, a sliding gate with a round button, and a slot
                 at the tail the webbing loops through
@@ -750,9 +752,11 @@ def static_line_parts(mirror=False):
               0.006, steps=10, caps=True)
     strap = Mesh()
     x = sx * SHOULDER_X
+    lie = 0.012                                       # the strap lies on his fatigues, not in them
     pts = _catmull([(cx, cy, cz - 0.14), (cx, cy - 0.05, cz - 0.30),
-                    (x, 0.11, SHOULDER_Z - 0.04), (x, 0.0, SHOULDER_Z + 0.015),
-                    (x * 0.95, BACK_Y + 0.03, SHOULDER_Z - 0.05), (x * 0.6, BACK_Y - 0.01, 1.15)])
+                    (x, 0.11 + lie, SHOULDER_Z - 0.05), (x, -0.05, SHOULDER_Z + lie),
+                    (x * 0.95, BACK_HIGH[0] - lie, BACK_HIGH[1]),
+                    (x * 0.6, BACK_LOW[0] - lie, BACK_LOW[1])])
     _ribbon(strap, pts, STATIC_LINE_W)
     return {"static_line": ("static_line", False, strap), "snap_hook": ("snap_hook", False, hook),
             "snap_gate": ("snap_hook", False, gate)}
@@ -924,9 +928,6 @@ def main():
         built, _ = door_panel_parts(args.length, closed)
         panel_paths.append(mesh_dir / f"{name}.nif")
         write_nif(panel_paths[-1], name, built, s, tex, pyn)
-    for mirror, name in ((False, "C130_StaticLineR"), (True, "C130_StaticLineL")):
-        panel_paths.append(mesh_dir / f"{name}.nif")
-        write_nif(panel_paths[-1], name, static_line_parts(mirror), s, tex, pyn)
 
     aisle = wall_x(SEAT_Z) - SEAT_D - (CENTER_BACK_W / 2 + SEAT_D)
     sc = args.scale

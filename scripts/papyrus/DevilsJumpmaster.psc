@@ -53,10 +53,11 @@ GlobalVariable Property OutboardUp Auto Const Mandatory
 stands them up, and they walk to their places in the aisle.}
 GlobalVariable Property InboardUp Auto Const Mandatory
 {DevilsStickInboardUp: the same for the centerline seats.}
-ObjectReference[] Property StickLines Auto Const
-{Each jumper's static line (DevilsC130StaticLineR on the starboard men, L on the port men,
-Initially Disabled), in the same order as Stick: from "Hook up!" each is kept on its man, wherever
-he actually stands, hooked to the anchor cable ahead of him.}
+Armor Property StaticLineRight Auto Const Mandatory
+{DevilsStaticLineRight: a hooked-up static line, worn (body slot 56), over the right shoulder to
+the anchor cable ahead of him. The starboard men's: facing aft, their inboard shoulder.}
+Armor Property StaticLineLeft Auto Const Mandatory
+{DevilsStaticLineLeft: the same over the left shoulder, for the port men.}
 Float Property DoorRaise = 140.0 Auto Const
 {How far the closed door slides up to be out of sight in the wall above the doorway.}
 Float Property TaxiSeconds = 20.0 Auto Const
@@ -70,7 +71,6 @@ ObjectReference[] Property NightLights Auto Const
 
 Bool running = False
 Int engine = 0                        ; the engine sound playing (its instance), 0 for none
-Bool hooked = False                   ; the stick's static lines are on them
 
 Event OnLoad()
 	If running
@@ -219,54 +219,34 @@ EndFunction
 
 Function HookUp()
 	{"Hook up!": the stick snaps their static lines to the anchor cables.}
-	If !StickLines || !Stick
-		Return
-	EndIf
-	hooked = True
-	Int i = 0
-	While i < StickLines.Length && i < Stick.Length
-		PlaceLine(i)
-		StickLines[i].Enable()
-		i += 1
-	EndWhile
-	CallFunctionNoWait("FollowStick", new Var[0])
-EndFunction
-
-Function FollowStick()
-	{Keeps each static line on its man while the stick is hooked up, if he's jostled or shuffles.}
-	While hooked
-		Utility.Wait(0.25)
-		Int i = 0
-		While hooked && i < StickLines.Length && i < Stick.Length
-			PlaceLine(i)
-			i += 1
-		EndWhile
-	EndWhile
-EndFunction
-
-Function PlaceLine(Int i)
-	{The line's model is in its man's frame, facing aft: put it where he stands. Turned with the
-	cabin, not with him, so the hook stays on the cable however he turns his shoulders.}
-	Actor man = Stick[i]
-	ObjectReference line = StickLines[i]
-	Float px = man.GetPositionX()
-	Float py = man.GetPositionY()
-	Float pz = man.GetPositionZ()
-	If Math.Abs(line.GetPositionX() - px) + Math.Abs(line.GetPositionY() - py) + Math.Abs(line.GetPositionZ() - pz) > 1.0
-		line.SetPosition(px, py, pz)
-		line.SetAngle(0.0, 0.0, 180.0)
-	EndIf
-EndFunction
-
-Function ClearStick()
-	{Out the door after Nate: gone from the plane, and back on their marks for next time.}
-	hooked = False
-	SetAll(StickLines, False)
 	If !Stick
 		Return
 	EndIf
 	Int i = 0
 	While i < Stick.Length
+		Armor line = StaticLineLeft
+		If i % 4 < 2                  ; Stick's order: outboard stbd 1-2, port 1-2; inboard the same
+			line = StaticLineRight
+		EndIf
+		Stick[i].AddItem(line, 1, True)
+		Stick[i].EquipItem(line, True, True)
+		i += 1
+	EndWhile
+EndFunction
+
+Function Unhook(Actor man)
+	man.RemoveItem(StaticLineRight, -1, True)
+	man.RemoveItem(StaticLineLeft, -1, True)
+EndFunction
+
+Function ClearStick()
+	{Out the door after Nate: gone from the plane, and back on their marks for next time.}
+	If !Stick
+		Return
+	EndIf
+	Int i = 0
+	While i < Stick.Length
+		Unhook(Stick[i])
 		Stick[i].Disable()
 		Stick[i].MoveToMyEditorLocation()
 		i += 1
