@@ -665,7 +665,7 @@ about airborne operations have heard of. It's the second worldspace.
     stand each man a beat apart instead of all at once, or space them a little wider. Left
     for beta: "If someone complains during beta, then we'll know."
   - **Hooked up (2026-11-17):** on "Hook up!" the stick's static lines appear: one model
-    (`C130_StaticLines.nif`, olive drab webbing) in the cabin's frame, each line snapped to its
+    (`C130_StaticLines.nif`, yellow webbing) in the cabin's frame, each line snapped to its
     side's anchor cable just aft of the man, toward the door, and run down over his inboard
     shoulder and down his back to where the pack will be. Since the men stand still on their
     marks, the lines can be fixed; they don't follow a man who's been jostled off his mark.

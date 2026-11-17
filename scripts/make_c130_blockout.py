@@ -202,7 +202,7 @@ MATERIALS = {
     "red": (_flat((230, 30, 25)), {}),
     "green": (_flat((40, 210, 60)), {}),
     "cable": (_flat((190, 190, 190)), {}),
-    "static_line": (_flat((92, 96, 62)), {}),     # olive drab webbing
+    "static_line": (_flat((222, 188, 42)), {}),   # yellow webbing (the author)
     "lamp": (_flat((255, 246, 222)), {"emit": True}),
 }
 
