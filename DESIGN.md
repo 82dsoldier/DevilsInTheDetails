@@ -723,7 +723,22 @@ about airborne operations have heard of. It's the second worldspace.
     from the floor, loaded first, and fell 350 m, and even in one cell he can. So `DevilsJumpmaster`
     disables him on load (a disabled actor doesn't fall), waits until the player is within 1,500
     units of the first red light, then puts him on his mark (`MoveToMyEditorLocation`) and enables
-    him before the commands start. Still to do: cabin lights.
+    him. (Cabin lights: done, below.)
+  - **The flight before the commands (2026-11-17).** "Aboard" means boarding, not the jump: the
+    author's point that the commands can't start before the bird is off the ground. The player
+    boards (at Boston Airport, through the parked plane's activator; for testing, `setpos` into
+    the cabin), and the jumpmaster's script flies first: the engines idle 20 s while the plane
+    taxis, then a 56 s takeoff (run-up against the brakes, the roll with the cabin shaking harder
+    as it gathers speed, liftoff, the climb, power back to cruise), then 30 s of cruise, then
+    "Ten minutes!". After "GO!" the engines fade once the player is out the door.
+    - **Engine sound:** made from scratch by `scripts/make_engine_audio.py` until there's a
+      recording: four T56s, each prop a 68 Hz blade-passing tone with harmonics, slightly out of
+      sync so they beat (the C-130 throb), a faint turbine whine, and a roar that grows with
+      power. Three pieces: an idle loop, the takeoff, a cruise loop; the script crossfades them.
+      Low on the runway, ramping up on takeoff, level in flight (the author's brief).
+    - **Open question:** the jump doors are open the whole time, so the takeoff happens with
+      sky in the doors. In real life they're closed for takeoff and the jumpmaster opens them
+      before the commands. Asked the author.
   - **The jumpmaster stands aft of the starboard door,** not in front of it (in front, he blocked
     it). He faces forward, toward the stick. He holds his spot and doesn't greet the player: no
     voice type, AI package `DefaultStayAtEditorLocationNoInterrupt`.

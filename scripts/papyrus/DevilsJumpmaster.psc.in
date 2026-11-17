@@ -1,10 +1,12 @@
 Scriptname DevilsJumpmaster extends Actor
-{The jumpmaster's commands, "Ten minutes!" to "GO!", when the cabin loads.
+{The flight and the jumpmaster's commands: once the player is aboard, taxi, takeoff and cruise
+(engine sound, the cabin shaking on the roll), then "Ten minutes!" to "GO!".
 
 DevilsJumpmaster.psc is generated from DevilsJumpmaster.psc.in by scripts/make_jump_audio.py,
 which times the lines to the audio: edit the .psc.in, not the .psc.
 
-Goes on the jumpmaster's reference in DevilsC130Interior, standing by the door.}
+Goes on the jumpmaster's reference in the cabin (DevilsSicilyWorld, cell 4,-7), aft of the
+starboard door.}
 
 Sound Property commands_1 Auto Const Mandatory
 {"Ten minutes!" through "Sound off for equipment check!" and the stick's OKs.}
@@ -20,12 +22,23 @@ ObjectReference[] Property RedLights Auto Const
 {The red jump lights (light references, Initially Disabled), one by each door.}
 ObjectReference[] Property GreenLights Auto Const
 {The green jump lights, the same.}
+Sound Property EnginesIdle Auto Const Mandatory
+{Looping: the engines at ground idle, while the stick boards and the plane taxis.}
+Sound Property EnginesTakeoff Auto Const Mandatory
+{One piece, TAKEOFF_LEN s (make_engine_audio.py): run-up, the roll, liftoff, the climb.}
+Sound Property EnginesCruise Auto Const Mandatory
+{Looping: the engines in flight.}
+Float Property TaxiSeconds = 20.0 Auto Const
+{From boarding to the run-up.}
+Float Property CruiseSeconds = 30.0 Auto Const
+{From reaching cruise to "Ten minutes!" (the flight, much shortened).}
 ObjectReference[] Property DayLights Auto Const
 {The cabin lights for a daytime jump: warm white.}
 ObjectReference[] Property NightLights Auto Const
 {The cabin lights for a night jump: dim red (Initially Disabled).}
 
 Bool running = False
+Int engine = 0                        ; the engine sound playing (its instance), 0 for none
 
 Event OnLoad()
 	If running
@@ -55,7 +68,7 @@ Event OnLoad()
 	EndWhile
 	MoveToMyEditorLocation()
 	Enable()
-	Utility.Wait(3.0)
+	Fly()                             ; taxi, takeoff, climb, the flight
 
 	Play_commands_1()
 	; Over the engines the jumpmaster can't hear a word of it, only that you shouted.
@@ -71,12 +84,71 @@ Event OnLoad()
 	SetLights(False, True)
 	GreenLight.SetValue(1)
 	Play_commands_3()
+
+	; Out the door, the plane flies on without you.
+	While PlayerAboard()
+		Utility.Wait(0.5)
+	EndWhile
+	Crossfade(engine, 0, 1.5)
+	engine = 0
 	running = False
 EndEvent
 
 Event OnUnload()
 	GreenLight.SetValue(0)
+	If engine > 0
+		Sound.StopInstance(engine)
+		engine = 0
+	EndIf
 EndEvent
+
+Function Fly()
+	{From boarding to cruise: the engines idle while the plane taxis, run up, roar down the runway
+	(the cabin shaking, harder as it gathers speed), and settle once it's climbed. The waits follow
+	the takeoff piece's timings in make_engine_audio.py: RUNUP 4, BRAKES_OFF 14, LIFTOFF 38,
+	CLIMBED 53, TAKEOFF_LEN 56.}
+	engine = EnginesIdle.Play(Self)
+	Utility.Wait(TaxiSeconds)
+
+	Int next = EnginesTakeoff.Play(Self)
+	Crossfade(engine, next, 2.0)      ; 0 to 2 s into the piece
+	engine = next
+	Utility.Wait(12.0)                ; brakes off at 14
+	Int i = 0
+	While i < 24                      ; the roll, 14 to 38
+		Game.ShakeCamera(None, 0.03 + 0.005 * i, 1.0)
+		Utility.Wait(1.0)
+		i += 1
+	EndWhile
+	Utility.Wait(15.0)                ; climbed by 53
+	next = EnginesCruise.Play(Self)
+	Crossfade(engine, next, 2.0)
+	engine = next
+	Utility.Wait(CruiseSeconds)
+EndFunction
+
+Function Crossfade(Int fromSound, Int toSound, Float seconds)
+	{Fades one sound instance out and another in (either can be 0, for none), then stops the first.}
+	If toSound > 0
+		Sound.SetInstanceVolume(toSound, 0.0)
+	EndIf
+	Int steps = 10
+	Int i = 1
+	While i <= steps
+		Float v = (i as Float) / steps
+		If toSound > 0
+			Sound.SetInstanceVolume(toSound, v)
+		EndIf
+		If fromSound > 0
+			Sound.SetInstanceVolume(fromSound, 1.0 - v)
+		EndIf
+		Utility.Wait(seconds / steps)
+		i += 1
+	EndWhile
+	If fromSound > 0
+		Sound.StopInstance(fromSound)
+	EndIf
+EndFunction
 
 Bool Function PlayerAboard()
 	{Within 1,500 units of the first red light, by the doors: anywhere in the cabin, and nowhere
