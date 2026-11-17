@@ -660,7 +660,9 @@ about airborne operations have heard of. It's the second worldspace.
     body overlaps the next man's, and the game shoved the outboard men back into their seats
     as the inboard men stood (tested twice). So the outboard men sit in outboard seats 1 and 4
     from the door, the inboard men on the centerline between seats 2-3 and 5-6 (the seat
-    markers are invisible, so they needn't sit on a seam).
+    markers are invisible, so they needn't sit on a seam). **Tested: "Much better."** They
+    still jostle some as they line up, but no one is pushed back into a seat. Possible polish:
+    stand each man a beat apart instead of all at once, or space them a little wider.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
