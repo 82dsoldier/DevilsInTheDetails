@@ -55,7 +55,8 @@ BULGE = 0.12                   # how far each wall bows out between the floor an
 RAMP_L = 3.7                   # the closed ramp, aft of the hinge (the true 3 m, stretched like the cabin)
 RAMP_ANGLE = 25.0              # degrees the closed ramp rises aft (data/reference/ramp.jpg)
 AFT_WIDTH = 0.85               # the tail's width at the ramp's end, against the cabin's
-AFT_HEIGHT = 0.08              # floor to ceiling at the ramp's end: the ramp meets the sloping cargo door, no end wall
+RAMP_STOP_HEADROOM = 2.3       # an invisible wall across the ramp where headroom falls to this
+AFT_HEIGHT = 0.08             # floor to ceiling at the ramp's end: the ramp meets the sloping cargo door, no end wall
 DOOR_W, DOOR_H, DOOR_R = 0.91, 1.83, 0.15   # paratroop doors, 36 x 72 in; corner radius
 DOOR_AFT = 0.15                # door's aft edge, forward of the ramp hinge
 PORTHOLE_D, PORTHOLE_Z = 0.30, 1.45         # diameter, centre height
@@ -438,6 +439,19 @@ def parts(length):
         for i in range(len(ring)):
             m.tri(c, ring[i], ring[(i + 1) % len(ring)])   # closes along the floor too
     p["hull"] = ("quilt", True, hull)
+
+    # An invisible wall across the ramp where the headroom drops to RAMP_STOP_HEADROOM: further up,
+    # the ramp's floor and the sloping cargo door squeeze the player (2 m in power armor) and the
+    # camera pokes through the ceiling.
+    t = (CABIN_H - RAMP_STOP_HEADROOM) / (CABIN_H - AFT_HEIGHT)   # headroom falls linearly aft
+    stop = Mesh()
+    ys, sec = hinge - t * RAMP_L, section(t)
+    cz = sum(z for _, z in sec) / len(sec)
+    c = stop.vert((0.0, ys, cz), (0, 1, 0), (0, 0))
+    ring = [stop.vert((x, ys, z), (0, 1, 0), (0, 0)) for x, z in sec]
+    for i in range(len(ring)):
+        stop.tri(c, ring[i], ring[(i + 1) % len(ring)])
+    p["ramp_stop"] = (None, True, stop)
     p["bulkhead"] = ("bulkhead", True, bulkhead)
 
     # Frames: bands standing proud of the blankets, every FRAME_PITCH from the hinge forward,
