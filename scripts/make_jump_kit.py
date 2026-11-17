@@ -151,7 +151,8 @@ def plate(m, outline, y, t, lift=None):
 
 
 W = 0.044                          # webbing width (1.75 in)
-MAIN = ((0.0, -0.275, 1.29), (0.19, 0.095, 0.25))        # centre, half extents
+# The main 15 cm deep (a T-10 pack's 6 in): at 19 it went through the net behind him seated.
+MAIN = ((0.0, -0.255, 1.29), (0.19, 0.075, 0.25))        # centre, half extents
 RESERVE = ((0.0, 0.222, 1.15), (0.17, 0.072, 0.11))   # snug on the harness at his belly
 # The ruck, as wide as his legs. Seated it rides his thighs, low on them so it lies in his lap
 # out toward his knees, clear of the reserve (the author: "the ruck position looks good");
@@ -162,6 +163,7 @@ RUCK_STANDING = ((0.0, 0.225, 0.80), (0.21, 0.10, 0.19))
 # trying to carry a crutch under your arm" (the author). Standing, forward of where his arm hangs;
 # seated, tipped forward from the hip so its foot clears the front of the seat.
 CASE = ((-0.245, 0.085, 0.80), (0.032, 0.10, 0.50))
+CASE_SEATED_OUT = 0.06             # seated, his knees spread: the case further out (it went through his thigh)
 CASE_TILT = math.radians(38)       # seated: its foot forward
 HIP_Z = 0.95
 CASE_TILE = 0.2                    # its quilting: one tile is two 10 cm squares
@@ -209,18 +211,36 @@ def kit_parts():
     # author). Pull the handle, the pin comes out, the flaps spring open.
     pillow(reserve, *RESERVE)
     (rx, ry, rz), (ra, rb, rh) = RESERVE
-    yf = ry + rb - 0.004                                      # its front face
-    ex, ez = ra * 0.86, rh * 0.80                             # flaps reach this far from the middle
-    # Each flap rises toward the pin, padded over the packed canopy, so each catches the light
-    # its own way and the four read apart.
-    T, R = 0.008, 0.016                                       # thickness; the rise to the middle
-    side = [(ex, -ez), (0.03, -0.035), (0.03, 0.035), (ex, ez)]
-    for sx in (-1, 1):
-        plate(flaps, [(rx + sx * px, rz + pz) for px, pz in side], yf, T, [0, R, R, 0])
-    tb = [(-ex, ez), (ex, ez), (0.03, 0.012), (-0.03, 0.012)]
-    for sz in (-1, 1):
-        plate(flaps, [(rx + px, rz + sz * pz) for px, pz in tb], yf + T, T, [0, 0, R, R])
-    yp = yf + 2 * T + R                                         # on top of the flaps
+    yf = ry + rb - 0.004                                      # just inside its front face
+    # The flaps are the pack's own cloth, not panels on it (the author: plates "look like they're
+    # glued on"): its front moulded into four padded flaps between seams running in from the
+    # corners to the pin, the top and bottom flaps lapped over the sides.
+    ex, ez = ra * 0.72, rh * 0.68                             # within the flat of its face
+    def flap_height(x, z):
+        ax, az = abs(x - rx) / ex, abs(z - rz) / ez
+        s, b = abs(ax - az), 1.0 - max(ax, az)                # from the seam, from the edge
+        st = lambda t: 0.0 if t <= 0 else 1.0 if t >= 1 else t * t * (3 - 2 * t)   # noqa: E731
+        if az >= ax:                                          # top or bottom: lapped over, a crisp edge
+            return 0.017 * st(s / 0.08) * st(b / 0.3)
+        return 0.010 * st(s / 0.25) * st(b / 0.3)             # a side flap, tucked under
+    nx_, nz_ = 72, 48
+    grid = []
+    for j in range(nz_ + 1):
+        row = []
+        for i in range(nx_ + 1):
+            x = rx - ex + 2 * ex * i / nx_
+            z = rz - ez + 2 * ez * j / nz_
+            d = 0.001
+            hx_ = (flap_height(x + d, z) - flap_height(x - d, z)) / (2 * d)
+            hz_ = (flap_height(x, z + d) - flap_height(x, z - d)) / (2 * d)
+            n = (-hx_, 1.0, -hz_)
+            ln = math.sqrt(sum(k * k for k in n))
+            row.append(flaps.vert((x, yf + flap_height(x, z), z), tuple(k / ln for k in n), (x / 0.25, z / 0.25)))
+        grid.append(row)
+    for j in range(nz_):
+        for i in range(nx_):
+            flaps.quad(grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i])
+    yp = yf + 0.012                                           # the pin, where the flaps gather
     steel.tube((rx, yp - 0.006, rz), (rx, yp + 0.006, rz), 0.012, steps=10, caps=True)        # the cone
     steel.tube((rx - 0.03, yp + 0.009, rz), (rx + 0.01, yp + 0.009, rz), 0.003, steps=6)       # the pin
     hx = rx + 0.10                                            # the handle, on his right of the pin
@@ -286,6 +306,7 @@ def gear_parts(seated):
     if seated:
         for m in (case, case_straps, case_steel):
             _tilt(m, HIP_Z, CASE_TILT)
+            m.verts = [(x - CASE_SEATED_OUT, y, z) for x, y, z in m.verts]
 
     thighs = lambda v: {"LLeg_Thigh": 0.5, "RLeg_Thigh": 0.5}      # noqa: E731
 

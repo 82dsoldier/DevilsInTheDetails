@@ -799,9 +799,9 @@ def static_line_parts(mirror=False):
     pts = _catmull([(cx, cy, cz - 0.14), (cx, cy - 0.05, cz - 0.30),
                     (x, 0.11 + lie, SHOULDER_Z - 0.05), (x, -0.05, SHOULDER_Z + lie),
                     # over the top of his main (make_jump_kit.MAIN: its top 1.54 m up, its back
-                    # 0.37 behind him) to where the rest of the line is stowed on it
-                    (x * 0.9, -0.17, 1.585), (x * 0.55, -0.26, 1.56), (x * 0.25, -0.345, 1.535),
-                    (x * 0.1, -0.385, 1.46), (0.0, -0.387, 1.40)])
+                    # 0.33 behind him) to where the rest of the line is stowed on it
+                    (x * 0.9, -0.17, 1.585), (x * 0.55, -0.24, 1.56), (x * 0.25, -0.305, 1.535),
+                    (x * 0.1, -0.345, 1.46), (0.0, -0.347, 1.40)])
     _ribbon(strap, pts, STATIC_LINE_W)
     return {"static_line": ("static_line", False, strap), "snap_hook": ("snap_hook", False, hook),
             "snap_gate": ("snap_hook", False, gate)}

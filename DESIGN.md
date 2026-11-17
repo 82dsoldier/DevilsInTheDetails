@@ -748,6 +748,12 @@ about airborne operations have heard of. It's the second worldspace.
       where he is (kit, gear, line once hooked up), all into his inventory first, then on.
       `DevilsJumpKit` is now the main, harness and reserve, the reserve with four flaps, the
       pin's cone where they meet, and its cable to a silver D handle on his right of it.
+    - **Third test:** the mains still went through the nets behind them seated, the seated
+      case through his left thigh (seated, his knees spread), and the flaps "look like
+      they're glued on". So: the main 15 cm deep (a T-10's 6 in) instead of 19, the seats 12
+      cm further forward (0.32 m in all), the seated case 6 cm further out, and the flaps
+      moulded into the reserve's own face (padded between seams from the corners to the pin,
+      the top and bottom flaps lapped over the sides) instead of panels laid on it.
     `DevilsParatrooper` wears the jumpmaster's uniform and takes a random male face from the
     vanilla Minutemen face list (template, Use Traits only). Each sits on an invisible
     `DevilsC130SeatMarker` (the vanilla folding chair's sit marker) on the red seats, held there
