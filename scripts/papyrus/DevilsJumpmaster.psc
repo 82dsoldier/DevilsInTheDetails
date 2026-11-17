@@ -28,6 +28,16 @@ Sound Property EnginesTakeoff Auto Const Mandatory
 {One piece, TAKEOFF_LEN s (make_engine_audio.py): run-up, the roll, liftoff, the climb.}
 Sound Property EnginesCruise Auto Const Mandatory
 {Looping: the engines in flight.}
+Sound Property EnginesCruiseDoors Auto Const Mandatory
+{Looping: in flight with the jump doors open, the wind roaring in.}
+Sound Property Hydraulics Auto Const Mandatory
+{The pump closing the ramp and doors before takeoff; the doors shut HYD_CLOSED s in.}
+Sound Property DoorOpenSound Auto Const Mandatory
+{The loadmaster opening the jump doors: latch, rattle up the tracks, bang, wind.}
+ObjectReference[] Property DoorsOpen Auto Const
+{The jump doors slid up open (DevilsC130DoorOpen), one on each door: for boarding, and the jump.}
+ObjectReference[] Property DoorsClosed Auto Const
+{The jump doors shut (DevilsC130DoorClosed, Initially Disabled): for takeoff and the flight.}
 Float Property TaxiSeconds = 20.0 Auto Const
 {From boarding to the run-up.}
 Float Property CruiseSeconds = 30.0 Auto Const
@@ -52,6 +62,7 @@ Event OnLoad()
 	Disable()
 	GreenLight.SetValue(0)
 	SetLights(True, False)            ; red the whole way, till the green
+	SetDoors(True)                    ; open for boarding
 	Bool night = IsNight()            ; a night jump flies with the cabin dark and red
 	SetAll(DayLights, !night)
 	SetAll(NightLights, night)
@@ -70,6 +81,9 @@ Event OnLoad()
 	Enable()
 	Fly()                             ; taxi, takeoff, climb, the flight
 
+	; The loadmaster opens the doors as the jumpmaster starts.
+	CallFunctionNoWait("LoadmasterOpensDoors", new Var[0])
+	Utility.Wait(0.5)
 	Play_commands_1()
 	; Over the engines the jumpmaster can't hear a word of it, only that you shouted.
 	If SoundOffMessage.Show() == 1
@@ -109,6 +123,10 @@ Function Fly()
 	CLIMBED 53, TAKEOFF_LEN 56.}
 	engine = EnginesIdle.Play(Self)
 	Utility.Wait(TaxiSeconds)
+	Hydraulics.Play(Self)             ; the ramp and doors closing, right before takeoff
+	Utility.Wait(9.0)                 ; HYD_CLOSED: the locks clunk home
+	SetDoors(False)
+	Utility.Wait(1.5)
 
 	Int next = EnginesTakeoff.Play(Self)
 	Crossfade(engine, next, 2.0)      ; 0 to 2 s into the piece
@@ -125,6 +143,22 @@ Function Fly()
 	Crossfade(engine, next, 2.0)
 	engine = next
 	Utility.Wait(CruiseSeconds)
+EndFunction
+
+Function LoadmasterOpensDoors()
+	{Run alongside the commands: the doors rattle up their tracks, and the wind comes in.}
+	Debug.Notification("The loadmaster opens the jump doors.")
+	DoorOpenSound.Play(Self)
+	Utility.Wait(1.6)                 ; the door bangs to the top of its tracks
+	SetDoors(True)
+	Int next = EnginesCruiseDoors.Play(Self)
+	Crossfade(engine, next, 1.5)
+	engine = next
+EndFunction
+
+Function SetDoors(Bool open)
+	SetAll(DoorsOpen, open)
+	SetAll(DoorsClosed, !open)
 EndFunction
 
 Function Crossfade(Int fromSound, Int toSound, Float seconds)

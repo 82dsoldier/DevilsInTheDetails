@@ -13,6 +13,10 @@ the rpm coming up from ground idle first.
                         liftoff, the climb, settling to cruise power. Starts like the idle loop
                         and ends like the cruise loop, so the scene crossfades between them.
   engines_cruise.wav    loop: in flight
+  engines_cruise_doors.wav  loop: in flight with the jump doors open, the wind roaring in
+  hydraulics.wav        one piece, HYD_LEN s: the pump closing the ramp and doors before
+                        takeoff; the doors shut at HYD_CLOSED
+  door_open.wav         one piece, DOOR_LEN s: the loadmaster opening a jump door
 
 The loops are seamless: every tone fits a whole number of cycles in LOOP_LEN, and the noise is
 made periodic. The jumpmaster's script (DevilsJumpmaster.psc.in) plays them; its takeoff
@@ -44,6 +48,9 @@ PEAK = 0.5                          # the loudest moment (full power on the roll
 
 # The takeoff piece, seconds from its start.
 RUNUP, BRAKES_OFF, LIFTOFF, CLIMBED, TAKEOFF_LEN = 4.0, 14.0, 38.0, 53.0, 56.0
+# The hydraulics closing the ramp and doors: the locks clunk home at HYD_CLOSED.
+HYD_CLOSED, HYD_LEN = 9.0, 10.5
+DOOR_LEN = 3.0                      # a jump door opening, latch to wind
 
 
 def smooth(t, a, b):
@@ -115,6 +122,63 @@ def takeoff_curves(t):
     return rpm, power
 
 
+def band_shape(lo, hi):
+    return lambda f: ((f > lo) & (f < hi)) / np.sqrt(np.maximum(f, 1))
+
+
+def clunk(n, at, freq, gain, seed, decay=0.12):
+    """A metal clunk at `at` s: a decaying low thud and a short bright crack."""
+    t = np.arange(n) / RATE - at
+    on = t >= 0
+    thud = np.sin(2 * np.pi * freq * t) * np.exp(-t / decay)
+    crack = noise(n, seed, band_shape(800, 5000)) * np.exp(-t / 0.02)
+    return np.where(on, gain * (thud + 0.5 * crack), 0)
+
+
+def hydraulics():
+    """The hydraulic pump closing the ramp and doors before takeoff: an electric motor whine that
+    spins up, labours while the ramp moves, the locks clunk home at HYD_CLOSED, and spins down."""
+    n = int(HYD_LEN * RATE)
+    t = np.arange(n) / RATE
+    run = smooth(t, 0, 0.8) * (1 - smooth(t, HYD_CLOSED + 0.3, HYD_LEN - 0.2))
+    load = smooth(t, 1.2, 2.0) * (1 - smooth(t, HYD_CLOSED - 0.4, HYD_CLOSED))
+    f = 410 * (0.4 + 0.6 * run) * (1 - 0.04 * load + 0.006 * np.sin(2 * np.pi * 0.7 * t))
+    phase = 2 * np.pi * np.cumsum(f) / RATE
+    whine = (np.sin(phase) + 0.5 * np.sin(2 * phase) + 0.3 * np.sin(3 * phase)
+             + 0.25 * np.sin(4.5 * phase) + 0.12 * np.sin(9 * phase))
+    hiss = noise(n, 31, band_shape(1500, 6000)) * 0.15 * load
+    a = 0.06 * run * (whine * (0.8 + 0.2 * load)) + 0.06 * hiss
+    a += clunk(n, HYD_CLOSED - 0.15, 70, 0.22, 32, 0.18) + clunk(n, HYD_CLOSED, 110, 0.14, 33)
+    return np.stack([a, a], 1)
+
+
+def wind(n, periodic_len=None):
+    """Wind roaring past the open doors, with some buffeting; stereo, the doors either side."""
+    t = np.arange(n) / RATE
+    out = np.zeros((n, 2))
+    for ch in range(2):
+        rush = noise(n, 41 + ch, lambda f: np.where(f > 40, 1 / np.sqrt(np.maximum(f, 1)), 0)
+                     / (1 + (f / 1800) ** 2))
+        buffet = noise(n, 43 + ch, rumble_shape)
+        flutter = 1 + 0.25 * np.sin(2 * np.pi * (round(0.37 * LOOP_LEN) / LOOP_LEN) * t + ch)
+        out[:, ch] = 0.07 * rush * flutter + 0.05 * buffet
+    return out
+
+
+def door_open():
+    """The loadmaster opening a jump door: unlatch, the door rattling up its tracks, a bang as it
+    stops at the top, and the wind coming in."""
+    n = int(DOOR_LEN * RATE)
+    t = np.arange(n) / RATE
+    a = clunk(n, 0.1, 140, 0.18, 51, 0.06)
+    slide = (smooth(t, 0.35, 0.5) * (1 - smooth(t, 1.5, 1.6)))
+    clicks = np.sin(2 * np.pi * 11 * t) ** 8                     # the rollers over the track joints
+    a = a + noise(n, 52, band_shape(300, 3000)) * 0.08 * slide * (0.5 + clicks)
+    a = a + clunk(n, 1.6, 90, 0.25, 53, 0.15)
+    a = np.stack([a, a], 1)
+    return a + wind(n) * smooth(t, 0.4, DOOR_LEN - 0.3)[:, None]
+
+
 def write_wav(path, a):
     path.parent.mkdir(parents=True, exist_ok=True)
     with wave.open(str(path), "wb") as w:
@@ -145,17 +209,20 @@ def main():
     takeoff += rumble[:, None]
 
     scale = PEAK / np.abs(takeoff).max()
+    idle, takeoff, cruise = idle * scale, takeoff * scale, cruise * scale
+    cruise_doors = cruise + wind(cruise.shape[0])
     files = []
-    for name, a in (("engines_idle", idle), ("engines_takeoff", takeoff), ("engines_cruise", cruise)):
-        a = a * scale
+    for name, a in (("engines_idle", idle), ("engines_takeoff", takeoff), ("engines_cruise", cruise),
+                    ("engines_cruise_doors", cruise_doors), ("hydraulics", hydraulics()),
+                    ("door_open", door_open())):
         p = sound_dir / f"{name}.wav"
         write_wav(p, a)
         files.append(p)
         rms = 20 * np.log10(np.sqrt(np.mean(a ** 2)))
         print(f"{p.relative_to(ROOT)}: {len(a) / RATE:.0f} s, {rms:.1f} dB RMS, peak {np.abs(a).max():.2f}")
     # The loops must match end to start.
-    for name, a in (("idle", idle), ("cruise", cruise)):
-        jump = np.abs(a[0] - a[-1]).max() * scale
+    for name, a in (("idle", idle), ("cruise", cruise), ("cruise_doors", cruise_doors)):
+        jump = np.abs(a[0] - a[-1]).max()
         print(f"  {name} loop seam: {jump:.4f}")
     if args.install:
         data = Path(args.install)

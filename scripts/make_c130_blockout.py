@@ -599,7 +599,6 @@ def door_parts(length):
     activator: ({name: (material, collides, Mesh)}, origin). The origin is where the door's
     centre line meets the wall at the floor; the port door is the same model turned 180 degrees.
       jambs     the doorway's edges and top, the hull's thickness, in bright aluminium
-      door      the door itself, slid up on its tracks to lie against the upper wall and ceiling
       platform  the jump platform, out over the slipstream at the sill
       activation an invisible slab filling the doorway: walking into it stops you, using it jumps
     Nothing outside: the cabin flies in the Sicily worldspace, so the real land and sky show."""
@@ -619,16 +618,47 @@ def door_parts(length):
                  ((xt, da, DOOR_TOP), (xt + JAMB, da, DOOR_TOP),
                   (xt + JAMB, db, DOOR_TOP), (xt, db, DOOR_TOP))])
 
-    panel.on_wall(rounded_rect(da, DOOR_TOP + 0.08, db, DOOR_TOP + 0.75, DOOR_R), 1, 0.06)
-    glass.on_wall(circle((da + db) / 2, DOOR_TOP + 0.41, PORTHOLE_D / 2), 1, 0.08)
     # The platform runs on from the cargo floor's edge, across the sill, out past the hull.
     x0 = origin[0] - 0.01
     platform.box(x0, da, -0.04, origin[0] + JAMB + 0.55, db, 0.002, "tnsew")
 
     block.box(origin[0] - 0.04, da, 0.0, origin[0] + JAMB, db, DOOR_TOP)
-    parts = {"jambs": ("door", False, jambs), "door": ("door", False, panel),
-             "door_porthole": ("glass", False, glass), "platform": ("aluminium", False, platform),
+    parts = {"jambs": ("door", False, jambs), "platform": ("aluminium", False, platform),
              "activation": (None, True, block)}
+    for _, _, m in parts.values():
+        m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
+    return parts, origin
+
+
+def door_panel_parts(length, closed):
+    """The starboard paratroop door itself, from the same origin as door_parts, as a static model
+    the scene swaps: closed (filling the doorway, for takeoff and the flight, until the
+    loadmaster opens it at "Ten minutes!"), or open (slid up on its tracks to lie against the
+    upper wall)."""
+    hinge = -length / 2
+    da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
+    origin = (wall_x(0), (da + db) / 2, 0.0)
+    panel, glass = Mesh(), Mesh()
+    if closed:
+        # A grid across the doorway that follows the wall's bow, set a little into the opening
+        # so the jambs show round it.
+        inset = -0.04
+        ys = [da + (db - da) * i / 4 for i in range(5)]
+        zs = [DOOR_TOP * i / WALL_STEPS for i in range(WALL_STEPS + 1)]
+
+        def place(y, z):
+            n = wall_normal(z, 1)
+            return panel.vert((wall_x(z) + n[0] * inset, y, z + n[2] * inset), n,
+                              ((y - da) / (db - da), 1 - z / DOOR_TOP))
+        grid = [[place(y, z) for y in ys] for z in zs]
+        for r0, r1 in zip(grid, grid[1:]):
+            for j in range(len(ys) - 1):
+                panel.quad(r0[j], r0[j + 1], r1[j + 1], r1[j])
+        glass.on_wall(circle((da + db) / 2, 1.35, PORTHOLE_D / 2), 1, inset + 0.01)
+    else:
+        panel.on_wall(rounded_rect(da, DOOR_TOP + 0.08, db, DOOR_TOP + 0.75, DOOR_R), 1, 0.06)
+        glass.on_wall(circle((da + db) / 2, DOOR_TOP + 0.41, PORTHOLE_D / 2), 1, 0.08)
+    parts = {"door": ("door", closed, panel), "door_porthole": ("glass", False, glass)}
     for _, _, m in parts.values():
         m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
     return parts, origin
@@ -678,6 +708,9 @@ def write_nif(path, root_name, built, s, tex, pyn):
             coll_verts += [tuple(c / HAVOC_SCALE_FACTOR for c in v) for v in verts]
             coll_tris += [[a + base, b + base, c + base] for a, b, c in m.tris]
 
+    if not coll_verts:                   # nothing to bump into (the open door): no collision
+        nif.save()
+        return
     physics = PhysicsProps(is_dynamic=False,
                            body_props_raw=bytes.fromhex("00ff003f003fcd3e01024c3deeff7f7f"),
                            collision_filter_info=1)
@@ -722,6 +755,11 @@ def main():
     door_built, door_origin = door_parts(args.length)
     door_path = mesh_dir / "C130_Door.nif"
     write_nif(door_path, "C130_Door", door_built, s, tex, pyn)
+    panel_paths = []
+    for closed, name in ((False, "C130_DoorOpen"), (True, "C130_DoorClosed")):
+        built, _ = door_panel_parts(args.length, closed)
+        panel_paths.append(mesh_dir / f"{name}.nif")
+        write_nif(panel_paths[-1], name, built, s, tex, pyn)
 
     aisle = wall_x(SEAT_Z) - SEAT_D - (CENTER_BACK_W / 2 + SEAT_D)
     sc = args.scale
@@ -737,7 +775,7 @@ def main():
     print(f"  port      X {-ox:+.0f}  Y {oy:+.0f}  Z 0, rotation Z 180")
     if args.install:
         data = Path(args.install)
-        for f in [nif_path, door_path] + tex_files:
+        for f in [nif_path, door_path] + panel_paths + tex_files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)

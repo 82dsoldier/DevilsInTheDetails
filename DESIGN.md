@@ -736,9 +736,16 @@ about airborne operations have heard of. It's the second worldspace.
       sync so they beat (the C-130 throb), a faint turbine whine, and a roar that grows with
       power. Three pieces: an idle loop, the takeoff, a cruise loop; the script crossfades them.
       Low on the runway, ramping up on takeoff, level in flight (the author's brief).
-    - **Open question:** the jump doors are open the whole time, so the takeoff happens with
-      sky in the doors. In real life they're closed for takeoff and the jumpmaster opens them
-      before the commands. Asked the author.
+    - **The doors (the author, 2026-11-17):** closed for takeoff. Right before takeoff there's a
+      mechanical whine, the hydraulics closing the ramp and doors. **The loadmaster, not the
+      jumpmaster, opens the doors,** usually right as the jumpmaster starts. So: open for
+      boarding; the hydraulic whine (`hydraulics.wav`) ends with the doors shutting; and as
+      "Ten minutes!" starts, "The loadmaster opens the jump doors": the latch, the rattle up the
+      tracks, a bang, and the wind roars in (the cruise loop crossfades to `engines_cruise_doors`).
+      The door itself is two statics on each doorway, `C130_DoorOpen.nif` (slid up) and
+      `C130_DoorClosed.nif` (filling the doorway), swapped by enabling one and disabling the
+      other; the jump door activator keeps the jambs, platform and jump slab. No loadmaster
+      actor yet: a notification stands in for him.
   - **The jumpmaster stands aft of the starboard door,** not in front of it (in front, he blocked
     it). He faces forward, toward the stick. He holds his spot and doesn't greet the player: no
     voice type, AI package `DefaultStayAtEditorLocationNoInterrupt`.
