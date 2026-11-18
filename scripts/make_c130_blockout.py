@@ -900,43 +900,148 @@ def door_parts(length):
     return parts, origin
 
 
-def door_panel_parts(length, closed):
-    """The starboard paratroop door itself, from the same origin as door_parts, as a static model
-    the scene swaps: closed (filling the doorway, for takeoff and the flight, until the
-    loadmaster opens it at "Ten minutes!"), or open (slid up on its tracks to lie against the
-    upper wall)."""
+DOOR_SEGMENTS = 5        # the door in horizontal panels, each riding the track: together they bend
+                         # round from the wall onto the ceiling as the real (curved) door does
+DOOR_TRACK_INSET = 0.03  # the door's track, just inside the hull's lining
+DOOR_STOW_CLEAR = 0.05   # opened, its bottom edge this far above the doorway's top
+DOOR_KEYS = 16           # poses along the track that the script slides each panel through
+DOOR_LIP = 0.04          # each panel's lip, behind the one below it, so no gap shows between them
+
+
+def door_track():
+    """The door's track: up the starboard wall from the floor and over under the ceiling, just
+    inside the lining. Returns (s, x, z) numpy arrays, s the distance along it."""
+    top, b = FLOOR_W / 2 + BULGE, CABIN_H - WALL_TOP
+    pts = [(wall_x(z), z) for z in np.linspace(0, WALL_TOP, 300)]
+    pts += [(top * math.cos(a), WALL_TOP + b * math.sin(a)) for a in np.linspace(0, math.radians(89), 600)[1:]]
+    xs, zs = [], []
+    for x, z in pts:
+        n = hull_normal(x, z)
+        xs.append(x + n[0] * DOOR_TRACK_INSET)
+        zs.append(z + n[2] * DOOR_TRACK_INSET)
+    xs, zs = np.array(xs), np.array(zs)
+    s = np.concatenate([[0.0], np.cumsum(np.hypot(np.diff(xs), np.diff(zs)))])
+    return s, xs, zs
+
+
+def door_segments(length):
+    """The paratroop door, closed, as DOOR_SEGMENTS panels (bottom first), each its own model from
+    the jump door's origin (as door_parts), and how each slides open along the track:
+    ([{name: (material, collides, Mesh)}], [[(dx, dz, degrees)] * (DOOR_KEYS + 1)], origin).
+    A key moves a panel from where it's modelled (closed): turned `degrees` about the long axis
+    (positive: its top over toward the cabin's centre), then shifted (dx, dz), in metres.
+    No collision: the engine won't slide a fixed body (the jump door's slab closes the doorway)."""
     hinge = -length / 2
     da, db = hinge + DOOR_AFT, hinge + DOOR_AFT + DOOR_W
     origin = (wall_x(0), (da + db) / 2, 0.0)
-    panel, glass = Mesh(), Mesh()
-    if closed:
-        # Rings of the doorway's outline (closed along the sill) shrinking to its middle, laid
-        # on the wall's bow and set a little into the opening so the jambs show round it.
-        inset = -0.04
-        outline = [(y, z) for y, z, _ in doorway(da, db)]
-        cy, cz = (da + db) / 2, DOOR_TOP / 2
+    ts, tx, tz = door_track()
 
-        def place(y, z):
-            n = wall_normal(z, 1)
-            return panel.vert((wall_x(z) + n[0] * inset, y, z + n[2] * inset), n,
-                              ((y - da) / (db - da), 1 - z / DOOR_TOP))
-        rings = [[place(cy + (y - cy) * f, cz + (z - cz) * f) for y, z in outline]
-                 for f in (1.0, 0.75, 0.5, 0.25)]
-        for r0, r1 in zip(rings, rings[1:]):
-            for j in range(len(outline)):
-                k = (j + 1) % len(outline)
-                panel.quad(r0[j], r0[k], r1[k], r1[j])
-        c = place(cy, cz)
-        for j in range(len(outline)):
-            panel.tri(c, rings[-1][j], rings[-1][(j + 1) % len(outline)])
-        glass.on_wall(circle((da + db) / 2, 1.35, PORTHOLE_D / 2), 1, inset + 0.01)
-    else:
-        panel.on_wall(rounded_rect(da, DOOR_TOP + 0.08, db, DOOR_TOP + 0.75, DOOR_R), 1, 0.06)
-        glass.on_wall(circle((da + db) / 2, DOOR_TOP + 0.41, PORTHOLE_D / 2), 1, 0.08)
-    parts = {"door": ("door", False, panel), "door_porthole": ("glass", False, glass)}
-    for _, _, m in parts.values():
-        m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
-    return parts, origin
+    def at(s, out=0.0):
+        """The track's point s along it, pushed `out` toward the hull; and its inward normal."""
+        x, z = float(np.interp(s, ts, tx)), float(np.interp(s, ts, tz))
+        n = hull_normal(x, z)
+        return (x - n[0] * out, z - n[2] * out), n
+
+    def s_of(z):
+        return float(np.interp(z, tz, ts))
+
+    def width(z):
+        """The door's edges at height z (closed): its top corners rounded as the doorway's."""
+        r, c = DOOR_R, DOOR_TOP - DOOR_R
+        cut = r - math.sqrt(max(0.0, r * r - (z - c) ** 2)) if z > c else 0.0
+        return da + cut, db - cut
+
+    bounds = [DOOR_TOP * k / DOOR_SEGMENTS for k in range(DOOR_SEGMENTS + 1)]
+    corner = [DOOR_TOP - DOOR_R + DOOR_R * i / 8 for i in range(1, 9)]
+    hole_z = 1.35                                     # the porthole's centre, as before
+    segs, keys = [], []
+    for k in range(DOOR_SEGMENTS):
+        z0, z1 = bounds[k], bounds[k + 1]
+        panel, glass = Mesh(), Mesh()
+        rows = sorted(set([z0 + (z1 - z0) * i / 4 for i in range(5)] + [z for z in corner if z0 < z < z1]))
+
+        def row(z, out=0.0, s_shift=0.0):
+            (x, zz), n = at(s_of(z) + s_shift, out)
+            ya, yb = width(z)
+            return [panel.vert((x, ya + (yb - ya) * j / 4, zz), n,
+                               ((ya + (yb - ya) * j / 4 - da) / (db - da), 1 - z / DOOR_TOP))
+                    for j in range(5)]
+        grid = [row(z) for z in rows]
+        if k:                                         # the lip, behind the panel below
+            grid = [row(z0, 0.012, -DOOR_LIP), row(z0, 0.012)] + grid
+        for r0, r1 in zip(grid, grid[1:]):
+            for j in range(4):
+                panel.quad(r0[j], r0[j + 1], r1[j + 1], r1[j])
+        if z0 < hole_z < z1:
+            ring = []
+            for y, z in [((da + db) / 2, hole_z)] + circle((da + db) / 2, hole_z, PORTHOLE_D / 2):
+                (x, zz), n = at(s_of(z), -0.01)
+                ring.append(glass.vert((x, y, zz), n))
+            for i in range(1, len(ring)):
+                glass.tri(ring[0], ring[i], ring[i % (len(ring) - 1) + 1])
+        parts = {"door": ("door", False, panel)}
+        if glass.verts:
+            parts["door_porthole"] = ("glass", False, glass)
+        for _, _, m in parts.values():
+            m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
+        segs.append(parts)
+
+        # Its poses: the chord from its bottom to its top edge slid along the track; turned to
+        # the chord's new slope, about the chord's middle.
+        sa, sb = s_of(z0), s_of(z1)
+        shift = s_of(DOOR_TOP + DOOR_STOW_CLEAR)
+        (ax, az), _ = at(sa)
+        (bx, bz), _ = at(sb)
+        m0 = ((ax + bx) / 2 - origin[0], (az + bz) / 2)
+        a0 = math.atan2(bz - az, bx - ax)
+        ks = []
+        for j in range(DOOR_KEYS + 1):
+            u = shift * j / DOOR_KEYS
+            (ax, az), _ = at(sa + u)
+            (bx, bz), _ = at(sb + u)
+            a = math.atan2(bz - az, bx - ax) - a0
+            mx, mz = (ax + bx) / 2 - origin[0], (az + bz) / 2
+            ks.append((mx - (m0[0] * math.cos(a) - m0[1] * math.sin(a)),
+                       mz - (m0[0] * math.sin(a) + m0[1] * math.cos(a)), math.degrees(a)))
+        keys.append(ks)
+    return segs, keys, origin
+
+
+def door_open_parts(length):
+    """The door slid open (every panel at its last key), as one static for when it's at rest."""
+    segs, keys, _ = door_segments(length)
+    out = {"door": ("door", False, Mesh()), "door_porthole": ("glass", False, Mesh())}
+    for parts, ks in zip(segs, keys):
+        dx, dz, deg = ks[-1]
+        c, s_ = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+        for name, (_, _, m) in parts.items():
+            o = out[name][2]
+            base = len(o.verts)
+            for (x, y, z), (nx, ny, nz), uv in zip(m.verts, m.norms, m.uvs):
+                o.verts.append((x * c - z * s_ + dx, y, x * s_ + z * c + dz))
+                o.norms.append((nx * c - nz * s_, ny, nx * s_ + nz * c))
+                o.uvs.append(uv)
+            o.tris += [(a + base, b + base, cc + base) for a, b, cc in m.tris]
+    return out
+
+
+def door_track_papyrus(keys, s):
+    """DevilsC130DoorTrack.psc: each panel's keys, in game units and degrees, for the panels'
+    script (DevilsC130DoorPanel)."""
+    lines = ["Scriptname DevilsC130DoorTrack Hidden",
+             "{Generated by scripts/make_c130_blockout.py: the jump door panels' poses along their",
+             "track, closed (key 0) to open. Each key is dx, dz, the turn about the long axis",
+             "(degrees, AngleY), from where the panel's modelled; dx is outboard on the starboard",
+             "door, so turned with the door's heading.}", "",
+             f"Int Function Count() Global", f"\tReturn {DOOR_KEYS + 1}", "EndFunction", "",
+             "Float[] Function Keys(Int panel) Global",
+             f"\tFloat[] k = new Float[{3 * (DOOR_KEYS + 1)}]"]
+    for p, ks in enumerate(keys):
+        lines.append(f"\t{'If' if p == 0 else 'ElseIf'} panel == {p}")
+        for j, (dx, dz, deg) in enumerate(ks):
+            lines.append(f"\t\tk[{3 * j}] = {dx * s:.3f}\n\t\tk[{3 * j + 1}] = {dz * s:.3f}\n\t\tk[{3 * j + 2}] = {deg:.3f}")
+    lines += ["\tEndIf", "\tReturn k", "EndFunction", ""]
+    return "\n".join(lines)
 
 
 TARMAC_DROP = 1.03       # the cargo floor above the ground (a C-130H's, about 41 in)
@@ -1052,11 +1157,17 @@ def main():
     door_built, door_origin = door_parts(args.length)
     door_path = mesh_dir / "C130_Door.nif"
     write_nif(door_path, "C130_Door", door_built, s, tex, pyn)
-    panel_paths = []
-    for closed, name in ((False, "C130_DoorOpen"), (True, "C130_DoorClosed")):
-        built, _ = door_panel_parts(args.length, closed)
-        panel_paths.append(mesh_dir / f"{name}.nif")
-        write_nif(panel_paths[-1], name, built, s, tex, pyn)
+    panel_paths = [mesh_dir / "C130_DoorOpen.nif"]
+    write_nif(panel_paths[0], "C130_DoorOpen", door_open_parts(args.length), s, tex, pyn)
+    segs, keys, _ = door_segments(args.length)
+    for k, seg in enumerate(segs):
+        panel_paths.append(mesh_dir / f"C130_DoorPanel{k}.nif")
+        write_nif(panel_paths[-1], f"C130_DoorPanel{k}", seg, s, tex, pyn)
+    track_psc = mod / "Scripts" / "Source" / "User" / "DevilsC130DoorTrack.psc"
+    track_psc.parent.mkdir(parents=True, exist_ok=True)
+    track_psc.write_text(door_track_papyrus(keys, s), newline="\r\n")
+    (ROOT / "scripts" / "papyrus" / "DevilsC130DoorTrack.psc").write_text(door_track_papyrus(keys, s), newline="\r\n")
+    panel_paths.append(track_psc)
     panel_paths.append(mesh_dir / "C130_Tarmac.nif")
     write_nif(panel_paths[-1], "C130_Tarmac", tarmac_parts(), s, tex, pyn)
 

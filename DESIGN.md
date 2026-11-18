@@ -906,6 +906,16 @@ about airborne operations have heard of. It's the second worldspace.
       (static-layer) collision, and the engine won't slide a fixed body with `TranslateTo`; it
       just jumps it to the end. The closed door now has no collision (the jump door activator's
       invisible slab already closes the doorway).
+    - **Round the track (the author, 2026-11-18):** sliding straight up wasn't right: the door
+      rides tracks up the wall and round under the ceiling, where it lies open (the reference
+      photo). A rigid door can't follow a track that bends like that without leaving it, so the
+      door is five horizontal panels (`DevilsC130DoorPanel0`-`4`, one model each, each ref with
+      `DevilsC130DoorPanel`). Each panel's poses along the track (`DOOR_KEYS`, 16) are worked
+      out by make_c130_blockout.py and written as `DevilsC130DoorTrack.psc`; the jumpmaster sends
+      one event (`DoorsSlide`) and all ten panels step through their poses in the same frame. A
+      lip behind each panel hides any gap. The open door static is the same panels at their
+      last pose, so swapping to it doesn't show. The rotation's sign assumes the engine turns
+      AngleY the same way as AngleZ (clockwise); if the doors swing outward instead, flip it.
     - **Rounded corners (the author, 2026-11-18):** the doorway's top corners are rounded
       (`DOOR_R`, 0.15 m) in the hull, the aluminium jambs and the closed door. The sill stays
       square, the platform running out level from the floor.

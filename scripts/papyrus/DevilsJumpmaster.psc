@@ -37,7 +37,11 @@ Sound Property DoorOpenSound Auto Const Mandatory
 ObjectReference[] Property DoorsOpen Auto Const
 {The jump doors slid up open (DevilsC130DoorOpen), one on each door: for boarding, and the jump.}
 ObjectReference[] Property DoorsClosed Auto Const
-{The jump doors shut (DevilsC130DoorClosed, Initially Disabled): for takeoff and the flight.}
+{The jump doors shut: each door's five panels (DevilsC130DoorPanel0-4, Initially Disabled), for
+takeoff and the flight. They slide along the door's track (DevilsC130DoorPanel).}
+
+CustomEvent DoorsStow
+CustomEvent DoorsSlide
 Actor[] Property Stick Auto Const
 {The Devils jumping with Nate (DevilsParatrooper, Initially Disabled): the outboard seats first
 (OutboardCount of them), then the centerline. Each one's reference stands where he lines up after
@@ -91,8 +95,6 @@ lap, the case tipped forward clear of the seat.}
 Armor Property GearStanding Auto Const Mandatory
 {DevilsJumpGearStanding: the same as he stands (slot 58): the ruck right under the reserve, the
 case straight down his left side. He changes into it as he gets up.}
-Float Property DoorRaise = 140.0 Auto Const
-{How far the closed door slides up to be out of sight in the wall above the doorway.}
 Float Property TaxiSeconds = 20.0 Auto Const
 {From boarding to the run-up.}
 Float Property CruiseSeconds = 30.0 Auto Const
@@ -121,6 +123,11 @@ Event OnLoad()
 	GreenLight.SetValue(0)
 	SetLights(True, False)            ; red the whole way, till the green
 	SetDoors(True)                    ; open for boarding
+	Int p = 0
+	While DoorsClosed && p < DoorsClosed.Length
+		(DoorsClosed[p] as DevilsC130DoorPanel).Listen(Self)
+		p += 1
+	EndWhile
 	Tarmac.Enable()                   ; on the ground
 	Bool night = IsNight()            ; a night jump flies with the cabin dark and red
 	SetAll(DayLights, !night)
@@ -482,54 +489,39 @@ Function SetDoors(Bool open)
 	SetAll(DoorsClosed, !open)
 	Int i = 0
 	While DoorsClosed && i < DoorsClosed.Length
+		DoorsClosed[i].StopTranslation()
 		DoorsClosed[i].MoveToMyEditorLocation()
 		i += 1
 	EndWhile
 EndFunction
 
 Function SlideDoorsClosed(Float seconds)
-	{Each door comes down out of the wall above the doorway into place, over `seconds`.}
+	{The door comes down off the ceiling, round the track and into the doorway, over `seconds`:
+	its panels are shown where it lies open, the open door hidden, and they slide together.}
 	If !DoorsClosed
 		Return
 	EndIf
-	Int i = 0
-	While i < DoorsClosed.Length
-		ObjectReference d = DoorsClosed[i]
-		d.MoveToMyEditorLocation()
-		d.SetPosition(d.GetPositionX(), d.GetPositionY(), d.GetPositionZ() + DoorRaise)
-		d.Enable()
-		i += 1
-	EndWhile
+	SendCustomEvent("DoorsStow", new Var[0])
+	Utility.Wait(0.4)                 ; all of them shown where the open door is
 	SetAll(DoorsOpen, False)
-	i = 0
-	While i < DoorsClosed.Length
-		ObjectReference d = DoorsClosed[i]
-		Int tries = 0
-		While !d.Is3DLoaded() && tries < 20
-			Utility.Wait(0.05)
-			tries += 1
-		EndWhile
-		d.TranslateTo(d.GetPositionX(), d.GetPositionY(), d.GetPositionZ() - DoorRaise, \
-			d.GetAngleX(), d.GetAngleY(), d.GetAngleZ(), DoorRaise / seconds)
-		i += 1
-	EndWhile
-	Utility.Wait(seconds)
+	Var[] args = new Var[2]
+	args[0] = False
+	args[1] = seconds - 0.4
+	SendCustomEvent("DoorsSlide", args)
+	Utility.Wait(seconds - 0.4)
 EndFunction
 
 Function SlideDoorsOpen(Float seconds)
-	{Each door slides up out of the doorway into the wall above it over `seconds`, and is then
-	shown lying open on its tracks against the upper wall.}
+	{The door slides up out of the doorway and round its track to lie under the ceiling over
+	`seconds`, then is swapped for the open door (the same shape, there).}
 	If !DoorsClosed
 		Return
 	EndIf
-	Int i = 0
-	While i < DoorsClosed.Length
-		ObjectReference d = DoorsClosed[i]
-		d.TranslateTo(d.GetPositionX(), d.GetPositionY(), d.GetPositionZ() + DoorRaise, \
-			d.GetAngleX(), d.GetAngleY(), d.GetAngleZ(), DoorRaise / seconds)
-		i += 1
-	EndWhile
-	Utility.Wait(seconds)
+	Var[] args = new Var[2]
+	args[0] = True
+	args[1] = seconds
+	SendCustomEvent("DoorsSlide", args)
+	Utility.Wait(seconds + 0.2)
 	SetDoors(True)
 EndFunction
 
