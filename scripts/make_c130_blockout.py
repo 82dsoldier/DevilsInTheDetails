@@ -902,23 +902,30 @@ def door_parts(length):
 
 DOOR_SEGMENTS = 5        # the door in horizontal panels, each riding the track: together they bend
                          # round from the wall onto the ceiling as the real (curved) door does
-DOOR_TRACK_INSET = 0.03  # the door's track, just inside the hull's lining
-DOOR_STOW_CLEAR = 0.05   # opened, its bottom edge this far above the doorway's top
+DOOR_TRACK_INSET = 0.03  # the door's track, just inside the hull's lining above the doorway...
+DOOR_RECESS = 0.04       # ...but set into the doorway, as the closed door was (flush with the side)
+DOOR_JOG = 0.06          # over this much height above the doorway, the track jogs in from one to the other
+DOOR_STOW_CLEAR = 0.07   # opened, its bottom edge this far above the doorway's top
 DOOR_KEYS = 16           # poses along the track that the script slides each panel through
 DOOR_LIP = 0.04          # each panel's lip, behind the one below it, so no gap shows between them
 
 
 def door_track():
-    """The door's track: up the starboard wall from the floor and over under the ceiling, just
-    inside the lining. Returns (s, x, z) numpy arrays, s the distance along it."""
+    """The door's track: up the starboard wall from the floor and over under the ceiling. In the
+    doorway it's set into the opening (the door closed sits flush with the plane's side); above
+    it, it jogs in to run just inside the lining. Returns (s, x, z) numpy arrays, s the distance
+    along it."""
     top, b = FLOOR_W / 2 + BULGE, CABIN_H - WALL_TOP
     pts = [(wall_x(z), z) for z in np.linspace(0, WALL_TOP, 300)]
-    pts += [(top * math.cos(a), WALL_TOP + b * math.sin(a)) for a in np.linspace(0, math.radians(89), 600)[1:]]
+    pts += [(top * math.cos(a), WALL_TOP + b * math.sin(a)) for a in np.linspace(0, math.radians(92), 600)[1:]]
     xs, zs = [], []
     for x, z in pts:
         n = hull_normal(x, z)
-        xs.append(x + n[0] * DOOR_TRACK_INSET)
-        zs.append(z + n[2] * DOOR_TRACK_INSET)
+        t = min(1.0, max(0.0, (z - DOOR_TOP) / DOOR_JOG))
+        t = t * t * (3 - 2 * t)
+        inset = -DOOR_RECESS + (DOOR_TRACK_INSET + DOOR_RECESS) * t
+        xs.append(x + n[0] * inset)
+        zs.append(z + n[2] * inset)
     xs, zs = np.array(xs), np.array(zs)
     s = np.concatenate([[0.0], np.cumsum(np.hypot(np.diff(xs), np.diff(zs)))])
     return s, xs, zs
