@@ -902,6 +902,13 @@ about airborne operations have heard of. It's the second worldspace.
       last 4 s of the hydraulics, and up into it over 2.8 s when the loadmaster opens it, the
       rattle stretched to match (`DOOR_SLIDE`, `DOOR_UP` in make_engine_audio.py); then the open
       door is shown lying on its tracks against the upper wall.
+    - **They still jumped, not slid (the author, 2026-11-18):** the closed door had fixed
+      (static-layer) collision, and the engine won't slide a fixed body with `TranslateTo`; it
+      just jumps it to the end. The closed door now has no collision (the jump door activator's
+      invisible slab already closes the doorway).
+    - **Rounded corners (the author, 2026-11-18):** the doorway's top corners are rounded
+      (`DOOR_R`, 0.15 m) in the hull, the aluminium jambs and the closed door. The sill stays
+      square, the platform running out level from the floor.
     - **Tested 2026-11-17: "Everything else is perfect."** The wait from boarding to "Ten
       minutes!" (about 2 minutes) may be a little long; left as is to see how players react.
       To shorten it, lower `TaxiSeconds` (20) or `CruiseSeconds` (30) on the jumpmaster's script

@@ -484,6 +484,22 @@ def rounded_rect(y0, z0, y1, z1, r, steps=6):
     return pts
 
 
+def doorway(da, db, steps=6):
+    """The paratroop doorway's edge, from the sill at its aft edge up, round the top (its upper
+    corners rounded, DOOR_R) and down its forward edge to the sill: [(y, z, (ny, nz))], each
+    with its normal across the opening, pointing into it. The sill is square: the jump platform
+    runs out level from the floor."""
+    top, r = DOOR_TOP, DOOR_R
+    zs = [WALL_TOP * i / WALL_STEPS for i in range(WALL_STEPS + 1) if WALL_TOP * i / WALL_STEPS < top - r]
+    pts = [(da, z, (1.0, 0.0)) for z in zs + [top - r]]
+    for cy, a0, a1, ks in ((da + r, 180, 90, range(1, steps + 1)), (db - r, 90, 0, range(steps))):
+        for i in ks:
+            a = math.radians(a0 + (a1 - a0) * i / steps)
+            pts.append((cy + r * math.cos(a), top - r + r * math.sin(a), (-math.cos(a), -math.sin(a))))
+    pts += [(db, z, (-1.0, 0.0)) for z in [top - r] + zs[::-1]]
+    return pts
+
+
 # --- The parts ---------------------------------------------------------------------------
 
 def parts(length):
@@ -521,6 +537,34 @@ def parts(length):
             if stations[k][0] == da and max(za, zb) <= DOOR_TOP and xa * xb > 0:
                 continue                                   # the doorway
             hull.quad(r0[i], r0[i + 1], r1[i + 1], r1[i])
+    # The doorway's rounded top corners: the wall fills in between each corner of the square hole
+    # and the arc, fanned from the corner (its edge points follow the wall's bow).
+    wall = [(x, z, si) for (x, z), si in zip(prof, arc) if x > 0]
+
+    def arc_at(z):
+        for (x0, z0, s0), (x1, z1, s1) in zip(wall, wall[1:]):
+            if min(z0, z1) <= z <= max(z0, z1):
+                return s0 + (s1 - s0) * (z - z0) / ((z1 - z0) or 1)
+        return wall[0][2]
+    edge = doorway(da, db)
+    k = next(i for i, (_, z, _) in enumerate(edge) if z >= DOOR_TOP - DOOR_R - 1e-9)
+    n = len(edge)
+    bow = [z for _, z, _ in wall if DOOR_TOP - DOOR_R < z < DOOR_TOP - 1e-6]   # on the edges
+    corners = ((da, [(da, z) for z in bow] + [(y, z) for y, z, _ in edge[k:k + 7]]),
+               (db, [(y, z) for y, z, _ in edge[k + 7:k + 14]] + [(db, z) for z in bow[::-1]]))
+    for side in (1, -1):
+        for cy, run in corners:
+            pts = [(cy, DOOR_TOP)] + run
+            # the run starts or ends on the corner's own edge at DOOR_TOP - DOOR_R; on the top
+            # edge it ends at the arc's last point
+            vs = []
+            for y, z in pts:
+                x = side * wall_x(z)
+                sa = arc_at(z)
+                vs.append(hull.vert((x, y, z), hull_normal(x, z),
+                                    ((y - hinge) / FRAME_PITCH, (sa if side > 0 else arc[-1] - sa) / 0.5)))
+            for a, b in zip(vs[1:], vs[2:]):
+                hull.tri(vs[0], a, b)
     for (y, sec), ny, m in ((stations[0], 1.0, hull), (stations[-1], -1.0, bulkhead)):
         cz = sum(z for _, z in sec) / len(sec)
         c = m.vert((0.0, y, cz), (0, ny, 0), (0.5, cz))
@@ -838,16 +882,11 @@ def door_parts(length):
     origin = (wall_x(0), (da + db) / 2, 0.0)
     jambs, panel, glass, platform, block = (Mesh() for _ in range(5))
 
-    zs = [DOOR_TOP * i / WALL_STEPS for i in range(WALL_STEPS + 1)]
-    for y, ny in ((da, 1.0), (db, -1.0)):           # the aft and forward edges, facing in
-        col = [(jambs.vert((wall_x(z), y, z), (0, ny, 0)),
-                jambs.vert((wall_x(z) + JAMB, y, z), (0, ny, 0))) for z in zs]
-        for (a, b), (c, d) in zip(col, col[1:]):
-            jambs.quad(a, b, d, c)
-    xt = wall_x(DOOR_TOP)
-    jambs.quad(*[jambs.vert(p, (0, 0, -1)) for p in
-                 ((xt, da, DOOR_TOP), (xt + JAMB, da, DOOR_TOP),
-                  (xt + JAMB, db, DOOR_TOP), (xt, db, DOOR_TOP))])
+    # The edges, the hull's thickness, all round the doorway but the sill, facing into it.
+    col = [(jambs.vert((wall_x(z), y, z), (0, ny, nz)),
+            jambs.vert((wall_x(z) + JAMB, y, z), (0, ny, nz))) for y, z, (ny, nz) in doorway(da, db)]
+    for (a, b), (c, d) in zip(col, col[1:]):
+        jambs.quad(a, b, d, c)
 
     # The platform runs on from the cargo floor's edge, across the sill, out past the hull.
     x0 = origin[0] - 0.01
@@ -871,25 +910,30 @@ def door_panel_parts(length, closed):
     origin = (wall_x(0), (da + db) / 2, 0.0)
     panel, glass = Mesh(), Mesh()
     if closed:
-        # A grid across the doorway that follows the wall's bow, set a little into the opening
-        # so the jambs show round it.
+        # Rings of the doorway's outline (closed along the sill) shrinking to its middle, laid
+        # on the wall's bow and set a little into the opening so the jambs show round it.
         inset = -0.04
-        ys = [da + (db - da) * i / 4 for i in range(5)]
-        zs = [DOOR_TOP * i / WALL_STEPS for i in range(WALL_STEPS + 1)]
+        outline = [(y, z) for y, z, _ in doorway(da, db)]
+        cy, cz = (da + db) / 2, DOOR_TOP / 2
 
         def place(y, z):
             n = wall_normal(z, 1)
             return panel.vert((wall_x(z) + n[0] * inset, y, z + n[2] * inset), n,
                               ((y - da) / (db - da), 1 - z / DOOR_TOP))
-        grid = [[place(y, z) for y in ys] for z in zs]
-        for r0, r1 in zip(grid, grid[1:]):
-            for j in range(len(ys) - 1):
-                panel.quad(r0[j], r0[j + 1], r1[j + 1], r1[j])
+        rings = [[place(cy + (y - cy) * f, cz + (z - cz) * f) for y, z in outline]
+                 for f in (1.0, 0.75, 0.5, 0.25)]
+        for r0, r1 in zip(rings, rings[1:]):
+            for j in range(len(outline)):
+                k = (j + 1) % len(outline)
+                panel.quad(r0[j], r0[k], r1[k], r1[j])
+        c = place(cy, cz)
+        for j in range(len(outline)):
+            panel.tri(c, rings[-1][j], rings[-1][(j + 1) % len(outline)])
         glass.on_wall(circle((da + db) / 2, 1.35, PORTHOLE_D / 2), 1, inset + 0.01)
     else:
         panel.on_wall(rounded_rect(da, DOOR_TOP + 0.08, db, DOOR_TOP + 0.75, DOOR_R), 1, 0.06)
         glass.on_wall(circle((da + db) / 2, DOOR_TOP + 0.41, PORTHOLE_D / 2), 1, 0.08)
-    parts = {"door": ("door", closed, panel), "door_porthole": ("glass", False, glass)}
+    parts = {"door": ("door", False, panel), "door_porthole": ("glass", False, glass)}
     for _, _, m in parts.values():
         m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
     return parts, origin
