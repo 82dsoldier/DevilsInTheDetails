@@ -70,6 +70,7 @@ SIGNALS = {
     "Hook up!": "SignalHookUp",
 }
 SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it
+SIGNAL_LEAD = 1.0       # his arm is going up (0.5 s, plus the game starting the idle) before he shouts
 
 PS_TTS = r"""
 Add-Type -AssemblyName System.Speech
@@ -177,7 +178,10 @@ def main():
             line = shout(voice[f"{piece}_{i}"])
             start = t
             if text in SIGNALS:
-                cues.append((t, f"Jumpmaster: {text}", f"Signal({SIGNALS[text]})"))
+                cues.append((t, None, f"Signal({SIGNALS[text]})"))
+                audio.append(silence(SIGNAL_LEAD))
+                t += SIGNAL_LEAD
+                cues.append((t, f"Jumpmaster: {text}", None))
             else:
                 cues.append((t, f"Jumpmaster ({signal}): {text}" if signal else f"Jumpmaster: {text}", None))
             audio.append(line)
