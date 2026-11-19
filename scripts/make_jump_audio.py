@@ -38,12 +38,12 @@ ECHO_GAP = 0.15     # the jumpmaster's line to the stick's echo
 # signal is shown with the line. The signals are from memory of FM 3-21.220; the author checks them.
 PIECES = {
     "commands_1": [
-        ("Ten minutes!", True, "both hands up, all ten fingers spread"),
-        ("Get ready!", True, "both arms out toward the stick"),
-        ("Outboard personnel, stand up!", True, "arms to the outboard seats, palms up, raised"),
-        ("Inboard personnel, stand up!", True, "arms to the centre seats, palms up, raised"),
+        ("Ten minutes!", True, "hands out in front, fingers splayed"),
+        ("Get ready!", True, "hands out in front, fingers together, tipped forward"),
+        ("Outboard personnel, stand up!", True, "arms out, palms up, raised"),
+        ("Inboard personnel, stand up!", True, "arms out, palms up, raised"),
         ("Hook up!", True, "arm overhead, finger crooked like a hook, pumping"),
-        ("Check static lines!", True, "OK rings with both hands, drawn to his eyes"),
+        ("Check static lines!", True, "arm overhead, finger crooked like a hook, pumping (as Hook up)"),
         ("Check equipment!", True, "fingertips tapping his chest"),
         ("Sound off for equipment check!", True, "hands cupped behind his ears"),
     ],
@@ -72,6 +72,7 @@ SIGNALS = {
     "Outboard personnel, stand up!": "SignalStandUp",
     "Inboard personnel, stand up!": "SignalStandUp",
     "Hook up!": "SignalHookUp",
+    "Check static lines!": "SignalHookUp",     # the same signal
 }
 SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it
 SIGNAL_LEAD = 1.0       # his arm is going up (0.5 s, plus the game starting the idle) before he shouts
