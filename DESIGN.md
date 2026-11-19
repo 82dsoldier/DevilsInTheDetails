@@ -816,6 +816,15 @@ about airborne operations have heard of. It's the second worldspace.
     through the air.** A real drop would need parachutes animated on falling bodies (a major
     job), and a way round fall damage that raises the question of why Nate needs power armor
     and they don't.
+  - **Built (2026-11-19): the stick on the ground.** Eight `XMarkerHeading`s on Sicily DZ
+    (`StickLandings` on the jumpmaster), at the terrain's height from the plugin's own LAND
+    records: **about 65 m apart along the run** (the author: a realistic spread), Nate's door's
+    men 65-260 m behind him, the other door's in a line 25 m to his left, 35-230 m back, so
+    none comes down where he's looking. Once Nate stops falling, `LandStick` takes each man out
+    of his kit and line and puts him on his marker, facing along the run. (The plane unloading
+    as Nate leaves no longer sends them back to their seats once the green light has been on.)
+    **Next (the author): they move up to Nate.** That needs navmesh on the DZ; there is none
+    yet, so for now they stand where they land.
   - **Parachutes only in the plane.** The jumpers in their seats wear a main and a reserve (a
     harness model; community help). The ones on the ground have already shed their harness to
     fight, so they need none.

@@ -61,6 +61,10 @@ ObjectReference[] Property StickStands Auto Const
 {Each jumper's mark in line (an XMarkerHeading on his own reference's spot, facing aft), in the
 same order as Stick. Up, he walks back to his spot; nearly there, he's set on his mark and held
 (restrained), so his hook is on the cable and no one shoves him off it.}
+ObjectReference[] Property StickLandings Auto Const
+{Where each jumper comes down on Sicily DZ (XMarkerHeadings, Stick's order): behind Nate along
+the jump run, about 65 m apart, each door's men in their own line (made by esp_landings.py).
+None: they just leave the plane, as before.}
 Float Property SettleDistance = 45.0 Auto Const
 {How near his mark (game units) a jumper walks before he's set on it.}
 Float Property SettleSeconds = 10.0 Auto Const
@@ -127,6 +131,7 @@ ObjectReference[] Property NightLights Auto Const
 Bool running = False
 Int engine = 0                        ; the engine sound playing (its instance), 0 for none
 Bool holding = False                  ; the stick is held on their marks (SettleHalf)
+Bool wentGreen = False                    ; the green light's been on: the stick goes out after Nate
 Bool hooked = False                   ; "Hook up!" has been given
 Bool[] up                             ; each man (by Stick's order) is out of his seat
 
@@ -141,6 +146,7 @@ Event OnLoad()
 	; keeps this from starting twice.
 	Disable()
 	GreenLight.SetValue(0)
+	wentGreen = False
 	SetLights(True, False)            ; red the whole way, till the green
 	SetDoors(True)                    ; open for boarding
 	Int p = 0
@@ -185,13 +191,15 @@ Event OnLoad()
 	Utility.Wait(Utility.RandomFloat(3.0, 6.0))
 	SetLights(False, True)
 	GreenLight.SetValue(1)
+	wentGreen = True
 	Play_commands_3()
 
 	; Out the door, the plane flies on without you.
 	While PlayerAboard()
 		Utility.Wait(0.5)
 	EndWhile
-	ClearStick()                      ; they followed him out
+	LandStick()                       ; they followed him out (wentGreen stays set: the plane's
+	                                  ; unloading mustn't put them back; the next boarding clears it)
 	Crossfade(engine, 0, 1.5)
 	engine = 0
 	running = False
@@ -203,7 +211,9 @@ Event OnUnload()
 		Sound.StopInstance(engine)
 		engine = 0
 	EndIf
-	ClearStick()                      ; left mid-flight: no one waiting to fall on the next load
+	If !wentGreen                       ; after the green light they're out after Nate (LandStick)
+		ClearStick()                  ; left mid-flight: no one waiting to fall on the next load
+	EndIf
 EndEvent
 
 Function Fly()
@@ -251,6 +261,10 @@ Function SeatStick()
 	While i < Stick.Length
 		Stick[i].SetRestrained(False)
 		Stick[i].SetLinkedRef(StickSeats[i], SeatLink)
+		If Stick[i].GetParentCell() != GetParentCell()   ; on the ground from the last jump
+			Stick[i].Disable()
+			Stick[i].MoveToMyEditorLocation()
+		EndIf
 		Stick[i].Enable()
 		i += 1
 	EndWhile
@@ -501,6 +515,43 @@ Function ClearStick()
 		Stick[i].SetHeadTracking(True)
 		Stick[i].Disable()
 		Stick[i].MoveToMyEditorLocation()
+		i += 1
+	EndWhile
+EndFunction
+
+Function LandStick()
+	{Out the door after Nate: once he's down, each man is on the ground behind him along the run
+	(StickLandings), out of his parachutes and line, ready to fight. They're put there unseen,
+	behind him, not dropped through the air (DESIGN.md, "Out the door").}
+	If !StickLandings || StickLandings.Length < Stick.Length
+		ClearStick()
+		Return
+	EndIf
+	holding = False
+	; Wait for Nate to come down: his height stops falling (15 s at most; the fall takes 4-5).
+	Actor player = Game.GetPlayer()
+	Float lastZ = player.GetPositionZ()
+	Int tries = 0
+	Bool falling = True
+	While falling && tries < 60
+		Utility.Wait(0.25)
+		Float now = player.GetPositionZ()
+		falling = (lastZ - now) > 4.0
+		lastZ = now
+		tries += 1
+	EndWhile
+	Int i = 0
+	While i < Stick.Length
+		Actor man = Stick[i]
+		Unhook(man)
+		man.RemoveItem(JumpKit, -1, True)
+		man.RemoveItem(GearSeated, -1, True)
+		man.RemoveItem(GearStanding, -1, True)
+		man.SetRestrained(False)
+		man.SetHeadTracking(True)
+		man.Disable()
+		man.MoveTo(StickLandings[i])
+		man.Enable()
 		i += 1
 	EndWhile
 EndFunction
