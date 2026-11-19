@@ -903,8 +903,9 @@ about airborne operations have heard of. It's the second worldspace.
       tracks, a bang, and the wind roars in (the cruise loop crossfades to `engines_cruise_doors`).
       The door itself is two statics on each doorway, `C130_DoorOpen.nif` (slid up) and
       `C130_DoorClosed.nif` (filling the doorway), swapped by enabling one and disabling the
-      other; the jump door activator keeps the jambs, platform and jump slab. No loadmaster
-      actor yet: a notification stands in for him.
+      other; the jump door activator keeps the jambs, platform and jump slab. **No loadmaster
+      actor (decided, the author, 2026-11-19):** the back of the plane is crowded enough, and
+      he'd have no room to get round and do his job. A notification stands in for him.
     - **The doors slide (2026-11-17):** a plain swap was too fast for the author. The closed door
       (an activator, so it can move) slides: down out of the wall above the doorway over the
       last 4 s of the hydraulics, and up into it over 2.8 s when the loadmaster opens it, the
