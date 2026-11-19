@@ -86,6 +86,8 @@ Idle Property SignalGetReady Auto Const Mandatory
 {DevilsJMSignalGetReady: "Get ready!", the same, fingers together, hands tipped forward 45 degrees.}
 Idle Property SignalStandUp Auto Const Mandatory
 {DevilsJMSignalStandUp: "Outboard/Inboard personnel, stand up!", both arms out, palms up, raised.}
+Idle Property SignalCheckEquipment Auto Const Mandatory
+{DevilsJMSignalCheckEquipment: "Check equipment!", both hands' fingertips tapping his chest.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -630,8 +632,10 @@ Function Play_commands_1()
 	Utility.Wait(1.00)
 	Debug.Notification("Jumpmaster: Check static lines!")
 	Utility.Wait(3.29)
-	Debug.Notification("Jumpmaster (fingertips tapping his chest): Check equipment!")
-	Utility.Wait(2.59)
+	Signal(SignalCheckEquipment)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Check equipment!")
+	Utility.Wait(3.00)
 	Debug.Notification("Jumpmaster (hands cupped behind his ears): Sound off for equipment check!")
 	Utility.Wait(4.16)
 	Debug.Notification("The stick: OK! OK! OK!")

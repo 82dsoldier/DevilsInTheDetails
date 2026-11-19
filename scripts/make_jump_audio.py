@@ -73,6 +73,7 @@ SIGNALS = {
     "Inboard personnel, stand up!": "SignalStandUp",
     "Hook up!": "SignalHookUp",
     "Check static lines!": "SignalHookUp",     # the same signal
+    "Check equipment!": "SignalCheckEquipment",
 }
 SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it
 SIGNAL_LEAD = 1.0       # his arm is going up (0.5 s, plus the game starting the idle) before he shouts

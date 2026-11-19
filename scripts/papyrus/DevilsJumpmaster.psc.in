@@ -86,6 +86,8 @@ Idle Property SignalGetReady Auto Const Mandatory
 {DevilsJMSignalGetReady: "Get ready!", the same, fingers together, hands tipped forward 45 degrees.}
 Idle Property SignalStandUp Auto Const Mandatory
 {DevilsJMSignalStandUp: "Outboard/Inboard personnel, stand up!", both arms out, palms up, raised.}
+Idle Property SignalCheckEquipment Auto Const Mandatory
+{DevilsJMSignalCheckEquipment: "Check equipment!", both hands' fingertips tapping his chest.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory

@@ -12,6 +12,7 @@ standing body and a hand-set right arm:
   Get ready!    the same, but the fingers together and the hands tipped forward 45 degrees
                 (the author)
   Stand up!     both arms out, palms up, then raised (the author): for outboard and inboard
+  Check equipment!  both hands' fingertips tapping his chest (the author)
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -168,6 +169,25 @@ class Body:
         _, pr = w[self.skel.parents[i]]
         self.local[i][1] = qmul(qconj(pr), qmul(q, wr))
 
+    def reach(self, side, target, pole):
+        """Two-bone IK: the upper arm and forearm aimed so the wrist lands on `target`, the elbow
+        bending toward `pole`."""
+        w = self.world()
+        sh = w[self.names[f"{side}Arm_UpperArm"]][0]
+        el = w[self.names[f"{side}Arm_ForeArm1"]][0]
+        wr = w[self.names[f"{side}Arm_Hand"]][0]
+        a, b = _dist(sh, el), _dist(el, wr)
+        to = [t - s for t, s in zip(target, sh)]
+        d = min(max(_dist(target, sh), abs(a - b) + 0.01), a + b - 0.01)
+        u = _norm(to)
+        x = (a * a - b * b + d * d) / (2 * d)
+        h = math.sqrt(max(a * a - x * x, 0.0))
+        pk = sum(p * q for p, q in zip(pole, u))
+        perp = _norm([p - pk * q for p, q in zip(pole, u)])
+        elbow = [s + q * x + r * h for s, q, r in zip(sh, u, perp)]
+        self.aim(f"{side}Arm_UpperArm", [e - s for e, s in zip(elbow, sh)])
+        self.aim(f"{side}Arm_ForeArm1", [t - e for t, e in zip([s + q * d for s, q in zip(sh, u)], elbow)])
+
     def turn(self, bone, axis, deg):
         """Turn a bone about one of its own axes (fingers curl about their Z)."""
         i = self.names[bone]
@@ -207,6 +227,10 @@ def hook_up_frames(base):
         t = 1 - k / n_down
         frames.append(pose(t * t * (3 - 2 * t), 0.0))
     return frames
+
+
+def _dist(a, b):
+    return math.sqrt(sum((p - q) ** 2 for p, q in zip(a, b)))
 
 
 def _norm(v):
@@ -291,8 +315,50 @@ def stand_up_frames(base):
     return frames
 
 
+CHEST_TIPS = (6.0, 9.5, 100.0)      # where his right middle fingertip touches his chest
+TAP_LIFT = 5.0                      # how far off his chest the fingertips come between taps
+
+
+def tap_pose(base, off):
+    """Both hands at his chest, fingertips toward it, `off` units out from touching."""
+    b = Body(base.skel, base.local)
+    for side, sx in (("R", 1.0), ("L", -1.0)):
+        m = lambda v: (v[0] * sx, v[1], v[2])
+        want = m((CHEST_TIPS[0], CHEST_TIPS[1] + off, CHEST_TIPS[2]))
+        target = list(want)
+        for _ in range(6):                                        # wrist placed so the fingertip lands
+            b.reach(side, target, m((1.0, -0.2, -0.8)))
+            b.aim(f"{side}Arm_Hand", m((-0.3, -0.75, -0.35)))
+            b.roll(f"{side}Arm_Hand", f"{side}Arm_Finger21", f"{side}Arm_Finger51", m((0.2, 0.0, -1.0)))
+            fingers = _norm(m((-0.15, -1.0, -0.25)))
+            for f in "2345":
+                for k in "123":
+                    b.aim(f"{side}Arm_Finger{f}{k}", fingers)
+            thumb = _norm(m((-0.5, -0.6, 0.4)))
+            for k in "123":
+                b.aim(f"{side}Arm_Finger1{k}", thumb)
+            w = b.world()
+            j2, j3 = w[b.names[f"{side}Arm_Finger32"]][0], w[b.names[f"{side}Arm_Finger33"]][0]
+            tip = [c + (c - p) * 0.8 for c, p in zip(j3, j2)]
+            target = [t + (g - h) for t, g, h in zip(target, want, tip)]
+    return b
+
+
+def check_equipment_frames(base):
+    """Both hands up to his chest, the fingertips tapping it (the author): four taps. Up in
+    0.5 s, tapping 1.6 s, down in 0.5 s."""
+    off = tap_pose(base, TAP_LIFT)
+    on = tap_pose(base, 0.0)
+    frames = [blend(base, off, t) for t in ease(int(0.5 * FPS))]
+    n = int(1.6 * FPS)
+    frames += [blend(off, on, 0.5 - 0.5 * math.cos(2 * math.pi * 4 * k / n)) for k in range(n)]
+    frames += [blend(base, off, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, off, 0.0)]
+    return frames
+
+
 SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames,
-           "JM_GetReady": get_ready_frames, "JM_StandUp": stand_up_frames}
+           "JM_GetReady": get_ready_frames, "JM_StandUp": stand_up_frames,
+           "JM_CheckEquipment": check_equipment_frames}
 
 
 def to_animation(frames):
