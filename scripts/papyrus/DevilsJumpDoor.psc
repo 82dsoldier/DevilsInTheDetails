@@ -35,8 +35,15 @@ Event OnActivate(ObjectReference akActionRef)
 
 	jumping = True
 	player.MoveTo(JumpMarker)
-	; An actor moved to a marker may be set down on the ground below it. If so, put the player
-	; back up in the air where the marker is. (In testing, MoveTo kept him in the air.)
+	; MoveTo sets an actor down on the navmesh under the marker, if there is any: on the ground,
+	; not in the air (tested: with the DZ navmeshed he no longer fell). Wait till the move has
+	; happened (read straight away, his height was still the plane's, the marker's own), then put
+	; him back up where the marker is.
+	Int tries = 0
+	While tries < 40 && Math.Abs(player.GetPositionX() - JumpMarker.GetPositionX()) > 500.0
+		Utility.Wait(0.05)
+		tries += 1
+	EndWhile
 	If player.GetPositionZ() < JumpMarker.GetPositionZ() - 500.0
 		player.SetPosition(JumpMarker.GetPositionX(), JumpMarker.GetPositionY(), JumpMarker.GetPositionZ())
 	EndIf

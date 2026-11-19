@@ -65,6 +65,10 @@ ObjectReference[] Property StickLandings Auto Const
 {Where each jumper comes down on Sicily DZ (XMarkerHeadings, Stick's order): behind Nate along
 the jump run, about 65 m apart, each door's men in their own line (made by esp_landings.py).
 None: they just leave the plane, as before.}
+Float Property StragglerSpeed = 350.0 Auto Const
+{How fast the men out of the loaded area close on Nate, game units a second (350: 5 m/s, a run).}
+Float Property StragglerStep = 2.0 Auto Const
+{Seconds between their moves.}
 GlobalVariable Property StickLanded Auto Const Mandatory
 {DevilsStickLanded: 1 once they're down. Their package DevilsStickFollowNate runs on it, ahead of
 the sit packages: they move up to Nate. 0 again at boarding.}
@@ -563,6 +567,38 @@ Function LandStick()
 	While i < Stick.Length
 		Stick[i].EvaluatePackage()
 		i += 1
+	EndWhile
+	CallFunctionNoWait("BringUpStragglers", new Var[0])
+EndFunction
+
+Function BringUpStragglers()
+	{The far end of the stick lands outside the loaded cells (two each way of Nate, about 130 m
+	along the run), where actors don't follow anyone: only the near four came up (tested). Out
+	there, unseen, each is moved toward Nate at a run (StragglerSpeed); once he's in the loaded
+	area his package brings him the rest of the way. MoveTo sets him down on the navmesh.}
+	Actor player = Game.GetPlayer()
+	Int rounds = 0
+	Bool waiting = True
+	While waiting && rounds < 60
+		Utility.Wait(StragglerStep)
+		waiting = False
+		Int i = 0
+		While i < Stick.Length
+			Actor man = Stick[i]
+			If !man.IsDisabled() && !man.Is3DLoaded()
+				waiting = True
+				Float dx = man.GetPositionX() - player.GetPositionX()
+				Float dy = man.GetPositionY() - player.GetPositionY()
+				Float d = Math.Sqrt(dx * dx + dy * dy)
+				Float k = (d - StragglerSpeed * StragglerStep) / d
+				If k < 0.0
+					k = 0.0
+				EndIf
+				man.MoveTo(player, dx * k, dy * k, 0.0)
+			EndIf
+			i += 1
+		EndWhile
+		rounds += 1
 	EndWhile
 EndFunction
 

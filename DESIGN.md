@@ -829,6 +829,13 @@ about airborne operations have heard of. It's the second worldspace.
     `DevilsStickFollowNate` (a copy of the vanilla `AO_TestNPCFollowPlayer`, the FollowPlayer
     template on the player), first on both paratrooper bases, run on the global
     `DevilsStickLanded`, which `LandStick` sets and boarding clears.
+    - **Tested 2026-11-19: only the near four came up.** The game runs actors only in the
+      cells within two of the player (about 130 m along the run); the far four landed outside
+      them and stood. Kept the spread: out there, unseen, `BringUpStragglers` moves each
+      toward Nate at a run until he's loaded, then his package brings him in.
+    - **Navmesh broke the fall (tested 2026-11-19):** `MoveTo` sets an actor down on the
+      navmesh under its target, so Nate landed at once. The jump door's check ran before the
+      move took effect; it now waits for the move, then puts him back up at the marker.
     - **The CK's save rewrites the paratroopers' race field** (to `SynthGen2RaceValentine`,
       seen 2026-11-19). It's unused: they take their traits from their template, so the game
       ignores it, but the records were put back as they were. Check after any CK save.
