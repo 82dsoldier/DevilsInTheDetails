@@ -68,6 +68,7 @@ ACTIONS = {
 # as he starts the line; the subtitle then drops the written signal.
 SIGNALS = {
     "Ten minutes!": "SignalTenMinutes",
+    "Get ready!": "SignalGetReady",
     "Hook up!": "SignalHookUp",
 }
 SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it

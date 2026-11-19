@@ -9,6 +9,8 @@ standing body and a hand-set right arm:
                 pumped down and up (the author): elbow out and bent, hand by his head, then up
   Ten minutes!  both hands held out in front, fingers splayed (the author): ten fingers, palms
                 to the stick
+  Get ready!    the same, but the fingers together and the hands tipped forward 45 degrees
+                (the author)
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -214,21 +216,34 @@ def _norm(v):
 def ten_minutes_frames(base):
     """Both arms out in front at chest height, hands up, palms to the stick, all ten fingers
     straight and splayed; out in 0.5 s, held 1.8 s, down in 0.5 s."""
+    return hands_out_frames(base, (0.0, 0.25, 1.0), (-9, 0, 9, 19), 55)
+
+
+def get_ready_frames(base):
+    """As Ten minutes, the fingers and thumb straight and together, the hands tipped forward
+    45 degrees toward the stick."""
+    return hands_out_frames(base, (0.0, 1.0, 1.0), (1, 0, -1, -2), 12)
+
+
+def hands_out_frames(base, fingers, spread, thumb):
+    """Both arms out in front at chest height, palms to the stick; `fingers` the way the
+    fingers point, `spread` each finger's angle off the middle one (index to little), `thumb`
+    the thumb's angle off them toward his middle."""
     out = Body(base.skel, base.local)
     for side, sx in (("R", 1.0), ("L", -1.0)):
         out.aim(f"{side}Arm_UpperArm", (0.22 * sx, 1.0, -0.25))       # forward, a little out and down
         out.aim(f"{side}Arm_ForeArm1", (0.02 * sx, 1.0, 0.12))       # nearly straight
-        up = _norm((0.0, 0.25, 1.0))                                  # the hand bent back, fingers up
+        up = _norm(fingers)
         out.aim(f"{side}Arm_Hand", up)
         across = (sx, 0.0, 0.0)                                       # index to little finger: outward
         out.roll(f"{side}Arm_Hand", f"{side}Arm_Finger21", f"{side}Arm_Finger51", across)
-        palm = (0.0, 1.0, -0.25)                                      # facing the stick
-        for f, deg in (("2", -9), ("3", 0), ("4", 9), ("5", 19)):     # spread, index to little
+        palm = _norm((0.0, up[2], -up[1]))                            # facing the stick
+        for f, deg in zip("2345", spread):
             a = math.radians(deg)
             d = _norm(tuple(u * math.cos(a) + c * math.sin(a) for u, c in zip(up, across)))
             for k in "123":
                 out.aim(f"{side}Arm_Finger{f}{k}", d)
-        a = math.radians(55)                                          # the thumb out, toward his middle
+        a = math.radians(thumb)                                       # the thumb, toward his middle
         d = _norm(tuple(u * math.cos(a) - c * math.sin(a) + 0.15 * p for u, c, p in zip(up, across, palm)))
         for k in "123":
             out.aim(f"{side}Arm_Finger1{k}", d)
@@ -250,7 +265,8 @@ def ten_minutes_frames(base):
     return frames
 
 
-SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames}
+SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames,
+           "JM_GetReady": get_ready_frames}
 
 
 def to_animation(frames):

@@ -82,6 +82,8 @@ Idle Property SignalHookUp Auto Const Mandatory
 pumping; a dynamic idle like the vanilla BOS_Salute.}
 Idle Property SignalTenMinutes Auto Const Mandatory
 {DevilsJMSignalTenMinutes: "Ten minutes!", both hands out in front, fingers splayed.}
+Idle Property SignalGetReady Auto Const Mandatory
+{DevilsJMSignalGetReady: "Get ready!", the same, fingers together, hands tipped forward 45 degrees.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -600,8 +602,10 @@ Function Play_commands_1()
 	Utility.Wait(1.00)
 	Debug.Notification("Jumpmaster: Ten minutes!")
 	Utility.Wait(3.00)
-	Debug.Notification("Jumpmaster (both arms out toward the stick): Get ready!")
-	Utility.Wait(2.22)
+	Signal(SignalGetReady)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Get ready!")
+	Utility.Wait(3.00)
 	Debug.Notification("Jumpmaster (arms to the outboard seats, palms up, raised): Outboard personnel, stand up!")
 	Utility.Wait(1.80)
 	StandUp(True)
