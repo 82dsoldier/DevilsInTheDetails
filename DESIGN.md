@@ -802,8 +802,8 @@ about airborne operations have heard of. It's the second worldspace.
     walk to their references' spots, a line down each aisle facing aft,
     leaving room for Nate by the starboard door. They're Initially Disabled (so none can load
     before the floor and fall) and enabled at boarding; after Nate goes out they're disabled.
-    Still to do: hooking up (no animation yet), shuffling to the door, landing on Sicily,
-    harnesses, the pallets forward.
+    Still to do: landing on Sicily, harnesses, the pallets forward. (Not wanted: the stick
+    shuffling to the door, nor Nate hooking up; see above.)
   - **Out the door:** each jumper is disabled in the plane as he goes and enabled on Sicily. The
     stick lands behind its first jumper along the run, so the others come down **behind Nate**,
     who faces west-northwest: he never sees them appear. **Decided: this, not dropping them
@@ -831,12 +831,14 @@ about airborne operations have heard of. It's the second worldspace.
   7. "Sound off for equipment check!" (passed down the stick: "OK!", "OK!", "All OK, jumpmaster!")
   8. The doors are already open: wind roar, light pouring in. "Six minutes!", "One minute!",
      "Thirty seconds!", "Drop zone coming up! Stand in the door!"
-  9. Red light, green light, **"GO!"**, and the stick shuffles toward the door.
+  9. Red light, green light, **"GO!"**, and Nate goes out first. (The stick doesn't shuffle
+     to the door: he's already out and never sees it.)
   - **Order confirmed by the author.**
   - **Length:** about a minute, with the gaps between commands squeezed. That's short for how much
     it carries, and it's the build-up the 4-5 second fall pays off.
-  - **The player takes part:** stand up when the call comes, hook up, and give the sound-off as a
-    dialogue choice. Doing something keeps a minute from feeling like waiting.
+  - **The player takes part** in the sound-off, a dialogue choice. Nate stands the whole flight
+    and jumps in power armor, so there's nothing for him to stand up from or hook up (the
+    author).
   - **The sound-off choice:** "All OK, jumpmaster!" or **"All OK, dumb bastard!"** A real joke
     the troops played: over the engines, the jumpmaster couldn't hear what anyone shouted, only
     that they shouted. Either way he gives the same nod and carries on; the jumper next to
@@ -860,7 +862,6 @@ about airborne operations have heard of. It's the second worldspace.
     author). "Hook up!" dresses the whole stick, which takes a while. Now each cue waits for
     its own time since the piece started (`WaitTill`, on the real-time clock), and the hook-up
     runs alongside.
-  - The "stand up" and "hook up" parts for the player are still to do.
   - **The doors are already open when the scene starts** (the author, 2026-11-16, with a photo of
     an open C-130 troop door: `data/reference/`, not in git). The door is slid up on its tracks
     against the upper wall and ceiling, the doorway has a bright aluminium frame, and the jump
