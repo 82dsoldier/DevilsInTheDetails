@@ -88,6 +88,9 @@ Idle Property SignalStandUp Auto Const Mandatory
 {DevilsJMSignalStandUp: "Outboard/Inboard personnel, stand up!", both arms out, palms up, raised.}
 Idle Property SignalCheckEquipment Auto Const Mandatory
 {DevilsJMSignalCheckEquipment: "Check equipment!", both hands' fingertips tapping his chest.}
+Idle Property SignalSoundOff Auto Const Mandatory
+{DevilsJMSignalSoundOff: "Sound off for equipment check!", both hands cupped behind his ears,
+held till the stick's OKs are in (7 s).}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -419,18 +422,23 @@ Function DressJumpmaster()
 	CallFunctionNoWait("HoldJumpmaster", new Var[0])
 EndFunction
 
-Function Signal(Idle sig)
-	{His hand signal, as he starts the command; the commands carry on meanwhile.}
-	Var[] args = new Var[1]
+Function Signal(Idle sig, Float seconds = 0.0)
+	{His hand signal, as he starts the command; the commands carry on meanwhile. seconds: its
+	length, if not SignalSeconds.}
+	If seconds <= 0.0
+		seconds = SignalSeconds
+	EndIf
+	Var[] args = new Var[2]
 	args[0] = sig
+	args[1] = seconds
 	CallFunctionNoWait("GiveSignal", args)
 EndFunction
 
-Function GiveSignal(Idle sig)
+Function GiveSignal(Idle sig, Float seconds)
 	{Held (restrained) he may not animate: let him go for the signal, then hold him again.}
 	SetRestrained(False)
 	PlayIdle(sig)
-	Utility.Wait(SignalSeconds)
+	Utility.Wait(seconds)
 	If running
 		SetRestrained(True)
 	EndIf
@@ -636,7 +644,9 @@ Function Play_commands_1()
 	Utility.Wait(1.00)
 	Debug.Notification("Jumpmaster: Check equipment!")
 	Utility.Wait(3.00)
-	Debug.Notification("Jumpmaster (hands cupped behind his ears): Sound off for equipment check!")
+	Signal(SignalSoundOff, 7.0)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Sound off for equipment check!")
 	Utility.Wait(4.16)
 	Debug.Notification("The stick: OK! OK! OK!")
 	Utility.Wait(2.37)

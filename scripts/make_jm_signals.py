@@ -13,6 +13,7 @@ standing body and a hand-set right arm:
                 (the author)
   Stand up!     both arms out, palms up, then raised (the author): for outboard and inboard
   Check equipment!  both hands' fingertips tapping his chest (the author)
+  Sound off for equipment check!  both hands cupped behind his ears (the author)
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -315,7 +316,8 @@ def stand_up_frames(base):
     return frames
 
 
-CHEST_TIPS = (6.0, 9.5, 100.0)      # where his right middle fingertip touches his chest
+MIDLINE = 2.6                       # his body's middle, in x (the vanilla skeleton is off centre)
+CHEST_TIPS = (3.5, 9.5, 100.0)      # where his right middle fingertip touches his chest (x off the middle)
 TAP_LIFT = 5.0                      # how far off his chest the fingertips come between taps
 
 
@@ -324,7 +326,7 @@ def tap_pose(base, off):
     b = Body(base.skel, base.local)
     for side, sx in (("R", 1.0), ("L", -1.0)):
         m = lambda v: (v[0] * sx, v[1], v[2])
-        want = m((CHEST_TIPS[0], CHEST_TIPS[1] + off, CHEST_TIPS[2]))
+        want = (MIDLINE + sx * CHEST_TIPS[0], CHEST_TIPS[1] + off, CHEST_TIPS[2])
         target = list(want)
         for _ in range(6):                                        # wrist placed so the fingertip lands
             b.reach(side, target, m((1.0, -0.2, -0.8)))
@@ -356,9 +358,46 @@ def check_equipment_frames(base):
     return frames
 
 
+EAR_CUP = (7.5, -1.0, 118.0)        # where his right middle knuckle sits, behind his ear (x off the middle)
+
+
+def ears_pose(base):
+    """Both hands cupped behind his ears, palms forward, fingers up and curled forward."""
+    b = Body(base.skel, base.local)
+    for side, sx in (("R", 1.0), ("L", -1.0)):
+        m = lambda v: (v[0] * sx, v[1], v[2])
+        want = (MIDLINE + sx * EAR_CUP[0], EAR_CUP[1], EAR_CUP[2])
+        target = list(want)
+        for _ in range(6):                                        # wrist placed so the knuckle lands
+            b.reach(side, target, m((1.0, 0.1, -0.3)))
+            b.aim(f"{side}Arm_Hand", m((0.15, -0.1, 1.0)))
+            b.roll(f"{side}Arm_Hand", f"{side}Arm_Finger21", f"{side}Arm_Finger51", m((0.0, -1.0, 0.0)))
+            for f, lean in zip("2345", (-0.15, 0.0, 0.12, 0.25)):
+                for k, fwd in zip("123", (0.35, 0.9, 1.6)):
+                    b.aim(f"{side}Arm_Finger{f}{k}", m((lean, fwd, 1.0)))
+            for k, fwd in zip("123", (0.8, 1.0, 1.2)):
+                b.aim(f"{side}Arm_Finger1{k}", m((-0.5, fwd, 0.5)))
+            w = b.world()
+            got = w[b.names[f"{side}Arm_Finger31"]][0]
+            target = [t + (g - h) for t, g, h in zip(target, want, got)]
+    return b
+
+
+def sound_off_frames(base):
+    """Both hands cupped behind his ears, listening for the stick (the author), held while the
+    OKs come up the stick. Up in 0.5 s, held 6 s, down in 0.5 s (make_jump_audio.py's
+    SIGNAL_LONGER: 7 s)."""
+    out = ears_pose(base)
+    frames = [blend(base, out, t) for t in ease(int(0.5 * FPS))]
+    frames += [out] * int(6.0 * FPS)
+    frames += [blend(base, out, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, out, 0.0)]
+    return frames
+
+
 SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames,
            "JM_GetReady": get_ready_frames, "JM_StandUp": stand_up_frames,
-           "JM_CheckEquipment": check_equipment_frames}
+           "JM_CheckEquipment": check_equipment_frames,
+           "JM_SoundOff": sound_off_frames}
 
 
 def to_animation(frames):
