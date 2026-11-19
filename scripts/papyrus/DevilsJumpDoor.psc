@@ -36,16 +36,21 @@ Event OnActivate(ObjectReference akActionRef)
 	jumping = True
 	player.MoveTo(JumpMarker)
 	; MoveTo sets an actor down on the navmesh under the marker, if there is any: on the ground,
-	; not in the air (tested: with the DZ navmeshed he no longer fell). Wait till the move has
-	; happened (read straight away, his height was still the plane's, the marker's own), then put
-	; him back up where the marker is.
+	; not in the air (tested: with the DZ navmeshed he no longer fell). It does so a moment after
+	; the move, as he loads in, while his height still reads the marker's (tested: a check straight
+	; after the move, or once he'd arrived, missed it). So watch him for 2 seconds: dropping
+	; more than 15,000 units (200 m) in the first 2 s is the snap, not the fall (the whole 21,000 takes
+	; 4-5 s), and he's put back up where the marker is.
+	Float top = JumpMarker.GetPositionZ()
 	Int tries = 0
-	While tries < 40 && Math.Abs(player.GetPositionX() - JumpMarker.GetPositionX()) > 500.0
-		Utility.Wait(0.05)
+	Bool snapped = False
+	While tries < 20 && !snapped              ; 2 s: a real fall is 4,000 units down by then
+		Utility.Wait(0.1)
+		If player.GetPositionZ() < top - 15000.0
+			player.SetPosition(JumpMarker.GetPositionX(), JumpMarker.GetPositionY(), top)
+			snapped = True
+		EndIf
 		tries += 1
 	EndWhile
-	If player.GetPositionZ() < JumpMarker.GetPositionZ() - 500.0
-		player.SetPosition(JumpMarker.GetPositionX(), JumpMarker.GetPositionY(), JumpMarker.GetPositionZ())
-	EndIf
 	jumping = False
 EndEvent
