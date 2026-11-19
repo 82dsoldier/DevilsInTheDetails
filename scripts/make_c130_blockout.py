@@ -75,6 +75,16 @@ FRAME_W, FRAME_DEPTH = 0.07, 0.035          # a frame's width, and how far it st
 DUCT_X, DUCT_Z, DUCT_R = 0.35, 2.55, 0.10   # the two overhead air ducts
 DOME_Z, DOME_PITCH, DOME_D = 2.3, 2.5, 0.18 # dome lights, high on each wall
 ROLLER_PITCH, ROLLER_R = 0.254, 0.025       # roller conveyor, one down each aisle
+# Cargo forward (DESIGN.md, "The stick"): pallets from the Boston run, the seats forward of the
+# stick folded up against the walls behind them.
+PALLETS = 3
+PALLET_L, PALLET_W, PALLET_T = 2.235, 2.743, 0.057   # 463L: 88 x 108 x 2.25 in, the 108 across
+PALLET_GAP = 0.10              # between pallets
+PALLET_FWD_GAP = 0.15          # the last one short of the flight deck steps
+SEAT_FWD_GAP = 0.45            # clear floor between the last seat down and the first pallet
+LOAD_H = 1.55                  # each load's height off the pallet: under the walls' curve
+NET_PITCH = 0.40               # the cargo net's squares
+NET_STRAP = 0.045
 ARC_STEPS, WALL_STEPS, ROUND_STEPS = 12, 6, 24
 # The open doorway's top: the arch's first profile point, 1.88 m, near enough the door's 1.83 m
 # plus its sill.
@@ -247,6 +257,32 @@ def tex_webbing():
     return np.dstack([rgb, alpha]), strap.astype(float) * 0.6
 
 
+def tex_carton():
+    """One carton face (each face its own 0-1 tile): kraft board, a strip of tape across the
+    middle, the edges darker with handling."""
+    u, v = _uv()
+    rgb = np.ones((TEX_SIZE, TEX_SIZE, 3)) * np.array([176, 140, 96])
+    flute = 0.5 + 0.5 * np.sin(2 * np.pi * u * 60)
+    edge = np.clip(1 - np.minimum(np.minimum(u, 1 - u), np.minimum(v, 1 - v)) / 0.06, 0, 1)
+    shade = (0.96 + 0.03 * flute) * (1 - 0.18 * edge) * (1 + 0.05 * _smooth_noise(50, 0.05)) + _noise(51, scale=0.02)
+    rgb *= shade[..., None]
+    tape = np.abs(v - 0.5) < 0.07
+    rgb[tape] = rgb[tape] * 0.75 + np.array([150, 120, 80]) * 0.25 * 1.2
+    return rgb, flute * 0.002 - edge * 0.05 + tape * 0.01
+
+
+def tex_crate():
+    """One ammunition crate face (its own 0-1 tile): olive drab painted wood, four planks, a
+    cleat round the edge."""
+    u, v = _uv()
+    plank = ((v * 4) % 1)
+    seam = np.exp(-(np.minimum(plank, 1 - plank) / 0.02) ** 2)
+    cleat = np.minimum(np.minimum(u, 1 - u), np.minimum(v, 1 - v)) < 0.08
+    grain = _smooth_noise(52, 0.15) * 0.04
+    shade = (0.95 + grain) * (1 - 0.35 * seam) * np.where(cleat, 0.88, 1.0) + _noise(53, scale=0.02)
+    return np.array([86, 90, 60])[None, None, :] * shade[..., None], cleat * 0.3 - seam * 0.2
+
+
 def tex_bulkhead():
     """The forward bulkhead, one tile 1 m square: pale green panels, riveted seams."""
     u, v = _uv()
@@ -289,6 +325,9 @@ MATERIALS = {
     "tarmac": (tex_tarmac, {}),                   # the apron under the plane, before takeoff       # M1950, pale grey quilted canvas (the author)
     "harness": (tex_od_webbing, {"double_sided": True}),
     "lamp": (_flat((255, 246, 222)), {"emit": True}),
+    "carton": (tex_carton, {}),                   # the pallets' loads
+    "crate": (tex_crate, {}),
+    "pallet": (_flat((150, 152, 150)), {}),       # 463L: aluminium skin, weathered
 }
 
 
@@ -313,7 +352,8 @@ SPECULAR = {"quilt": (0.03, 0.1), "fabric": (0.04, 0.12), "webbing": (0.04, 0.12
             "dark": (0.25, 0.3), "red": (0.3, 0.5), "green": (0.3, 0.5), "lamp": (0.3, 0.5),
             "static_line": (0.05, 0.15), "snap_hook": (0.45, 0.45),
             "nylon": (0.05, 0.15), "alice": (0.05, 0.12), "harness": (0.05, 0.15),
-            "weapons_case": (0.03, 0.1), "tarmac": (0.08, 0.2)}
+            "weapons_case": (0.03, 0.1), "tarmac": (0.08, 0.2),
+            "carton": (0.02, 0.08), "crate": (0.06, 0.15), "pallet": (0.35, 0.4)}
 SPECULAR_PAINT = (0.12, 0.25)    # everything else: painted metal, ducting, cable
 
 
@@ -619,9 +659,12 @@ def parts(length):
     p["floor"] = ("floor", True, floor)
     p["ramp"] = ("floor", True, ramp)
 
-    # Troop seats, from just forward of the doors to the flight deck steps.
+    # Troop seats, from just forward of the doors to the pallets; forward of them the outboard
+    # seats are folded up against the wall (their nets run on to the flight deck steps) and the
+    # centerline seats are out.
     y0 = db + SEAT_AFT_GAP
-    per_row = int((fwd - STEPS_L - 0.3 - y0) / SEAT_W)
+    y_end = y0 + int((fwd - STEPS_L - 0.3 - y0) / SEAT_W) * SEAT_W   # the full run, seats all down
+    per_row = int((pallet_spans(length)[0][0] - SEAT_FWD_GAP - y0) / SEAT_W)
     y1 = y0 + per_row * SEAT_W
     pans, nets, metal, backs = Mesh(), Mesh(), Mesh(), Mesh()
     legs_y = [y0 + 0.08 + k * 2 * SEAT_W for k in range(per_row // 2 + 1)]
@@ -641,10 +684,17 @@ def parts(length):
         col = [(side * (wall_x(z) - 0.04), z, (z - SEAT_Z) / (WALL_NET_TOP - SEAT_Z)) for z in zs]
         n = (-side, 0, 0)
         for (xa_, za, va), (xb_, zb, vb) in zip(col, col[1:]):
-            nets.quad(nets.vert((xa_, y0, za), n, (0, 1 - va)), nets.vert((xa_, y1, za), n, ((y1 - y0) / SEAT_W, 1 - va)),
-                      nets.vert((xb_, y1, zb), n, ((y1 - y0) / SEAT_W, 1 - vb)), nets.vert((xb_, y0, zb), n, (0, 1 - vb)))
+            nets.quad(nets.vert((xa_, y0, za), n, (0, 1 - va)), nets.vert((xa_, y_end, za), n, ((y_end - y0) / SEAT_W, 1 - va)),
+                      nets.vert((xb_, y_end, zb), n, ((y_end - y0) / SEAT_W, 1 - vb)), nets.vert((xb_, y0, zb), n, (0, 1 - vb)))
         xr = side * (wall_x(WALL_NET_TOP) - 0.05)
-        metal.tube((xr, y0 - 0.1, WALL_NET_TOP), (xr, y1 + 0.1, WALL_NET_TOP), 0.018)
+        metal.tube((xr, y0 - 0.1, WALL_NET_TOP), (xr, y_end + 0.1, WALL_NET_TOP), 0.018)
+        # The folded seats: each pan swung up flat against the net, its front rail on top.
+        if y_end > y1 + 0.01:
+            xw = wall_x(SEAT_Z + SEAT_D / 2) - 0.06
+            xa, xb = sorted((side * xw, side * (xw - pan_t)))
+            pans.box(xa, y1 + 0.01, SEAT_Z - 0.04, xb, y_end, SEAT_Z + SEAT_D - 0.04, "tnsew", tile=SEAT_W)
+            metal.tube((side * (xw - 0.02), y1 + 0.01, SEAT_Z + SEAT_D - 0.02),
+                       (side * (xw - 0.02), y_end, SEAT_Z + SEAT_D - 0.02), 0.016)
 
         # Centerline: pans each side of the middle, back to back.
         xa, xb = sorted((side * CENTER_BACK_W / 2, side * (CENTER_BACK_W / 2 + SEAT_D)))
@@ -688,7 +738,7 @@ def parts(length):
     # Round jump lights just forward of each door; portholes spaced down each side between the
     # seats' ends. The doors themselves are their own model (door_parts), for the activator.
     rims, glass, reds, greens, domes = Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
-    ports = [y0 + (y1 - y0) * (i + 0.5) / PORTHOLES for i in range(PORTHOLES)]
+    ports = [y0 + (y_end - y0) * (i + 0.5) / PORTHOLES for i in range(PORTHOLES)]
     for side in (-1, 1):
         for y in ports:
             rims.on_wall(circle(y, PORTHOLE_Z, PORTHOLE_D / 2 + 0.04), side, 0.01)
@@ -724,7 +774,86 @@ def parts(length):
     steps = Mesh()
     steps.box(-hw, fwd - STEPS_L, 0, -hw + STEPS_W, fwd, STEPS_H, "tsew", tile=1.016)
     p["flight_deck_steps"] = ("floor", True, steps)
+    p.update(pallet_parts(length))
     return p, per_row
+
+
+def pallet_spans(length):
+    """Each pallet's (aft, forward) y, the last just short of the flight deck steps."""
+    fwd = length / 2 - STEPS_L - PALLET_FWD_GAP
+    first = fwd - PALLETS * PALLET_L - (PALLETS - 1) * PALLET_GAP
+    return [(first + k * (PALLET_L + PALLET_GAP), first + k * (PALLET_L + PALLET_GAP) + PALLET_L)
+            for k in range(PALLETS)]
+
+
+def _block(m, x0, y0, z0, x1, y1, z1, sides="tnsew"):
+    """A box with each face its own 0-1 texture tile (a carton's, a crate's)."""
+    faces = {
+        "t": ([(x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)], (0, 0, 1)),
+        "s": ([(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)], (0, -1, 0)),
+        "e": ([(x1, y0, z0), (x1, y1, z0), (x1, y1, z1), (x1, y0, z1)], (1, 0, 0)),
+        "n": ([(x1, y1, z0), (x0, y1, z0), (x0, y1, z1), (x1, y1, z1)], (0, 1, 0)),
+        "w": ([(x0, y1, z0), (x0, y0, z0), (x0, y0, z1), (x0, y1, z1)], (-1, 0, 0)),
+    }
+    for s in sides:
+        pts, n = faces[s]
+        m.quad(*[m.vert(p, n, uv) for p, uv in zip(pts, ((0, 1), (1, 1), (1, 0), (0, 0)))])
+
+
+def pallet_parts(length):
+    """The cargo forward: 463L pallets on the rollers, each built up square with cartons and
+    olive drab crates in layers, under a cargo net hooked to the pallet's rim. One collision box
+    a pallet."""
+    rng = np.random.default_rng(130)
+    base, rims, cartons, crates, net, solid = Mesh(), Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
+    z0 = ROLLER_R + 0.03                              # on the rollers
+    hx = PALLET_W / 2
+    for ya, yb in pallet_spans(length):
+        base.box(-hx, ya, z0, hx, yb, z0 + PALLET_T, tile=1.0)
+        lip = 0.03
+        for xa, xb, y_a, y_b in ((-hx, -hx + lip, ya, yb), (hx - lip, hx, ya, yb),
+                                 (-hx, hx, ya, ya + lip), (-hx, hx, yb - lip, yb)):
+            rims.box(xa, y_a, z0 + PALLET_T, xb, y_b, z0 + PALLET_T + 0.012, "tnsew")
+        # The load: layers, each in rows along the cabin, each row in boxes across it.
+        lx, ly0, ly1 = hx - 0.06, ya + 0.06, yb - 0.06
+        zt = z0 + PALLET_T
+        top = zt + LOAD_H
+        z = zt
+        while z < top - 0.05:
+            h = min(rng.choice([0.28, 0.36, 0.45]), top - z)
+            y = ly0
+            while y < ly1 - 0.05:
+                d = min(rng.choice([0.4, 0.5, 0.6]), ly1 - y)
+                x = -lx
+                while x < lx - 0.05:
+                    w = min(rng.choice([0.45, 0.55, 0.65, 0.8]), lx - x)
+                    m = crates if rng.random() < 0.3 else cartons
+                    g = 0.006
+                    _block(m, x + g, y + g, z, x + w - g, y + d - g, z + h - g)
+                    x += w
+                y += d
+            z += h
+        # The net: straps over the top and down all four sides to the rim, NET_PITCH apart.
+        e = 0.012                                     # standing off the boxes
+        t = NET_STRAP / 2
+        nx = max(2, round(2 * lx / NET_PITCH))
+        ny = max(2, round((ly1 - ly0) / NET_PITCH))
+        for i in range(nx + 1):                       # across the cabin: over the top, down the ends
+            x = -lx + 2 * lx * i / nx
+            net.box(x - t, ly0 - e, top, x + t, ly1 + e, top + e, "t")
+            net.box(x - t, ly0 - e, zt, x + t, ly0 - e + 0.001, top + e, "s")
+            net.box(x - t, ly1 + e - 0.001, zt, x + t, ly1 + e, top + e, "n")
+        for j in range(ny + 1):                       # along it: over the top, down the sides
+            y = ly0 + (ly1 - ly0) * j / ny
+            net.box(-lx - e, y - t, top + e, lx + e, y + t, top + 2 * e, "t")
+            net.box(-lx - e, y - t, zt, -lx - e + 0.001, y + t, top + 2 * e, "w")
+            net.box(lx + e - 0.001, y - t, zt, lx + e, y + t, top + 2 * e, "e")
+        for zz in (zt + LOAD_H * k / 3 for k in (1, 2)):   # two bands round the sides
+            net.box(-lx - e - 0.002, ly0 - e - 0.002, zz - t, lx + e + 0.002, ly1 + e + 0.002, zz + t, "nsew")
+        solid.box(-hx, ya, 0.0, hx, yb, top + 0.03)
+    return {"pallets": ("pallet", False, base), "pallet_rims": ("dark", False, rims),
+            "cargo_cartons": ("carton", False, cartons), "cargo_crates": ("crate", False, crates),
+            "cargo_net": ("harness", False, net), "cargo_solid": (None, True, solid)}
 
 
 # --- The stick ------------------------------------------------------------------------

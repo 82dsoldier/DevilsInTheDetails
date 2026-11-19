@@ -802,8 +802,14 @@ about airborne operations have heard of. It's the second worldspace.
     walk to their references' spots, a line down each aisle facing aft,
     leaving room for Nate by the starboard door. They're Initially Disabled (so none can load
     before the floor and fall) and enabled at boarding; after Nate goes out they're disabled.
-    Still to do: landing on Sicily, harnesses, the pallets forward. (Not wanted: the stick
-    shuffling to the door, nor Nate hooking up; see above.)
+    Still to do: landing on Sicily. (Harnesses: as done as they'll get, the author. Not
+    wanted: the stick shuffling to the door, nor Nate hooking up; see above.)
+  - **Cargo forward (2026-11-19):** three 463L pallets (88 x 108 in, the 108 across) on the
+    rollers, from just short of the flight deck steps aft to 1.2 m forward of the last jumper,
+    each built up square about 1.6 m high with cartons and olive drab crates under an olive
+    drab cargo net, one collision box apiece (`pallet_parts` in make_c130_blockout.py). The
+    seats stop short of them, 8 a row; forward of that the outboard seats are folded up
+    against their nets and the centerline seats are out.
   - **Out the door:** each jumper is disabled in the plane as he goes and enabled on Sicily. The
     stick lands behind its first jumper along the run, so the others come down **behind Nate**,
     who faces west-northwest: he never sees them appear. **Decided: this, not dropping them
