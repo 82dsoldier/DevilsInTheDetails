@@ -49,9 +49,9 @@ PIECES = {
     ],
     "commands_2": [
         ("Six minutes!", True, "six fingers up"),
-        ("One minute!", True, "one finger up"),
-        ("Thirty seconds!", True, "thumb and forefinger an inch apart"),
-        ("Stand in the door!", False, "points the first jumper into the door"),
+        ("One minute!", True, "one finger up, the hand not on his static line"),
+        ("Thirty seconds!", True, "thumb and forefinger held close together"),
+        ("Drop zone coming up! Stand in the door!", False, "points the first jumper into the door"),
     ],
     "commands_3": [
         ("Go!", False, None),
@@ -76,6 +76,8 @@ SIGNALS = {
     "Check equipment!": "SignalCheckEquipment",
     "Sound off for equipment check!": "SignalSoundOff",
     "Six minutes!": "SignalSixMinutes",
+    "One minute!": "SignalOneMinute",
+    "Thirty seconds!": "SignalThirtySeconds",
 }
 SIGNAL_LONGER = {"SignalSoundOff": 7.0}   # held through the stick's OKs (make_jm_signals.py)
 SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it

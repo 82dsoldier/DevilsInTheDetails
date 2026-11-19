@@ -93,6 +93,10 @@ Idle Property SignalSoundOff Auto Const Mandatory
 held till the stick's OKs are in (7 s).}
 Idle Property SignalSixMinutes Auto Const Mandatory
 {DevilsJMSignalSixMinutes: "Six minutes!", six fingers held up (the right hand open, the left index).}
+Idle Property SignalOneMinute Auto Const Mandatory
+{DevilsJMSignalOneMinute: "One minute!", one finger held up, the right hand (the left on his line).}
+Idle Property SignalThirtySeconds Auto Const Mandatory
+{DevilsJMSignalThirtySeconds: "Thirty seconds!", the right thumb and forefinger held close together.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -661,12 +665,16 @@ Function Play_commands_2()
 	Utility.Wait(1.00)
 	Debug.Notification("Jumpmaster: Six minutes!")
 	Utility.Wait(3.00)
-	Debug.Notification("Jumpmaster (one finger up): One minute!")
-	Utility.Wait(2.21)
-	Debug.Notification("Jumpmaster (thumb and forefinger an inch apart): Thirty seconds!")
-	Utility.Wait(2.88)
-	Debug.Notification("Jumpmaster (points the first jumper into the door): Stand in the door!")
-	Utility.Wait(1.09)
+	Signal(SignalOneMinute)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: One minute!")
+	Utility.Wait(3.00)
+	Signal(SignalThirtySeconds)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Thirty seconds!")
+	Utility.Wait(3.00)
+	Debug.Notification("Jumpmaster (points the first jumper into the door): Drop zone coming up! Stand in the door!")
+	Utility.Wait(2.94)
 EndFunction
 
 Function Play_commands_3()

@@ -830,7 +830,7 @@ about airborne operations have heard of. It's the second worldspace.
   6. "Check equipment!"
   7. "Sound off for equipment check!" (passed down the stick: "OK!", "OK!", "All OK, jumpmaster!")
   8. The doors are already open: wind roar, light pouring in. "Six minutes!", "One minute!",
-     "Thirty seconds!", "Stand in the door!"
+     "Thirty seconds!", "Drop zone coming up! Stand in the door!"
   9. Red light, green light, **"GO!"**, and the stick shuffles toward the door.
   - **Order confirmed by the author.**
   - **Length:** about a minute, with the gaps between commands squeezed. That's short for how much
@@ -842,7 +842,7 @@ about airborne operations have heard of. It's the second worldspace.
     that they shouted. Either way he gives the same nod and carries on; the jumper next to
     Nate grins or laughs, and that's the only sign anyone heard.
   - **Skippable after the first time:** later flights (going home, the Sanctuary jump) get a short
-    version, from "Stand in the door!" on.
+    version, from "Drop zone coming up! Stand in the door!" on.
   - **Voice:** needs real recordings, since nothing vanilla sounds like a jumpmaster. Open: who
     voices him (and the echoing stick).
   - **First build (2026-11-16): a scripted sequence, not a CK dialogue scene.**
@@ -862,7 +862,8 @@ about airborne operations have heard of. It's the second worldspace.
     doorway (frame, raised door, platform), with
     an invisible slab filling the doorway: walking into it stops you, using it jumps. The hull has
     a hole there.
-  - **The last command before the lights is "Stand in the door!",** not "Stand by!" (the author).
+  - **The last command before the lights is "Drop zone coming up! Stand in the door!",** not
+    "Stand by!" (the author; the "Drop zone coming up!" added 2026-11-19).
     The stick doesn't echo it in the stand-in; it's the first jumper's cue, not the whole stick's.
   - **The cabin flies in the Sicily worldspace, not an interior cell (tested 2026-11-16).** A flat
     sky-and-ground backdrop outside the doors looked wrong (too close, so its horizon moved, and

@@ -93,6 +93,10 @@ Idle Property SignalSoundOff Auto Const Mandatory
 held till the stick's OKs are in (7 s).}
 Idle Property SignalSixMinutes Auto Const Mandatory
 {DevilsJMSignalSixMinutes: "Six minutes!", six fingers held up (the right hand open, the left index).}
+Idle Property SignalOneMinute Auto Const Mandatory
+{DevilsJMSignalOneMinute: "One minute!", one finger held up, the right hand (the left on his line).}
+Idle Property SignalThirtySeconds Auto Const Mandatory
+{DevilsJMSignalThirtySeconds: "Thirty seconds!", the right thumb and forefinger held close together.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory

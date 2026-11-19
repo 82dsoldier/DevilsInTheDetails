@@ -15,6 +15,8 @@ standing body and a hand-set right arm:
   Check equipment!  both hands' fingertips tapping his chest (the author)
   Sound off for equipment check!  both hands cupped behind his ears (the author)
   Six minutes!  six fingers held up (the author): the right hand open, the left index finger
+  One minute!   one finger held up (the author), on the hand not holding his static line: the right
+  Thirty seconds!  the thumb and forefinger held close together (the author), the right hand
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -422,22 +424,82 @@ def six_minutes_frames(base):
     out = hands_pose(base, (0.22, 1.0, -0.25), (0.02, 1.0, 0.12), up, (1.0, 0.0, 0.0),
                      (0.0, up[2], -up[1]), (-9, 0, 9, 19), 55)
     curl(out, "L", "345", 80)
-    w = out.world()                                               # the thumb across the curled fingers
-    over = [p + 2.0 * q for p, q in zip(w[out.names["LArm_Finger32"]][0], _norm(qrot(w[out.names["LArm_Hand"]][1], (0, 1, 0))))]
-    for k in "123":
-        w = out.world()
-        out.aim(f"LArm_Finger1{k}", [a - b for a, b in zip(over, w[out.names[f"LArm_Finger1{k}"]][0])])
+    tuck_thumb(out, "L")
     frames = [blend(base, out, t) for t in ease(int(0.5 * FPS))]
     frames += [out] * int(1.8 * FPS)
     frames += [blend(base, out, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, out, 0.0)]
     return frames
 
 
+def tuck_thumb(b, side):
+    """The thumb across the curled middle fingers."""
+    w = b.world()
+    over = [p + 2.0 * q for p, q in zip(w[b.names[f"{side}Arm_Finger32"]][0],
+                                        _norm(qrot(w[b.names[f"{side}Arm_Hand"]][1], (0, 1, 0))))]
+    for k in "123":
+        w = b.world()
+        b.aim(f"{side}Arm_Finger1{k}", [p - q for p, q in zip(over, w[b.names[f"{side}Arm_Finger1{k}"]][0])])
+
+
+def right_only(base, b):
+    """Just his right hand signalling: the left arm (on his static line, the author) left as it is."""
+    for i, n in enumerate(base.skel.bones):
+        if n.startswith("LArm") or n == "WeaponLeft":
+            b.local[i] = list(base.local[i])
+    return b
+
+
+def held_frames(base, out, hold=1.8):
+    frames = [blend(base, out, t) for t in ease(int(0.5 * FPS))]
+    frames += [out] * int(hold * FPS)
+    frames += [blend(base, out, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, out, 0.0)]
+    return frames
+
+
+def one_minute_frames(base):
+    """One finger held up (the author), on the hand not holding his static line: the right, up
+    in front of his shoulder, palm to the stick, the index finger up, the rest curled in."""
+    up = _norm((0.0, 0.1, 1.0))
+    out = hands_pose(base, (0.35, 0.9, 0.05), (0.05, 0.35, 1.0), up, (1.0, 0.0, 0.0),
+                     (0.0, up[2], -up[1]), (0, 0, 9, 19), 55)
+    right_only(base, out)
+    curl(out, "R", "345", 80)
+    tuck_thumb(out, "R")
+    return held_frames(base, out)
+
+
+def thirty_seconds_frames(base):
+    """The thumb and forefinger held close together (the author), the right hand: up in front
+    of his face, palm to the stick, the forefinger pointing across to his left, the thumb just
+    under it, the other fingers curled in."""
+    b = Body(base.skel, base.local)
+    b.aim("RArm_UpperArm", (0.35, 0.9, 0.05))
+    b.aim("RArm_ForeArm1", (-0.45, 0.3, 1.0))
+    b.aim("RArm_Hand", (-1.0, 0.1, 0.25))
+    b.roll("RArm_Hand", "RArm_Finger21", "RArm_Finger51", (0.0, 0.0, 1.0))
+    index = _norm((-1.0, 0.05, 0.1))
+    for k in "123":
+        b.aim(f"RArm_Finger2{k}", index)
+    curl(b, "R", "345", 80)
+    w = b.world()
+    j2, j3 = w[b.names["RArm_Finger22"]][0], w[b.names["RArm_Finger23"]][0]
+    tip = [c + (c - p) * 0.8 for c, p in zip(j3, j2)]
+    target = [tip[0], tip[1], tip[2] - THIRTY_GAP]
+    for k in "123":
+        w = b.world()
+        b.aim(f"RArm_Finger1{k}", [p - q for p, q in zip(target, w[b.names[f"RArm_Finger1{k}"]][0])])
+    return held_frames(base, b)
+
+
+THIRTY_GAP = 1.8                    # thumb under forefinger: about an inch, in game units
+
+
 SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames,
            "JM_GetReady": get_ready_frames, "JM_StandUp": stand_up_frames,
            "JM_CheckEquipment": check_equipment_frames,
            "JM_SoundOff": sound_off_frames,
-           "JM_SixMinutes": six_minutes_frames}
+           "JM_SixMinutes": six_minutes_frames,
+           "JM_OneMinute": one_minute_frames, "JM_ThirtySeconds": thirty_seconds_frames}
 
 
 def to_animation(frames):
