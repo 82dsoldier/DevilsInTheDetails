@@ -985,6 +985,13 @@ about airborne operations have heard of. It's the second worldspace.
   facing north-northeast, the door's side; he can look where he likes as he falls.
   - **The cabin needs navmesh too:** boarding moves the player into the cabin, and with the
     DZ navmeshed under it the move would set him on the ground, not the cabin floor.
+    **Keep the plane inside one cell:** it straddled (-4, -5) and (-4, -6), and the CK's
+    navmesh, made a cell at a time, covered only the half of the cabin floor in (-4, -6), so
+    a move into the cabin set the player on the grass. Shifted 412 units south (the jump
+    marker and the stick's landings with it), wholly in (-4, -6).
+  - **Test from a save that has never seen the plane.** A save keeps where every moved actor
+    was: an old one had the jumpmaster where the plane used to be (so he never loaded) and
+    the stick on the ground still following Nate, so they followed him up and fell.
 - **The jump marker (worked out 2026-11-13):** an `XMarkerHeading`, `DevilsSicilyJumpMarker`,
   at **X -13650, Y -20430, Z 24300**,
   **rotation Z 284** (in cell -4, -5).
