@@ -65,6 +65,9 @@ ObjectReference[] Property StickLandings Auto Const
 {Where each jumper comes down on Sicily DZ (XMarkerHeadings, Stick's order): behind Nate along
 the jump run, about 65 m apart, each door's men in their own line (made by esp_landings.py).
 None: they just leave the plane, as before.}
+GlobalVariable Property StickLanded Auto Const Mandatory
+{DevilsStickLanded: 1 once they're down. Their package DevilsStickFollowNate runs on it, ahead of
+the sit packages: they move up to Nate. 0 again at boarding.}
 Float Property SettleDistance = 45.0 Auto Const
 {How near his mark (game units) a jumper walks before he's set on it.}
 Float Property SettleSeconds = 10.0 Auto Const
@@ -255,6 +258,7 @@ Function SeatStick()
 	EndIf
 	OutboardUp.SetValue(0)
 	InboardUp.SetValue(0)
+	StickLanded.SetValue(0)
 	hooked = False
 	up = new Bool[Stick.Length]
 	Int i = 0
@@ -552,6 +556,12 @@ Function LandStick()
 		man.Disable()
 		man.MoveTo(StickLandings[i])
 		man.Enable()
+		i += 1
+	EndWhile
+	StickLanded.SetValue(1)            ; and they move up to him
+	i = 0
+	While i < Stick.Length
+		Stick[i].EvaluatePackage()
 		i += 1
 	EndWhile
 EndFunction

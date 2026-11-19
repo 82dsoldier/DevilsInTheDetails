@@ -823,8 +823,15 @@ about airborne operations have heard of. It's the second worldspace.
     none comes down where he's looking. Once Nate stops falling, `LandStick` takes each man out
     of his kit and line and puts him on his marker, facing along the run. (The plane unloading
     as Nate leaves no longer sends them back to their seats once the green light has been on.)
-    **Next (the author): they move up to Nate.** That needs navmesh on the DZ; there is none
-    yet, so for now they stand where they land.
+    **Then they move up to Nate (the author):** navmesh on the landing ground (the author, in
+    the CK, 2026-11-19: Recast with the default settings, one cell at a time, the 15 cells x
+    -4 to 0, y -7 to -5; the dialog has no choice of area), and a package,
+    `DevilsStickFollowNate` (a copy of the vanilla `AO_TestNPCFollowPlayer`, the FollowPlayer
+    template on the player), first on both paratrooper bases, run on the global
+    `DevilsStickLanded`, which `LandStick` sets and boarding clears.
+    - **The CK's save rewrites the paratroopers' race field** (to `SynthGen2RaceValentine`,
+      seen 2026-11-19). It's unused: they take their traits from their template, so the game
+      ignores it, but the records were put back as they were. Check after any CK save.
   - **Parachutes only in the plane.** The jumpers in their seats wear a main and a reserve (a
     harness model; community help). The ones on the ground have already shed their harness to
     fight, so they need none.
