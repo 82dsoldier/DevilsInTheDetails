@@ -971,7 +971,20 @@ about airborne operations have heard of. It's the second worldspace.
     and so on (`PIECES` in `make_jump_audio.py`). They're written from memory of FM 3-21.220 and
     are **for the author to check**. Animating them for real needs custom animations (HKX), a job
     for later or for community help.
-- **Out the door** is a teleport to a marker about **1,000 ft above Sicily DZ**. The loading screen in between can be its own art.
+- **Out the door: Nate steps out for real (2026-11-19).** It was a teleport to a marker 1,000 ft
+  above Sicily DZ, which worked only while the DZ had no navmesh: the game sets a moved actor
+  down on the navmesh under its target, by MoveTo or SetPosition alike, so once the landing
+  ground was navmeshed he landed at once (tested: 24310 straight after the move, 2964 a tenth
+  of a second later; SetPosition retries a second apart all came back 2966). Now the plane
+  hangs over the DZ at that height, flying the jump run west-northwest (heading 284), every
+  reference of it moved (`esp_jump_out.py`) so that a man stepping out of the starboard door
+  comes down where the marker is. On the green light, while Nate's in power armor, each jump
+  door activator (the doorway shut by an invisible slab) is swapped for `DevilsC130DoorFrame`,
+  the bare doorway (`C130_DoorFrame.nif`); out of the armor, the slab comes back. "Step out
+  the door!" on screen, and the jumpmaster hurries him every 6 s till he's out. He steps out
+  facing north-northeast, the door's side; he can look where he likes as he falls.
+  - **The cabin needs navmesh too:** boarding moves the player into the cabin, and with the
+    DZ navmeshed under it the move would set him on the ground, not the cabin floor.
 - **The jump marker (worked out 2026-11-13):** an `XMarkerHeading`, `DevilsSicilyJumpMarker`,
   at **X -13650, Y -20430, Z 24300**,
   **rotation Z 284** (in cell -4, -5).

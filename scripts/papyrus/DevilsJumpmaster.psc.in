@@ -65,6 +65,12 @@ ObjectReference[] Property StickLandings Auto Const
 {Where each jumper comes down on Sicily DZ (XMarkerHeadings, Stick's order): behind Nate along
 the jump run, about 65 m apart, each door's men in their own line (made by esp_landings.py).
 None: they just leave the plane, as before.}
+ObjectReference[] Property JumpDoors Auto Const Mandatory
+{The jump door activators (DevilsC130JumpDoor), starboard and port: the doorway shut by an
+invisible slab.}
+ObjectReference[] Property DoorFrames Auto Const Mandatory
+{The open doorways (DevilsC130DoorFrame, Initially Disabled), the same order: shown in the jump
+doors' place from the green light while Nate's in power armor, so he steps out and falls.}
 Float Property StragglerSpeed = 350.0 Auto Const
 {How fast the men out of the loaded area close on Nate, game units a second (350: 5 m/s, a run).}
 Float Property StragglerStep = 2.0 Auto Const
@@ -154,6 +160,7 @@ Event OnLoad()
 	Disable()
 	GreenLight.SetValue(0)
 	wentGreen = False
+	SetDoorways(False)                ; shut till the green light
 	SetLights(True, False)            ; red the whole way, till the green
 	SetDoors(True)                    ; open for boarding
 	Int p = 0
@@ -199,11 +206,22 @@ Event OnLoad()
 	SetLights(False, True)
 	GreenLight.SetValue(1)
 	wentGreen = True
+	CallFunctionNoWait("WatchDoorways", new Var[0])
 	Play_commands_3()
+	Debug.Notification("Step out the door!")
 
-	; Out the door, the plane flies on without you.
+	; Out the door, the plane flies on without you. Till then he hurries you.
+	Int waited = 0
 	While PlayerAboard()
 		Utility.Wait(0.5)
+		waited += 1
+		If waited % 12 == 0
+			If Game.GetPlayer().IsInPowerArmor()
+				Debug.Notification("Jumpmaster: GO! GO! GO! Out the door!")
+			Else
+				Debug.Notification("Jumpmaster: Where's your rig, trooper? Get in it!")
+			EndIf
+		EndIf
 	EndWhile
 	LandStick()                       ; they followed him out (wentGreen stays set: the plane's
 	                                  ; unloading mustn't put them back; the next boarding clears it)
@@ -524,6 +542,28 @@ Function ClearStick()
 		Stick[i].Disable()
 		Stick[i].MoveToMyEditorLocation()
 		i += 1
+	EndWhile
+EndFunction
+
+Bool doorwaysOpen = False
+
+Function SetDoorways(Bool open)
+	{Open: the jump doors' slabs gone and the bare doorways in their place, so Nate can step out.}
+	doorwaysOpen = open
+	SetAll(DoorFrames, open)
+	SetAll(JumpDoors, !open)
+EndFunction
+
+Function WatchDoorways()
+	{From the green light till Nate's out: the doorways open while he's in power armor, shut if he
+	climbs out of it (a fall without a rig kills).}
+	Actor player = Game.GetPlayer()
+	While wentGreen && PlayerAboard()
+		Bool rig = player.IsInPowerArmor()
+		If rig != doorwaysOpen
+			SetDoorways(rig)
+		EndIf
+		Utility.Wait(0.5)
 	EndWhile
 EndFunction
 
