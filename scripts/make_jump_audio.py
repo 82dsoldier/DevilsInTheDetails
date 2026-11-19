@@ -62,7 +62,7 @@ SOUND_OFF = ["OK!", "OK!", "OK!"]   # passed forward up the stick, at the end of
 ACTIONS = {
     "Outboard personnel, stand up!": "StandUp(True)",
     "Inboard personnel, stand up!": "StandUp(False)",
-    "Hook up!": "HookUp()",
+    "Hook up!": 'CallFunctionNoWait("HookUp", new Var[0])',   # dressing them all takes a while
 }
 # The hand signals he's animated for (make_jm_signals.py): the jumpmaster's Idle property, played
 # as he starts the line; the subtitle then drops the written signal.
@@ -154,13 +154,17 @@ def write_wav(path, a):
 
 
 def papyrus_piece(name, cues):
-    """A function that plays one piece and shows each line as it's said."""
+    """A function that plays one piece and shows each line as it's said. Each cue waits for its
+    time from the start of the sound (WaitTill), not from the cue before: the calls between
+    take time of their own (dressing the stick on "Hook up!"), which otherwise added up and
+    left his signals behind the voice (tested)."""
     lines = [f"Function Play_{name}()",
-             f"\tInt id = {name}.Play(Self)"]
+             f"\tInt id = {name}.Play(Self)",
+             "\tFloat t0 = Utility.GetCurrentRealTime()"]
     t = 0.0
     for at, text, action in cues:          # (seconds, text or None, Papyrus call or None)
         if at > t:
-            lines.append(f"\tUtility.Wait({at - t:.2f})")
+            lines.append(f"\tWaitTill(t0 + {at:.2f})")
             t = at
         if text:
             lines.append(f'\tDebug.Notification("{text}")')
@@ -226,7 +230,7 @@ def main():
         files.append(wav)
         lengths[piece] = len(a) / RATE
         body, last = papyrus_piece(piece, cues)
-        body += [f"\tUtility.Wait({max(0.0, lengths[piece] - last):.2f})", "EndFunction", ""]
+        body += [f"\tWaitTill(t0 + {lengths[piece]:.2f})", "EndFunction", ""]
         funcs += body
         print(f"{wav.relative_to(ROOT)}: {lengths[piece]:.1f} s, {len(cues)} lines")
 

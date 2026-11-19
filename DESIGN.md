@@ -854,6 +854,12 @@ about airborne operations have heard of. It's the second worldspace.
     a pause of 3 to 6 seconds, the green light, "GO!". The doors work only once the green light is
     on (global `DevilsJumpGreenLight`). Real recordings replace the WAVs without touching the
     script; a proper dialogue scene with lip sync can come later if it's worth it.
+  - **Cues timed from the start of the sound (2026-11-19).** Each waited a set time after the
+    one before, so whatever ran between them added up: from "Check static lines!" on, his
+    signals came after the voice and got further behind until the next piece started (the
+    author). "Hook up!" dresses the whole stick, which takes a while. Now each cue waits for
+    its own time since the piece started (`WaitTill`, on the real-time clock), and the hook-up
+    runs alongside.
   - The "stand up" and "hook up" parts for the player are still to do.
   - **The doors are already open when the scene starts** (the author, 2026-11-16, with a photo of
     an open C-130 troop door: `data/reference/`, not in git). The door is slid up on its tracks

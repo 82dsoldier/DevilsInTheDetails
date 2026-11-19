@@ -431,6 +431,14 @@ Function DressJumpmaster()
 	CallFunctionNoWait("HoldJumpmaster", new Var[0])
 EndFunction
 
+Function WaitTill(Float realTime)
+	{The scene's clock: wait until Utility.GetCurrentRealTime() reaches realTime (now, if past).}
+	Float d = realTime - Utility.GetCurrentRealTime()
+	If d > 0.0
+		Utility.Wait(d)
+	EndIf
+EndFunction
+
 Function Signal(Idle sig, Float seconds = 0.0)
 	{His hand signal, as he starts the command; the commands carry on meanwhile. seconds: its
 	length, if not SignalSeconds.}
