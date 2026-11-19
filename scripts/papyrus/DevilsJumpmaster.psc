@@ -91,6 +91,8 @@ Idle Property SignalCheckEquipment Auto Const Mandatory
 Idle Property SignalSoundOff Auto Const Mandatory
 {DevilsJMSignalSoundOff: "Sound off for equipment check!", both hands cupped behind his ears,
 held till the stick's OKs are in (7 s).}
+Idle Property SignalSixMinutes Auto Const Mandatory
+{DevilsJMSignalSixMinutes: "Six minutes!", six fingers held up (the right hand open, the left index).}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -655,8 +657,10 @@ EndFunction
 Function Play_commands_2()
 	Int id = commands_2.Play(Self)
 	Utility.Wait(0.30)
-	Debug.Notification("Jumpmaster (six fingers up): Six minutes!")
-	Utility.Wait(2.74)
+	Signal(SignalSixMinutes)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Six minutes!")
+	Utility.Wait(3.00)
 	Debug.Notification("Jumpmaster (one finger up): One minute!")
 	Utility.Wait(2.21)
 	Debug.Notification("Jumpmaster (thumb and forefinger an inch apart): Thirty seconds!")

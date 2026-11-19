@@ -91,6 +91,8 @@ Idle Property SignalCheckEquipment Auto Const Mandatory
 Idle Property SignalSoundOff Auto Const Mandatory
 {DevilsJMSignalSoundOff: "Sound off for equipment check!", both hands cupped behind his ears,
 held till the stick's OKs are in (7 s).}
+Idle Property SignalSixMinutes Auto Const Mandatory
+{DevilsJMSignalSixMinutes: "Six minutes!", six fingers held up (the right hand open, the left index).}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory

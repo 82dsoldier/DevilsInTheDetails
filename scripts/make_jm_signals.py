@@ -14,6 +14,7 @@ standing body and a hand-set right arm:
   Stand up!     both arms out, palms up, then raised (the author): for outboard and inboard
   Check equipment!  both hands' fingertips tapping his chest (the author)
   Sound off for equipment check!  both hands cupped behind his ears (the author)
+  Six minutes!  six fingers held up (the author): the right hand open, the left index finger
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -394,10 +395,49 @@ def sound_off_frames(base):
     return frames
 
 
+def curl(b, side, fingers, deg):
+    """Curl fingers ("2345", say) into the palm, each joint by about deg, finding which way is
+    in (the hands' axes are mirrored) by trying it."""
+    w = b.world()
+    palm = w[b.names[f"{side}Arm_Hand"]][0]
+    for f in fingers:
+        tip0 = w[b.names[f"{side}Arm_Finger{f}3"]][0]
+        for sign in (-1.0, 1.0):
+            t = Body(b.skel, b.local)
+            for k in "123":
+                t.turn(f"{side}Arm_Finger{f}{k}", (0, 0, 1), sign * deg)
+            tip = t.world()[t.names[f"{side}Arm_Finger{f}3"]][0]
+            if _dist(tip, palm) < _dist(tip0, palm) - 1.0:
+                b.local = t.local
+                break
+        else:
+            raise SystemExit(f"can't curl {side} finger {f}")
+        w = b.world()
+
+
+def six_minutes_frames(base):
+    """Six fingers held up (the author): as Ten minutes, the right hand open, all five up, the
+    left showing just the index finger, the others and the thumb curled in."""
+    up = _norm((0.0, 0.25, 1.0))
+    out = hands_pose(base, (0.22, 1.0, -0.25), (0.02, 1.0, 0.12), up, (1.0, 0.0, 0.0),
+                     (0.0, up[2], -up[1]), (-9, 0, 9, 19), 55)
+    curl(out, "L", "345", 80)
+    w = out.world()                                               # the thumb across the curled fingers
+    over = [p + 2.0 * q for p, q in zip(w[out.names["LArm_Finger32"]][0], _norm(qrot(w[out.names["LArm_Hand"]][1], (0, 1, 0))))]
+    for k in "123":
+        w = out.world()
+        out.aim(f"LArm_Finger1{k}", [a - b for a, b in zip(over, w[out.names[f"LArm_Finger1{k}"]][0])])
+    frames = [blend(base, out, t) for t in ease(int(0.5 * FPS))]
+    frames += [out] * int(1.8 * FPS)
+    frames += [blend(base, out, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, out, 0.0)]
+    return frames
+
+
 SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames,
            "JM_GetReady": get_ready_frames, "JM_StandUp": stand_up_frames,
            "JM_CheckEquipment": check_equipment_frames,
-           "JM_SoundOff": sound_off_frames}
+           "JM_SoundOff": sound_off_frames,
+           "JM_SixMinutes": six_minutes_frames}
 
 
 def to_animation(frames):
