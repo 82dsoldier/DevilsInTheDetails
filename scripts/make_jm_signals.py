@@ -11,6 +11,7 @@ standing body and a hand-set right arm:
                 to the stick
   Get ready!    the same, but the fingers together and the hands tipped forward 45 degrees
                 (the author)
+  Stand up!     both arms out, palms up, then raised (the author): for outboard and inboard
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -225,48 +226,73 @@ def get_ready_frames(base):
     return hands_out_frames(base, (0.0, 1.0, 1.0), (1, 0, -1, -2), 12)
 
 
+def hands_pose(base, upper, fore, fingers, across, palm, spread, thumb):
+    """Both arms set alike (mirrored for the left): the upper arm and forearm aimed (his right
+    arm's directions), the fingers pointing `fingers`, the line from index to little finger
+    `across` (his right hand's), the palm facing `palm`; `spread` each finger's angle off the
+    middle one (index to little, positive toward the little finger), `thumb` the thumb's angle
+    off them, away from the little finger."""
+    out = Body(base.skel, base.local)
+    for side, sx in (("R", 1.0), ("L", -1.0)):
+        m = lambda v: (v[0] * sx, v[1], v[2])
+        out.aim(f"{side}Arm_UpperArm", m(upper))
+        out.aim(f"{side}Arm_ForeArm1", m(fore))
+        up, cross, pl = _norm(m(fingers)), m(across), _norm(m(palm))
+        out.aim(f"{side}Arm_Hand", up)
+        out.roll(f"{side}Arm_Hand", f"{side}Arm_Finger21", f"{side}Arm_Finger51", cross)
+        for f, deg in zip("2345", spread):
+            a = math.radians(deg)
+            d = _norm(tuple(u * math.cos(a) + c * math.sin(a) for u, c in zip(up, cross)))
+            for k in "123":
+                out.aim(f"{side}Arm_Finger{f}{k}", d)
+        a = math.radians(thumb)
+        d = _norm(tuple(u * math.cos(a) - c * math.sin(a) + 0.15 * p for u, c, p in zip(up, cross, pl)))
+        for k in "123":
+            out.aim(f"{side}Arm_Finger1{k}", d)
+    return out
+
+
+def blend(a, b, t):
+    """A pose t of the way from Body a to Body b."""
+    out = Body(a.skel, a.local)
+    for i in range(len(out.local)):
+        out.local[i][1] = qslerp(tuple(a.local[i][1]), tuple(b.local[i][1]), t)
+    return out
+
+
+def ease(n):
+    return [(k / n) * (k / n) * (3 - 2 * k / n) for k in range(n)]
+
+
 def hands_out_frames(base, fingers, spread, thumb):
     """Both arms out in front at chest height, palms to the stick; `fingers` the way the
     fingers point, `spread` each finger's angle off the middle one (index to little), `thumb`
-    the thumb's angle off them toward his middle."""
-    out = Body(base.skel, base.local)
-    for side, sx in (("R", 1.0), ("L", -1.0)):
-        out.aim(f"{side}Arm_UpperArm", (0.22 * sx, 1.0, -0.25))       # forward, a little out and down
-        out.aim(f"{side}Arm_ForeArm1", (0.02 * sx, 1.0, 0.12))       # nearly straight
-        up = _norm(fingers)
-        out.aim(f"{side}Arm_Hand", up)
-        across = (sx, 0.0, 0.0)                                       # index to little finger: outward
-        out.roll(f"{side}Arm_Hand", f"{side}Arm_Finger21", f"{side}Arm_Finger51", across)
-        palm = _norm((0.0, up[2], -up[1]))                            # facing the stick
-        for f, deg in zip("2345", spread):
-            a = math.radians(deg)
-            d = _norm(tuple(u * math.cos(a) + c * math.sin(a) for u, c in zip(up, across)))
-            for k in "123":
-                out.aim(f"{side}Arm_Finger{f}{k}", d)
-        a = math.radians(thumb)                                       # the thumb, toward his middle
-        d = _norm(tuple(u * math.cos(a) - c * math.sin(a) + 0.15 * p for u, c, p in zip(up, across, palm)))
-        for k in "123":
-            out.aim(f"{side}Arm_Finger1{k}", d)
+    the thumb's angle off them toward his middle. Out in 0.5 s, held 1.8 s, down in 0.5 s."""
+    up = _norm(fingers)
+    out = hands_pose(base, (0.22, 1.0, -0.25), (0.02, 1.0, 0.12), fingers, (1.0, 0.0, 0.0),
+                     (0.0, up[2], -up[1]), spread, thumb)
+    frames = [blend(base, out, t) for t in ease(int(0.5 * FPS))]
+    frames += [out] * int(1.8 * FPS)
+    frames += [blend(base, out, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, out, 0.0)]
+    return frames
 
-    def pose(t):
-        b = Body(base.skel, out.local)
-        for i in range(len(b.local)):
-            b.local[i][1] = qslerp(tuple(base.local[i][1]), tuple(out.local[i][1]), t)
-        return b
-    frames = []
-    n_up, n_hold, n_down = int(0.5 * FPS), int(1.8 * FPS), int(0.5 * FPS)
-    for k in range(n_up):
-        t = k / n_up
-        frames.append(pose(t * t * (3 - 2 * t)))
-    frames += [pose(1.0)] * n_hold
-    for k in range(n_down + 1):
-        t = 1 - k / n_down
-        frames.append(pose(t * t * (3 - 2 * t)))
+
+def stand_up_frames(base):
+    """Both arms out in front, low, palms up, fingers together toward the stick; then raised,
+    lifting them to their feet (the author). Out 0.5 s, a beat, up 0.8 s, held, down 0.5 s."""
+    pose = dict(across=(-1.0, 0.0, 0.0), palm=(0.0, 0.0, 1.0), spread=(1, 0, -1, -2), thumb=20)
+    low = hands_pose(base, (0.2, 1.0, -0.75), (0.05, 1.0, -0.1), (0.0, 1.0, 0.05), **pose)
+    high = hands_pose(base, (0.2, 1.0, 0.55), (0.05, 1.0, 0.75), (0.0, 1.0, 0.35), **pose)
+    frames = [blend(base, low, t) for t in ease(int(0.5 * FPS))]
+    frames += [low] * int(0.3 * FPS)
+    frames += [blend(low, high, t) for t in ease(int(0.8 * FPS))]
+    frames += [high] * int(0.6 * FPS)
+    frames += [blend(base, high, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, high, 0.0)]
     return frames
 
 
 SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames,
-           "JM_GetReady": get_ready_frames}
+           "JM_GetReady": get_ready_frames, "JM_StandUp": stand_up_frames}
 
 
 def to_animation(frames):

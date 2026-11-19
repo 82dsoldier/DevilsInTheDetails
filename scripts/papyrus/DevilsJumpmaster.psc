@@ -84,6 +84,8 @@ Idle Property SignalTenMinutes Auto Const Mandatory
 {DevilsJMSignalTenMinutes: "Ten minutes!", both hands out in front, fingers splayed.}
 Idle Property SignalGetReady Auto Const Mandatory
 {DevilsJMSignalGetReady: "Get ready!", the same, fingers together, hands tipped forward 45 degrees.}
+Idle Property SignalStandUp Auto Const Mandatory
+{DevilsJMSignalStandUp: "Outboard/Inboard personnel, stand up!", both arms out, palms up, raised.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -606,11 +608,15 @@ Function Play_commands_1()
 	Utility.Wait(1.00)
 	Debug.Notification("Jumpmaster: Get ready!")
 	Utility.Wait(3.00)
-	Debug.Notification("Jumpmaster (arms to the outboard seats, palms up, raised): Outboard personnel, stand up!")
+	Signal(SignalStandUp)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Outboard personnel, stand up!")
 	Utility.Wait(1.80)
 	StandUp(True)
 	Utility.Wait(3.27)
-	Debug.Notification("Jumpmaster (arms to the centre seats, palms up, raised): Inboard personnel, stand up!")
+	Signal(SignalStandUp)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Inboard personnel, stand up!")
 	Utility.Wait(1.76)
 	StandUp(False)
 	Utility.Wait(3.20)
