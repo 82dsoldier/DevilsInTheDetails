@@ -80,6 +80,8 @@ hangs at jump height, so otherwise it's all sky out there); gone as the doors cl
 Idle Property SignalHookUp Auto Const Mandatory
 {DevilsJMSignalHookUp: his "Hook up!" signal (make_jm_signals.py), arm overhead, finger hooked,
 pumping; a dynamic idle like the vanilla BOS_Salute.}
+Idle Property SignalTenMinutes Auto Const Mandatory
+{DevilsJMSignalTenMinutes: "Ten minutes!", both hands out in front, fingers splayed.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -594,8 +596,10 @@ EndFunction
 Function Play_commands_1()
 	Int id = commands_1.Play(Self)
 	Utility.Wait(0.30)
-	Debug.Notification("Jumpmaster (both hands up, all ten fingers spread): Ten minutes!")
-	Utility.Wait(2.50)
+	Signal(SignalTenMinutes)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Ten minutes!")
+	Utility.Wait(3.00)
 	Debug.Notification("Jumpmaster (both arms out toward the stick): Get ready!")
 	Utility.Wait(2.22)
 	Debug.Notification("Jumpmaster (arms to the outboard seats, palms up, raised): Outboard personnel, stand up!")

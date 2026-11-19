@@ -5,8 +5,10 @@
 The author knows the signals; this builds them in code (no Blender), each from the vanilla
 standing body and a hand-set right arm:
 
-  Hook up!   his right arm overhead, the index finger crooked like a hook, the whole arm pumped
-             down and up (the author): elbow out and bent, hand by his head, then up again
+  Hook up!      his right arm overhead, the index finger crooked like a hook, the whole arm
+                pumped down and up (the author): elbow out and bent, hand by his head, then up
+  Ten minutes!  both hands held out in front, fingers splayed (the author): ten fingers, palms
+                to the stick
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -143,6 +145,26 @@ class Body:
         _, pr = w[self.skel.parents[i]]
         self.local[i][1] = qmul(qconj(pr), qmul(q, wr))
 
+    def roll(self, bone, a, b, want):
+        """Turn a bone about its own length so the line from bone a to bone b (its children:
+        across the knuckles, say) points as near `want` as it can."""
+        i = self.names[bone]
+        w = self.world()
+        _, wr = w[i]
+        x = qrot(wr, (1, 0, 0))
+        def flat(v):
+            d = sum(p * q for p, q in zip(v, x))
+            v = [p - d * q for p, q in zip(v, x)]
+            n = math.sqrt(sum(c * c for c in v)) or 1.0
+            return [c / n for c in v]
+        have = flat([p - q for p, q in zip(w[self.names[b]][0], w[self.names[a]][0])])
+        want = flat(want)
+        ang = math.degrees(math.atan2(sum(x[k] * (have[(k + 1) % 3] * want[(k + 2) % 3] - have[(k + 2) % 3] * want[(k + 1) % 3]) for k in range(3)),
+                                      sum(p * q for p, q in zip(have, want))))
+        q = qaxis(x, ang)
+        _, pr = w[self.skel.parents[i]]
+        self.local[i][1] = qmul(qconj(pr), qmul(q, wr))
+
     def turn(self, bone, axis, deg):
         """Turn a bone about one of its own axes (fingers curl about their Z)."""
         i = self.names[bone]
@@ -184,7 +206,51 @@ def hook_up_frames(base):
     return frames
 
 
-SIGNALS = {"JM_HookUp": hook_up_frames}
+def _norm(v):
+    n = math.sqrt(sum(c * c for c in v))
+    return tuple(c / n for c in v)
+
+
+def ten_minutes_frames(base):
+    """Both arms out in front at chest height, hands up, palms to the stick, all ten fingers
+    straight and splayed; out in 0.5 s, held 1.8 s, down in 0.5 s."""
+    out = Body(base.skel, base.local)
+    for side, sx in (("R", 1.0), ("L", -1.0)):
+        out.aim(f"{side}Arm_UpperArm", (0.22 * sx, 1.0, -0.25))       # forward, a little out and down
+        out.aim(f"{side}Arm_ForeArm1", (0.02 * sx, 1.0, 0.12))       # nearly straight
+        up = _norm((0.0, 0.25, 1.0))                                  # the hand bent back, fingers up
+        out.aim(f"{side}Arm_Hand", up)
+        across = (sx, 0.0, 0.0)                                       # index to little finger: outward
+        out.roll(f"{side}Arm_Hand", f"{side}Arm_Finger21", f"{side}Arm_Finger51", across)
+        palm = (0.0, 1.0, -0.25)                                      # facing the stick
+        for f, deg in (("2", -9), ("3", 0), ("4", 9), ("5", 19)):     # spread, index to little
+            a = math.radians(deg)
+            d = _norm(tuple(u * math.cos(a) + c * math.sin(a) for u, c in zip(up, across)))
+            for k in "123":
+                out.aim(f"{side}Arm_Finger{f}{k}", d)
+        a = math.radians(55)                                          # the thumb out, toward his middle
+        d = _norm(tuple(u * math.cos(a) - c * math.sin(a) + 0.15 * p for u, c, p in zip(up, across, palm)))
+        for k in "123":
+            out.aim(f"{side}Arm_Finger1{k}", d)
+
+    def pose(t):
+        b = Body(base.skel, out.local)
+        for i in range(len(b.local)):
+            b.local[i][1] = qslerp(tuple(base.local[i][1]), tuple(out.local[i][1]), t)
+        return b
+    frames = []
+    n_up, n_hold, n_down = int(0.5 * FPS), int(1.8 * FPS), int(0.5 * FPS)
+    for k in range(n_up):
+        t = k / n_up
+        frames.append(pose(t * t * (3 - 2 * t)))
+    frames += [pose(1.0)] * n_hold
+    for k in range(n_down + 1):
+        t = 1 - k / n_down
+        frames.append(pose(t * t * (3 - 2 * t)))
+    return frames
+
+
+SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames}
 
 
 def to_animation(frames):

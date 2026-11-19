@@ -67,6 +67,7 @@ ACTIONS = {
 # The hand signals he's animated for (make_jm_signals.py): the jumpmaster's Idle property, played
 # as he starts the line; the subtitle then drops the written signal.
 SIGNALS = {
+    "Ten minutes!": "SignalTenMinutes",
     "Hook up!": "SignalHookUp",
 }
 SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it

@@ -80,6 +80,8 @@ hangs at jump height, so otherwise it's all sky out there); gone as the doors cl
 Idle Property SignalHookUp Auto Const Mandatory
 {DevilsJMSignalHookUp: his "Hook up!" signal (make_jm_signals.py), arm overhead, finger hooked,
 pumping; a dynamic idle like the vanilla BOS_Salute.}
+Idle Property SignalTenMinutes Auto Const Mandatory
+{DevilsJMSignalTenMinutes: "Ten minutes!", both hands out in front, fingers splayed.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
