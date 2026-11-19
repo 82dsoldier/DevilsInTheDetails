@@ -78,6 +78,7 @@ SIGNALS = {
     "Six minutes!": "SignalSixMinutes",
     "One minute!": "SignalOneMinute",
     "Thirty seconds!": "SignalThirtySeconds",
+    "Drop zone coming up! Stand in the door!": "SignalStandInDoor",
 }
 SIGNAL_LONGER = {"SignalSoundOff": 7.0}   # held through the stick's OKs (make_jm_signals.py)
 SIGNAL_SECONDS = 3.0    # a signal's length (make_jm_signals.py: 2.8 s): the next command waits for it

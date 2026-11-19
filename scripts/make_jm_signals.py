@@ -17,6 +17,8 @@ standing body and a hand-set right arm:
   Six minutes!  six fingers held up (the author): the right hand open, the left index finger
   One minute!   one finger held up (the author), on the hand not holding his static line: the right
   Thirty seconds!  the thumb and forefinger held close together (the author), the right hand
+  Drop zone coming up! Stand in the door!  he points the first jumper into the door (the
+                author): at him, then at the door
 
 Each is a Fallout 4 Havok animation (hkaSplineCompressedAnimation) written by PyNifly's
 anim_fo4 (data/tools/io_scene_nifly/hkx), bound to the vanilla human skeleton (95 bones, the
@@ -491,6 +493,39 @@ def thirty_seconds_frames(base):
     return held_frames(base, b)
 
 
+def point_pose(base, d):
+    """His right arm out straight (the elbow a touch bent), the forefinger pointing d, palm down,
+    the other fingers curled in; the left arm on his line."""
+    d = _norm(d)
+    b = Body(base.skel, base.local)
+    b.aim("RArm_UpperArm", (d[0] + 0.1, d[1], d[2] - 0.15))
+    b.aim("RArm_ForeArm1", d)
+    b.aim("RArm_Hand", d)
+    b.roll("RArm_Hand", "RArm_Finger21", "RArm_Finger51", (d[1], -d[0], 0.0))
+    for k in "123":
+        b.aim(f"RArm_Finger2{k}", d)
+    curl(b, "R", "345", 80)
+    tuck_thumb(b, "R")
+    return b
+
+
+POINT_JUMPER = (0.25, 1.0, -0.1)    # from the ramp, facing forward: the first jumper in the aisle
+POINT_DOOR = (1.0, 0.45, -0.15)     # and the starboard door, just ahead on his right
+
+
+def stand_in_door_frames(base):
+    """He points the first jumper into the door (the author): his right arm out at the first
+    jumper, then swung to the door. Out 0.5 s, held 0.6 s, swung 0.6 s, held 0.8 s, down 0.5 s."""
+    at = point_pose(base, POINT_JUMPER)
+    door = point_pose(base, POINT_DOOR)
+    frames = [blend(base, at, t) for t in ease(int(0.5 * FPS))]
+    frames += [at] * int(0.6 * FPS)
+    frames += [blend(at, door, t) for t in ease(int(0.6 * FPS))]
+    frames += [door] * int(0.8 * FPS)
+    frames += [blend(base, door, 1 - t) for t in ease(int(0.5 * FPS))] + [blend(base, door, 0.0)]
+    return frames
+
+
 THIRTY_GAP = 1.8                    # thumb under forefinger: about an inch, in game units
 
 
@@ -499,7 +534,8 @@ SIGNALS = {"JM_HookUp": hook_up_frames, "JM_TenMinutes": ten_minutes_frames,
            "JM_CheckEquipment": check_equipment_frames,
            "JM_SoundOff": sound_off_frames,
            "JM_SixMinutes": six_minutes_frames,
-           "JM_OneMinute": one_minute_frames, "JM_ThirtySeconds": thirty_seconds_frames}
+           "JM_OneMinute": one_minute_frames, "JM_ThirtySeconds": thirty_seconds_frames,
+           "JM_StandInDoor": stand_in_door_frames}
 
 
 def to_animation(frames):

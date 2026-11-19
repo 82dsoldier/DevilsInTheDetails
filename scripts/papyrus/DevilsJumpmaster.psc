@@ -97,6 +97,9 @@ Idle Property SignalOneMinute Auto Const Mandatory
 {DevilsJMSignalOneMinute: "One minute!", one finger held up, the right hand (the left on his line).}
 Idle Property SignalThirtySeconds Auto Const Mandatory
 {DevilsJMSignalThirtySeconds: "Thirty seconds!", the right thumb and forefinger held close together.}
+Idle Property SignalStandInDoor Auto Const Mandatory
+{DevilsJMSignalStandInDoor: "Drop zone coming up! Stand in the door!", he points the first jumper
+into the door: his right arm at him, then at the door.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
@@ -673,7 +676,9 @@ Function Play_commands_2()
 	Utility.Wait(1.00)
 	Debug.Notification("Jumpmaster: Thirty seconds!")
 	Utility.Wait(3.00)
-	Debug.Notification("Jumpmaster (points the first jumper into the door): Drop zone coming up! Stand in the door!")
+	Signal(SignalStandInDoor)
+	Utility.Wait(1.00)
+	Debug.Notification("Jumpmaster: Drop zone coming up! Stand in the door!")
 	Utility.Wait(2.94)
 EndFunction
 

@@ -97,6 +97,9 @@ Idle Property SignalOneMinute Auto Const Mandatory
 {DevilsJMSignalOneMinute: "One minute!", one finger held up, the right hand (the left on his line).}
 Idle Property SignalThirtySeconds Auto Const Mandatory
 {DevilsJMSignalThirtySeconds: "Thirty seconds!", the right thumb and forefinger held close together.}
+Idle Property SignalStandInDoor Auto Const Mandatory
+{DevilsJMSignalStandInDoor: "Drop zone coming up! Stand in the door!", he points the first jumper
+into the door: his right arm at him, then at the door.}
 Float Property SignalSeconds = 3.0 Auto Const
 {How long a signal takes (the animations are 2.8 s).}
 Armor Property StaticLineJM Auto Const Mandatory
