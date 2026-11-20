@@ -1298,6 +1298,11 @@ def main():
     frame_path = mesh_dir / "C130_DoorFrame.nif"
     write_nif(frame_path, "C130_DoorFrame", {k: v for k, v in door_built.items() if k != "activation"},
               s, tex, pyn)
+    # The open doorway's way out, from the green light on: just the slab filling it, on a load
+    # door to the exit point over Sicily (the cabin is an interior; a door's teleport puts the
+    # jumper in the air, where a script move set him on the ground's navmesh).
+    exit_path = mesh_dir / "C130_DoorExit.nif"
+    write_nif(exit_path, "C130_DoorExit", {"activation": door_built["activation"]}, s, tex, pyn)
     panel_paths = [mesh_dir / "C130_DoorOpen.nif"]
     write_nif(panel_paths[0], "C130_DoorOpen", door_open_parts(args.length), s, tex, pyn)
     segs, keys, _ = door_segments(args.length)
@@ -1326,7 +1331,7 @@ def main():
     print(f"  port      X {-ox:+.0f}  Y {oy:+.0f}  Z 0, rotation Z 180")
     if args.install:
         data = Path(args.install)
-        for f in [nif_path, door_path, frame_path] + panel_paths + tex_files:
+        for f in [nif_path, door_path, frame_path, exit_path] + panel_paths + tex_files:
             dest = data / f.relative_to(mod)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
