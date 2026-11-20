@@ -582,6 +582,13 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
   the player ever sees Bragg. Nearby scavengers and settlements already pay a tithe.
 
+- **A rig on the field (the author, 2026-11-20).** The jump needs power armor, and most players
+  don't walk around in it; they shouldn't have to go back to Sanctuary for theirs. Hanscom has
+  a frame to find, and the pieces to fit on it are scattered round the base, so getting a rig
+  is a hunt over the field rather than a gift. (Where the frame and the pieces are, and whether
+  the recruiting sergeant points the way, isn't decided.) Players who brought their own just
+  jump in it.
+
 #### The leak
 
 Supply caravans bringing scrap to the DRMO keep getting hit on the road out of Boston, and the
