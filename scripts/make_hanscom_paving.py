@@ -51,6 +51,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from make_heightmap import CELL_UNITS, POINT_M, POINT_UNITS, ROOT, UNIT_M, out_dir, write_dds_r32f  # noqa: E402
 from make_photo_overlay import load_pynifly                                   # noqa: E402
 import make_c130_blockout as c130                                             # noqa: E402
+from ddsutil import save_dds                                                  # noqa: E402
 
 AREA = "hanscom"
 OVERPASS = "https://overpass-api.de/api/interpreter"
@@ -140,9 +141,9 @@ def write_textures(tex_dir):
     for name, make in MATERIALS.items():
         img, h = make()
         f = tex_dir / f"paving_{name}.dds"
-        Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB").save(f, pixel_format="DXT1")
+        save_dds(Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB"), f)
         fn = tex_dir / f"paving_{name}_n.dds"
-        Image.fromarray(np.clip(c130.normal_map(h), 0, 255).astype(np.uint8), "RGB").save(fn, pixel_format="DXT1")
+        save_dds(Image.fromarray(np.clip(c130.normal_map(h), 0, 255).astype(np.uint8), "RGB"), fn)
         shine, smooth = SPECULAR[name]
         fs = tex_dir / f"paving_{name}_s.dds"
         Image.new("RGB", (64, 64), (round(shine * 255), round(smooth * 255), 0)).save(fs, pixel_format="DXT1")

@@ -38,6 +38,7 @@ from make_heightmap import CELL_UNITS, ROOT, UNIT_M, out_dir                  # 
 from make_photo_overlay import load_pynifly                                   # noqa: E402
 import make_c130_blockout as c130                                             # noqa: E402
 import make_hanscom_paving as paving                                          # noqa: E402
+from ddsutil import save_dds                                                  # noqa: E402
 
 AREA = "hanscom"
 OSM_BBOX = (42.4500, -71.3200, 42.4900, -71.2550)
@@ -57,19 +58,60 @@ ROLES = {
     "1730": ("DerelictB", 12.0, [("frac", 0.7, 8.0, 0.5)]),
     "1614": ("DRMO", 7.0, [(5.0, 5.0, 0.3), (5.0, 5.0, 0.55), (1.2, 2.2, 0.8)]),
 }
-TILE_M = {"siding": 3.0, "block": 4.0, "roof": 6.0, "floor": c130.TARMAC_SLAB}
+TILE_M = {"block": 4.0, "roof": 6.0, "floor": c130.TARMAC_SLAB,
+          "siding": 4.0}            # only for the doorways' sides and heads; walls use the atlas
+# Siding: an atlas of SHEET_VARIANTS sheets side by side, each SHEET_W_M x SHEET_H_M; each sheet
+# of a wall picks one by a hash of where it is, so nothing repeats along a wall (one tiled
+# texture's rust streaks read as lines of writing down a 113 m hangar).
+SHEET_VARIANTS = 4
+SHEET_W_M, SHEET_H_M = 1.0, 4.0
+SHEET_PX = 256                  # pixels per metre
+PANEL_M = 8.0                   # other walls are cut into squares this size
+
+
+def _hash(*k):
+    h = 2166136261
+    for v in k:
+        h = ((h ^ (v & 0xFFFFFFFF)) * 16777619) & 0xFFFFFFFF
+    return h
 
 
 # --- Textures -------------------------------------------------------------------------------
 def tex_siding():
-    """Corrugated steel siding, faded green-grey paint, rust streaks running down."""
-    u, v = c130._uv()
-    rib = np.cos(u * 2 * math.pi * 12)
-    streak = np.clip(c130._smooth_noise(70, 0.02) * (1 - v) - 0.6, 0, 1)
-    shade = 0.86 + 0.08 * rib + c130._noise(71, scale=0.04)
-    rgb = np.array([112, 120, 108])[None, None, :] * shade[..., None]
-    rgb = rgb * (1 - streak[..., None]) + np.array([120, 70, 40]) * streak[..., None]
-    return rgb, rib * 0.5
+    """The siding atlas: SHEET_VARIANTS ribbed steel sheets (R-panel, a rib every 0.3 m), each
+    in the same faded green-grey (a building is one colour), a shade apart, each weathered its own way. Rust
+    bleeds down from the fastener rows and gathers at the bottom edge; a few dents. The top of
+    the image is the top of a sheet."""
+    W, H = SHEET_PX, int(SHEET_H_M * SHEET_PX)
+    rng = np.random.default_rng(1715)
+    paints = [(112, 120, 108), (116, 122, 109), (108, 117, 106), (114, 118, 110)]
+    x = (np.arange(W) + 0.5) / SHEET_PX                     # metres across the sheet
+    z = (np.arange(H) + 0.5) / SHEET_PX                     # metres down from its top
+    ph = (x / 0.3) % 1
+    rib = np.minimum(np.clip(1 - np.abs(ph - 0.5) * 6, 0, 1) * 1.5, 1.0)   # flat-topped ribs
+    rgbs, hs = [], []
+    for k in range(SHEET_VARIANTS):
+        noise = np.kron(rng.normal(0, 1, (H // 8, W // 8)), np.ones((8, 8)))
+        noise = (noise + np.roll(noise, 4, 0) + np.roll(noise, 4, 1)) / 3
+        base = np.array(paints[k], float)[None, None, :] * (0.92 + 0.04 * noise[..., None])
+        rust = np.zeros((H, W))
+        for _ in range(rng.integers(2, 6)):                   # streaks from the fasteners
+            cx = rng.uniform(0, 1.0)
+            top = rng.choice([0.05, 1.05, 2.05, 3.05])
+            length, width = rng.uniform(0.3, 2.5), rng.uniform(0.02, 0.07)
+            fall = np.clip(1 - (z[:, None] - top) / length, 0, 1) * (z[:, None] > top)
+            rust = np.maximum(rust, fall * np.exp(-((x[None, :] - cx) / width) ** 2) * rng.uniform(0.3, 0.8))
+        bottom = np.clip((z[:, None] - (SHEET_H_M - rng.uniform(0.2, 0.6))) / 0.4, 0, 1) * rng.uniform(0.2, 0.6)
+        rust = np.clip(rust + bottom * (0.6 + 0.4 * noise), 0, 1)
+        rgb = base * (0.85 + 0.12 * rib[None, :] + 0.03 * noise)[..., None]
+        rgb = rgb * (1 - rust[..., None]) + np.array([118, 66, 38]) * rust[..., None]
+        height = np.broadcast_to(rib[None, :], (H, W)).copy()
+        for _ in range(rng.integers(0, 3)):                   # dents
+            dx, dz, r = rng.uniform(0, 1.0), rng.uniform(0.3, 3.7), rng.uniform(0.08, 0.25)
+            height -= 0.6 * np.exp(-(((x[None, :] - dx) ** 2 + (z[:, None] - dz) ** 2) / r ** 2))
+        rgbs.append(rgb)
+        hs.append(height)
+    return np.concatenate(rgbs, axis=1), np.concatenate(hs, axis=1)
 
 
 def tex_block():
@@ -94,14 +136,25 @@ MATERIALS = {"siding": tex_siding, "block": tex_block, "roof": tex_roof, "floor"
 SPECULAR = {"siding": (0.2, 0.3), "block": (0.04, 0.15), "roof": (0.03, 0.1), "floor": (0.08, 0.2)}
 
 
+def normal_map(h, strength):
+    """As c130.normal_map, for an image of any size."""
+    k = strength * h.shape[1] / 2
+    dx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) * k
+    dy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) * k
+    n = np.dstack([-dx, -dy, np.ones_like(h)])
+    n /= np.linalg.norm(n, axis=2, keepdims=True)
+    return (n * 0.5 + 0.5) * 255
+
+
 def write_textures(tex_dir):
     files = []
     for name, make in MATERIALS.items():
         img, h = make()
         f = tex_dir / f"bldg_{name}.dds"
-        Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB").save(f, pixel_format="DXT1")
+        save_dds(Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB"), f)
         fn = tex_dir / f"bldg_{name}_n.dds"
-        Image.fromarray(np.clip(c130.normal_map(h), 0, 255).astype(np.uint8), "RGB").save(fn, pixel_format="DXT1")
+        strength = 0.02 if name == "siding" else 0.5            # the atlas is 4 sheets wide
+        save_dds(Image.fromarray(np.clip(normal_map(h, strength), 0, 255).astype(np.uint8), "RGB"), fn)
         shine, smooth = SPECULAR[name]
         fs = tex_dir / f"bldg_{name}_s.dds"
         Image.new("RGB", (64, 64), (round(shine * 255), round(smooth * 255), 0)).save(fs, pixel_format="DXT1")
@@ -119,11 +172,12 @@ class Mesh:
     def _p(self, mat):
         return self.parts.setdefault(mat, ([], [], [], []))   # verts, tris, uvs, normals
 
-    def quad(self, mat, a, b, c, d, n, uv):
-        """a b c d counter-clockwise seen from the normal's side; uv: their (u, v) in metres."""
+    def quad(self, mat, a, b, c, d, n, uv, raw=False):
+        """a b c d round the quad (fix_quads winds them to face n); uv: their (u, v) in metres,
+        or texture coordinates as they are if raw."""
         vs, ts, us, ns = self._p(mat)
         k = len(vs)
-        tile = TILE_M[mat]
+        tile = 1.0 if raw else TILE_M[mat]
         vs += [a, b, c, d]
         us += [(p[0] / tile, p[1] / tile) for p in uv]
         ns += [n] * 4
@@ -160,28 +214,36 @@ def wall_box(m, mat, p0, p1, inward, z0, z1, t, openings=(), inner=True):
         pieces.append((a, b, top, z1))
         s = b
     pieces.append((s, L + t, z0, z1))
+    # Faces are cut into sheets (SHEET_W_M x SHEET_H_M for siding, PANEL_M squares otherwise),
+    # lined up with the wall's start and the ground, so no triangle is huge (a 113 m wall in
+    # two triangles lost a piece in game) and each siding sheet can be a different one.
+    sheet = mat == "siding"
+    sw = (SHEET_W_M if sheet else PANEL_M) / UNIT_M
+    sh = (SHEET_H_M if sheet else PANEL_M) / UNIT_M
     for s0, s1, za, zb in pieces:
         if s1 - s0 < 1 or zb - za < 1:
             continue
-        for off, n, flip in ((0.0, out_n, False), (t, in_n, True)):
+        cuts_s = [s0] + [k * sw for k in range(math.floor(s0 / sw) + 1, math.ceil(s1 / sw))] + [s1]
+        cuts_z = [za] + [k * sh for k in range(math.floor(za / sh) + 1, math.ceil(zb / sh))] + [zb]
+        for off, n in ((0.0, out_n), (t, in_n)):
             if off and not inner:
                 continue
-            q0, q1 = at(s0, off), at(s1, off)
-            a, b, c, d = (*q0, za), (*q1, za), (*q1, zb), (*q0, zb)
-            uv = [(s0 * UNIT_M, za * UNIT_M), (s1 * UNIT_M, za * UNIT_M),
-                  (s1 * UNIT_M, zb * UNIT_M), (s0 * UNIT_M, zb * UNIT_M)]
-            if flip:
-                a, b, c, d = b, a, d, c
-                uv = [uv[1], uv[0], uv[3], uv[2]]
-            # Outer face: counter-clockwise seen from outside means p0 -> p1 along the bottom
-            # when inward is to the left of travel; check and swap if not.
-            if not flip and (ux * inward[1] - uy * inward[0]) < 0:
-                a, b, c, d = b, a, d, c
-                uv = [uv[1], uv[0], uv[3], uv[2]]
-            if flip and (ux * inward[1] - uy * inward[0]) < 0:
-                a, b, c, d = b, a, d, c
-                uv = [uv[1], uv[0], uv[3], uv[2]]
-            m.quad(mat, a, b, c, d, n, uv)
+            for sa, sb in zip(cuts_s, cuts_s[1:]):
+                for zlo, zhi in zip(cuts_z, cuts_z[1:]):
+                    if sb - sa < 0.5 or zhi - zlo < 0.5:
+                        continue
+                    qa, qb = at(sa, off), at(sb, off)
+                    if sheet:
+                        k0 = math.floor((sa + sb) / 2 / sw)
+                        r0 = math.floor((zlo + zhi) / 2 / sh)
+                        var = _hash(round(p0[0]), round(p0[1]), k0, r0, int(off > 0)) % SHEET_VARIANTS
+                        u = lambda q: (var + (q - k0 * sw) / sw) / SHEET_VARIANTS
+                        v = lambda z: 1 - (z - r0 * sh) / sh
+                        uv = [(u(sa), v(zlo)), (u(sb), v(zlo)), (u(sb), v(zhi)), (u(sa), v(zhi))]
+                    else:
+                        uv = [(sa * UNIT_M, zlo * UNIT_M), (sb * UNIT_M, zlo * UNIT_M),
+                              (sb * UNIT_M, zhi * UNIT_M), (sa * UNIT_M, zhi * UNIT_M)]
+                    m.quad(mat, (*qa, zlo), (*qb, zlo), (*qb, zhi), (*qa, zhi), n, uv, raw=sheet)
     # The opening's sides and head, so the wall reads as thick.
     for a, b, top in openings:
         for s_, sign in ((a, 1), (b, -1)):
@@ -259,7 +321,7 @@ def hollow(m, poly, ground_top, ground_low, height, openings, mats, ramp):
     inner = poly.buffer(-t, join_style="mitre")
     m.polygon("floor", inner, z_floor, True)
     m.polygon("roof", poly, z1 + 1, True)
-    m.polygon(mats["wall"], inner, z1 - 1, False)       # the ceiling
+    m.polygon("roof", inner, z1 - 1, False)             # the ceiling
     return z_floor
 
 
