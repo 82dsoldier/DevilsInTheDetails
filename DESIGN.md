@@ -549,6 +549,70 @@ resupply. Nate runs into them in the street. They tell him about the bird, and h
 - **The crew can warn him:** "You'll need a rig. Nobody goes out the door without one." That sets
   up the power armor requirement before he boards.
 
+### Hanscom Field: the first act
+
+**Decided (2026-11-20):** the plane is at **Hanscom Field**, Bedford, in a small worldspace of its
+own (see "Getting on the plane" below for why not Boston Airport). Building a worldspace for a
+bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not fetch quests.
+
+- **The area (decided): the whole field,** about 2.65 x 1.9 km: both runways (11/29, 2,137 m,
+  and 05/23), the East Ramp where the C-130 parks, the west hangars and the old terminal. Layout
+  from OpenStreetMap; options drawn in `out/hanscom/outline_options.png`.
+- **The way in (decided): a road out of Boston,** a map-edge transition (one load door in a
+  vanilla cell), coming in at the south gate. Not a tunnel.
+- **The hook: a recruiting beacon (idea).** The Devils' relay broadcasts a recruiting pitch
+  ("Able-bodied? Got a rig? The 82nd is hiring."), with the 2077 "report to division
+  headquarters" loop they've kept for two hundred years running under it. Nate walks in as a
+  recruit: the only pre-war officer in the Commonwealth, and nobody believes him. (The "Nate
+  relieves the post" ending pays that off.)
+- **The recruiting station:** a recruiting sergeant with the whole pitch, working the line of
+  Commonwealth drifters who answered the beacon. (Not the forced recruit: that belongs at Bragg,
+  in "Bringing a conscript home".)
+- **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
+  military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
+  in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
+  the player ever sees Bragg. Nearby scavengers and settlements already pay a tithe.
+
+#### The leak
+
+Supply caravans bringing scrap to the DRMO keep getting hit on the road out of Boston, and the
+raiders always know the schedule. Someone in the recruiting line is a raider scout, signed up to
+watch the field.
+
+- **An investigation, not a marker:** a few suspects and some red herrings. Nate works it out
+  from their stories, their gear and where they go at night.
+- **The choice:** hand him to the Devils, and their justice, or turn him and feed the raiders a
+  false schedule to set up an ambush on the road. It joins the recruiting station to the DRMO and
+  shows how the Devils deal out justice before Bragg does.
+
+#### Jump school's mock door
+
+Nobody goes on the bird without going through the mock door: a fuselage mock-up where recruits
+practise standing in the door and stepping out, as at jump school.
+
+- The sergeant runs Nate through the commands in power armor, and Nate **steps out of the mock
+  door, for real**, onto a padded landing.
+- **It teaches the jump.** The real jump only works if the player knows to step out of the door
+  himself (the author's condition, 2026-11-19); by then he's done it once.
+- Short and funny, with the right sergeant's voice.
+
+#### The bird is grounded
+
+The spine of the act: the C-130 needs an avionics part before it can fly, and the jump waits on
+it. Three ways to get it, each with consequences later (what the Brotherhood thinks of Nate, what
+the hardliner and the reformer think of how he did it, whether the Devils owe him):
+
+1. **Trade with the Brotherhood** (the Devils already trade them avionics and manuals; see "The
+   recall"). Nate brokers it at Boston Airport, and learns how much the Brotherhood wants to know
+   where the Devils' tech comes from.
+2. **Strip it from a wreck at Boston Airport,** under the Brotherhood's nose: stealth, or a fight
+   for a player at war with them.
+3. **Pre-war Hanscom itself.** The real Hanscom was the Air Force's electronics base (its
+   Electronic Systems Division, with MIT's Lincoln Laboratory beside the field). A sealed pre-war
+   lab under the field is a proper dungeon: ferals, a garrison that never left, and the part. It
+   can hint at how military authentication worked, setting up the codebook and the numbers
+   station at Bragg without giving them away.
+
 ### Getting to Bragg: the jump
 
 The player arrives the way the 82nd does: **by parachute, onto Sicily Drop Zone.**
@@ -1020,7 +1084,23 @@ about airborne operations have heard of. It's the second worldspace.
 - **Landing** can open the story: a raid hits the drop zone as the player comes down, and the
   Devils' reception party fights it off. First impression of both the threat and the protectors.
 - **Getting on the plane (decided):** the Devils' last airworthy C-130, at Boston Airport (see
-  "The recall" above).
+  "The recall" above). **Changed 2026-11-20: at Hanscom Field, Bedford, in a worldspace of its
+  own.** Boston Airport has no room: a search of every vanilla object on the airfield found no
+  flat spot a C-130 (30 m long, 40 m span) fits without wreckage under it (the best was about
+  40% covered), and parking there means edits to vanilla cells, which the Sanctuary jump was
+  designed to avoid. The highways don't work either: the longest unbroken straight deck in the
+  Commonwealth is about 88 m. Hanscom is a real Air Force field about 3 miles from Concord; its
+  own worldspace gives a clear ramp and runway, nothing vanilla to conflict with (the Prydwen
+  can come down without touching the plane), and a real door to board by. The way in is a
+  tunnel or road from the Commonwealth (one load door in a vanilla cell). The layout comes from
+  OpenStreetMap (runways 11/29, 2,137 m, and 05/23; the East Ramp, the military apron).
+  - **Boarding starts the flight:** the plane's door moves the player into the cabin and tells
+    the jumpmaster, instead of his polling the player's distance from a red light. (A save keeps
+    its own copy of every persistent reference's position, so a save from before the plane
+    moved had the light, and "aboard", 31,000 units away; tested 2026-11-20. The jumpmaster
+    now also puts every persistent piece of the plane back on its plugin position at load.)
+  - **The story:** the broadcast is still heard in Boston's south end, and the crew still meets
+    Nate in the street; they tell him to meet the bird at Hanscom.
 
 **Technical notes:**
 - The drop zones are miles from the barracks area. **Solved by the underground:** the drop zone
@@ -1155,8 +1235,8 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
 
 ## Scope (to keep it finishable)
 
-- **Three small worldspaces:** the barracks area (the map below), Sicily DZ, and Bragg Boulevard
-  (the settlers' home, condensed).
+- **Four small worldspaces:** the barracks area (the map below), Sicily DZ, Bragg Boulevard
+  (the settlers' home, condensed), and Hanscom Field (the plane, outside Boston).
 - **Interiors:** the aircraft, the headquarters building, the company barracks, the underground
   complex (a few connected cells), and a few storefronts on Bragg Boulevard. Every other barracks
   and shop has a locked or sealed door.
