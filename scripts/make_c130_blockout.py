@@ -45,6 +45,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from make_heightmap import ROOT, UNIT_M, out_dir                  # noqa: E402
 from make_photo_overlay import load_pynifly                      # noqa: E402
+from ddsutil import save_dds                                      # noqa: E402
 
 # Size, metres (C-130H cargo compartment, except the length).
 DEFAULT_LENGTH = 15.0          # the true 12.2 m (40 ft) felt short in game
@@ -364,9 +365,9 @@ def write_textures(tex_dir):
         img = np.clip(img, 0, 255).astype(np.uint8)
         mode = "RGBA" if img.shape[2] == 4 else "RGB"
         f = tex_dir / f"c130_{name}.dds"
-        Image.fromarray(img, mode).save(f, pixel_format="DXT5" if mode == "RGBA" else "DXT1")
+        save_dds(Image.fromarray(img, mode), f, "DXT5" if mode == "RGBA" else "DXT1")   # with mipmaps: no shimmer
         fn = tex_dir / f"c130_{name}_n.dds"
-        Image.fromarray(np.clip(normal_map(h), 0, 255).astype(np.uint8), "RGB").save(fn, pixel_format="DXT1")
+        save_dds(Image.fromarray(np.clip(normal_map(h), 0, 255).astype(np.uint8), "RGB"), fn)
         shine, smooth = SPECULAR.get(name, SPECULAR_PAINT)
         fs = tex_dir / f"c130_{name}_s.dds"
         Image.new("RGB", (64, 64), (round(shine * 255), round(smooth * 255), 0)).save(fs, pixel_format="DXT1")
