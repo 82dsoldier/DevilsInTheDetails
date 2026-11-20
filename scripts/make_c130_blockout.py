@@ -1312,11 +1312,12 @@ def main():
     frame_path = mesh_dir / "C130_DoorFrame.nif"
     write_nif(frame_path, "C130_DoorFrame", {k: v for k, v in door_built.items() if k != "activation"},
               s, tex, pyn)
-    # The open doorway's way out, from the green light on: just the slab filling it, on a load
-    # door to the exit point over Sicily (the cabin is an interior; a door's teleport puts the
-    # jumper in the air, where a script move set him on the ground's navmesh).
+    # The doorway's way out, from the green light on: a load door to the exit point over Sicily
+    # (the cabin is an interior; a door's teleport puts the jumper in the air, where a script move
+    # set him on the ground's navmesh). Nothing to see or touch: the slab's script activates it
+    # (DevilsJumpDoor), since as its own prompt it gave none (tested 2026-11-20).
     exit_path = mesh_dir / "C130_DoorExit.nif"
-    write_nif(exit_path, "C130_DoorExit", {"activation": door_built["activation"]}, s, tex, pyn)
+    write_nif(exit_path, "C130_DoorExit", {"activation": (None, False, door_built["activation"][2])}, s, tex, pyn)
     panel_paths = [mesh_dir / "C130_DoorOpen.nif"]
     write_nif(panel_paths[0], "C130_DoorOpen", door_open_parts(args.length), s, tex, pyn)
     segs, keys, _ = door_segments(args.length)

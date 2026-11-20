@@ -33,6 +33,15 @@ Event DevilsJumpmaster.DoorsStow(DevilsJumpmaster jm, Var[] args)
 	SetPosition(X(last), Y(last), ez + keys[3 * last + 1])
 	SetAngle(0.0, keys[3 * last + 2], heading)
 	Enable()
+	; Set again once it's drawn: set while disabled, the turn didn't take, and the door showed
+	; upright at the open height, out through the hull, before sliding in (tested 2026-11-20).
+	Int tries = 0
+	While !Is3DLoaded() && tries < 20
+		Utility.Wait(0.02)
+		tries += 1
+	EndWhile
+	SetPosition(X(last), Y(last), ez + keys[3 * last + 1])
+	SetAngle(0.0, keys[3 * last + 2], heading)
 EndEvent
 
 Event DevilsJumpmaster.DoorsSlide(DevilsJumpmaster jm, Var[] args)
