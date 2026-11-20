@@ -13,7 +13,7 @@ Fallout 4 scale: 128 game units = 6 ft, so one unit is 0.0142875 m. A cell is
 neighbouring cells share their edge points, so N cells need N*32 + 1 points.
 
 Writes to out/<area>/:
-  dem_utm.tif          the downloaded elevation, metres, UTM 17N, 1 m pixels
+  dem_utm.tif          the downloaded elevation, metres, UTM (17N; 19N for hanscom), 1 m pixels
   heightmap16.png      16-bit grayscale, one pixel per height point, north up
   heightmap16.raw      the same, little-endian 16-bit, no header
   heightmap.dds        for the Fallout 4 Creation Kit's importer: one channel of 32-bit float
@@ -59,6 +59,12 @@ AREAS = {
         ((35, 9, 47.29), (79, 7, 9.71)),
         ((35, 8, 39.13), (79, 7, 31.10)),
     ],
+    "hanscom": [   # Hanscom Field, Bedford, Massachusetts: the plane, and the first act
+        ((42, 28, 32.00), (71, 18, 12.69)),
+        ((42, 28, 34.32), (71, 16, 16.72)),
+        ((42, 27, 32.77), (71, 16, 14.49)),
+        ((42, 27, 30.45), (71, 18, 10.43)),
+    ],
 }
 MARGIN_M = 150                 # extra ground around the area, so its edges aren't the world's edges
 # Whole columns of cells added on the east after the grid is centred, so the grid and every
@@ -70,6 +76,12 @@ POINT_UNITS = 128
 CELL_M = CELL_UNITS * UNIT_M   # 58.5216
 POINT_M = POINT_UNITS * UNIT_M # 1.8288
 UTM = "EPSG:32617"             # UTM zone 17N: metres, fits North Carolina
+UTM_ZONE = {"hanscom": "EPSG:32619"}   # zone 19N for Massachusetts
+
+
+def utm(area):
+    """The area's UTM zone, as an EPSG code."""
+    return UTM_ZONE.get(area, UTM)
 EXPORT_URL = "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage"
 
 
@@ -78,7 +90,7 @@ def dms(d, m, s):
 
 
 def corners_utm(area="barracks"):
-    to_utm = Transformer.from_crs("EPSG:4326", UTM, always_xy=True)
+    to_utm = Transformer.from_crs("EPSG:4326", utm(area), always_xy=True)
     return [to_utm.transform(-dms(*lon), dms(*lat)) for lat, lon in AREAS[area]]
 
 
@@ -89,18 +101,18 @@ def out_dir(area):
 TILE_M = 2000   # the elevation service limits image size, so big areas come down in tiles
 
 
-def download_dem(bounds, path):
+def download_dem(bounds, path, crs=UTM):
     """3DEP's best available elevation (1 m lidar here) for the bounds, in UTM, 1 m pixels."""
     minx, miny, maxx, maxy = bounds
     if maxx - minx <= TILE_M and maxy - miny <= TILE_M:
-        download_tile(bounds, path)
+        download_tile(bounds, path, crs)
         return
     from rasterio.merge import merge
     tiles = []
     for x in range(minx, maxx, TILE_M):
         for y in range(miny, maxy, TILE_M):
             t = path.with_name(f"{path.stem}_{x}_{y}.tif")
-            download_tile((x, y, min(x + TILE_M, maxx), min(y + TILE_M, maxy)), t)
+            download_tile((x, y, min(x + TILE_M, maxx), min(y + TILE_M, maxy)), t, crs)
             tiles.append(t)
     srcs = [rasterio.open(t) for t in tiles]
     data, transform = merge(srcs, nodata=-9999)
@@ -114,11 +126,11 @@ def download_dem(bounds, path):
         t.unlink()
 
 
-def download_tile(bounds, path):
+def download_tile(bounds, path, crs=UTM):
     minx, miny, maxx, maxy = bounds
     width, height = int(round(maxx - minx)), int(round(maxy - miny))
     params = {
-        "bbox": f"{minx},{miny},{maxx},{maxy}", "bboxSR": 32617, "imageSR": 32617,
+        "bbox": f"{minx},{miny},{maxx},{maxy}", "bboxSR": crs.split(":")[1], "imageSR": crs.split(":")[1],
         "size": f"{width},{height}", "format": "tiff", "pixelType": "F32",
         "interpolation": "RSP_BilinearInterpolation", "noData": -9999, "f": "image",
     }
@@ -177,7 +189,7 @@ def main():
     dem_path = out / "dem_utm.tif"
     if args.redownload or not dem_path.exists():
         print("Downloading 3DEP elevation...")
-        download_dem(dl_bounds, dem_path)
+        download_dem(dl_bounds, dem_path, utm(args.area))
 
     # Resample onto the height-point grid. Points sit on cell corners, so the
     # first point is at (west, north) exactly: grid pixels are centred there.
@@ -187,7 +199,7 @@ def main():
         src_res = src.res
         reproject(
             source=rasterio.band(src, 1), destination=grid,
-            dst_transform=grid_transform, dst_crs=UTM, src_nodata=-9999, dst_nodata=np.nan,
+            dst_transform=grid_transform, dst_crs=utm(args.area), src_nodata=-9999, dst_nodata=np.nan,
             resampling=Resampling.average,   # averages the 1 m lidar under each 1.83 m point
         )
     missing = int(np.isnan(grid).sum())
@@ -218,7 +230,7 @@ def main():
         "points": [nx, ny],
         "point_spacing_m": POINT_M,
         "cell_size_m": CELL_M,
-        "utm_crs": UTM,
+        "utm_crs": utm(args.area),
         "north_west_corner_utm": [west, north],
         "lowest_elevation_m": base,
         "highest_elevation_m": float(grid.max()),

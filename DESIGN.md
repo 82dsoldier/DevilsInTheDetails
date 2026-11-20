@@ -557,7 +557,16 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
 
 - **The area (decided): the whole field,** about 2.65 x 1.9 km: both runways (11/29, 2,137 m,
   and 05/23), the East Ramp where the C-130 parks, the west hangars and the old terminal. Layout
-  from OpenStreetMap; options drawn in `out/hanscom/outline_options.png`.
+  from OpenStreetMap; options drawn in `out/hanscom/outline_options.png`. Outline (`hanscom` in
+  `make_heightmap.py`, UTM zone 19N, not North Carolina's 17N):
+  - 42°28'32.00"N 71°18'12.69"W
+  - 42°28'34.32"N 71°16'16.72"W
+  - 42°27'32.77"N 71°16'14.49"W
+  - 42°27'30.45"N 71°18'10.43"W
+
+  With the 150 m margin, **51 x 38 cells** (2,985 x 2,224 m). Heightmap: `make_heightmap.py
+  --area hanscom` (33.9 to 75.0 m, 41 m of relief, 2879 game units top to bottom). The lidar is
+  bare earth: the runways show faintly, the buildings not at all, as with the other maps.
 - **The way in (decided): a road out of Boston,** a map-edge transition (one load door in a
   vanilla cell), coming in at the south gate. Not a tunnel.
 - **The hook: a recruiting beacon (idea).** The Devils' relay broadcasts a recruiting pitch

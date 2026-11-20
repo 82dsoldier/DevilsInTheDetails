@@ -7,7 +7,7 @@ Run make_heightmap.py for the same area first (this reads out/<area>/heightmap.j
 Several photos are combined, the first one listed winning where they overlap.
 
 Writes to out/<area>/:
-  aerial_grid.tif     the photo(s) on the heightmap's area, 1 m pixels, georeferenced (UTM 17N)
+  aerial_grid.tif     the photo(s) on the heightmap's area, 1 m pixels, georeferenced (the area's UTM zone)
   aerial_grid.png     the same with the cell grid, cell numbers and the area outline drawn on
   cells.json          what the cell numbers mean
 Cell numbers: cell (0, 0) is the one just south-east of the grid's centre; x grows
@@ -26,7 +26,7 @@ from rasterio.warp import reproject
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from make_heightmap import AREAS, corners_utm, out_dir, UTM   # noqa: E402
+from make_heightmap import AREAS, corners_utm, out_dir, utm   # noqa: E402
 
 PX_M = 1.0   # output pixel size
 
@@ -51,19 +51,19 @@ def main():
         img = np.zeros((h, w), dtype=np.uint8)
         with rasterio.open(path) as src:
             reproject(source=rasterio.band(src, 1), destination=img, dst_transform=transform,
-                      dst_crs=UTM, src_nodata=None, dst_nodata=0, resampling=Resampling.bilinear,
+                      dst_crs=utm(args.area), src_nodata=None, dst_nodata=0, resampling=Resampling.bilinear,
                       init_dest_nodata=True)
             # Where the photo actually covers (0 can also be real black, so use its footprint).
             cover = np.zeros((h, w), dtype=np.uint8)
             reproject(source=np.ones((src.height, src.width), dtype=np.uint8), destination=cover,
                       src_transform=src.transform, src_crs=src.crs, dst_transform=transform,
-                      dst_crs=UTM, dst_nodata=0, resampling=Resampling.nearest)
+                      dst_crs=utm(args.area), dst_nodata=0, resampling=Resampling.nearest)
         take = (cover > 0) & ~have
         mosaic[take] = img[take]
         have |= take
 
     with rasterio.open(out / "aerial_grid.tif", "w", driver="GTiff", width=w, height=h, count=1,
-                       dtype="uint8", crs=UTM, transform=transform, nodata=None) as dst:
+                       dtype="uint8", crs=utm(args.area), transform=transform, nodata=None) as dst:
         dst.write(mosaic, 1)
 
     rgb = np.stack([mosaic] * 3, axis=-1)
