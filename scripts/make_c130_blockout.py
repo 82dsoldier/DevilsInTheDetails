@@ -1029,8 +1029,8 @@ def door_parts(length):
     return parts, origin
 
 
-DOOR_SEGMENTS = 5        # the door in horizontal panels, each riding the track: together they bend
-                         # round from the wall onto the ceiling as the real (curved) door does
+DOOR_SEGMENTS = 1        # the door in one piece (it was 5 panels bending round the track; the real door
+                         # is rigid, see door_segments). Kept as panels for the scripts that move it.
 DOOR_TRACK_INSET = 0.03  # the door's track, just inside the hull's lining above the doorway...
 DOOR_RECESS = 0.04       # ...but set into the doorway, as the closed door was (flush with the side)
 DOOR_JOG = 0.06          # over this much height above the doorway, the track jogs in from one to the other
@@ -1122,19 +1122,33 @@ def door_segments(length):
             m.verts = [tuple(v[i] - origin[i] for i in range(3)) for v in m.verts]
         segs.append(parts)
 
-        # Its poses: the chord from its bottom to its top edge slid along the track; turned to
-        # the chord's new slope, about the chord's middle.
+        # Its poses. The door is rigid (the author: a real C-130's doesn't bend): its bottom edge
+        # rides the track straight up the doorway, its top edge the track along the ceiling, so
+        # as the bottom rises the top swings in. Each pose: the bottom slid u up the track, the
+        # top where the track is the door's own height (the chord) from it; the door turned to
+        # that chord's slope, about the chord's middle.
         sa, sb = s_of(z0), s_of(z1)
         shift = s_of(DOOR_TOP + DOOR_STOW_CLEAR)
         (ax, az), _ = at(sa)
         (bx, bz), _ = at(sb)
+        chord = math.hypot(bx - ax, bz - az)
         m0 = ((ax + bx) / 2 - origin[0], (az + bz) / 2)
         a0 = math.atan2(bz - az, bx - ax)
+
+        def top_at(s_bottom):
+            """Where along the track the top edge is, a chord from the bottom edge at s_bottom."""
+            (px, pz), _ = at(s_bottom)
+            lo, hi = s_bottom, ts[-1]
+            for _ in range(60):
+                mid = (lo + hi) / 2
+                (qx, qz), _ = at(mid)
+                lo, hi = (mid, hi) if math.hypot(qx - px, qz - pz) < chord else (lo, mid)
+            return (lo + hi) / 2
         ks = []
         for j in range(DOOR_KEYS + 1):
             u = shift * j / DOOR_KEYS
             (ax, az), _ = at(sa + u)
-            (bx, bz), _ = at(sb + u)
+            (bx, bz), _ = at(top_at(sa + u))
             a = math.atan2(bz - az, bx - ax) - a0
             mx, mz = (ax + bx) / 2 - origin[0], (az + bz) / 2
             ks.append((mx - (m0[0] * math.cos(a) - m0[1] * math.sin(a)),
