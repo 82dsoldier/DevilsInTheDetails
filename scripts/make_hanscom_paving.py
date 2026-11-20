@@ -77,6 +77,26 @@ def fetch_osm(path):
     path.write_text(r.text)
 
 
+# The act's buildings (make_hanscom_buildings.py's ROLES), by their OSM names: each stands on a
+# level pad a little beyond its walls, so its floor is flat and meets the ground at its doors.
+ACT_BUILDINGS = ("Hangar 1715", "Hanscom Aero Club", "East Coast Aero Club", "1727", "1730", "1614")
+ACT_MARGIN_M = 3.0
+
+
+def act_footprints(out, terrain, to_utm):
+    """The act's buildings' footprints in game units, ACT_MARGIN_M wider (none before
+    make_hanscom_buildings.py has fetched them)."""
+    path = out / "osm_buildings.json"
+    if not path.exists():
+        return []
+    polys = []
+    for el in json.loads(path.read_text())["elements"]:
+        if el.get("tags", {}).get("name") in ACT_BUILDINGS and "building" in el["tags"] and el.get("geometry"):
+            e, n = np.array([to_utm.transform(p["lon"], p["lat"]) for p in el["geometry"]]).T
+            polys.append(Polygon(np.column_stack(terrain.game(e, n))).buffer(ACT_MARGIN_M / UNIT_M))
+    return polys
+
+
 def paved_areas(osm, to_utm):
     """{material: polygon, in UTM metres}."""
     asphalt, concrete = [], []
@@ -150,8 +170,11 @@ class Terrain:
         self.step = meta["game_units_per_pixel_step"]
         self.top = meta["height_range_game_units"]
 
-    def grade(self, areas):
-        """Grade the ground under the paving (see the module's notes); returns the largest change."""
+    def grade(self, areas, pads=()):
+        """Grade the ground under the paving (see the module's notes), then level a pad under
+        each of `pads` (the act's buildings: act_footprints) at the median of the graded
+        ground under it (cut and fill, like a foundation), blending back over BLEND_M. Returns the largest
+        change."""
         xs, ys = np.meshgrid(np.arange(self.nx) * POINT_UNITS + self.x0,
                              self.y1 - np.arange(self.ny) * POINT_UNITS)
         paved = np.zeros(self.z.shape, bool)
@@ -167,6 +190,13 @@ class Terrain:
         t = np.clip(1 - d / BLEND_M, 0, 1)
         t = t * t * (3 - 2 * t)                                        # smoothstep
         graded = np.clip(t * fit + (1 - t) * self.z, 0, self.top)
+        for pad in pads:
+            inside = shapely.contains_xy(pad, xs, ys)
+            level = float(np.median(graded[inside]))
+            d = ndimage.distance_transform_edt(~inside) * POINT_M
+            t = np.clip(1 - d / BLEND_M, 0, 1)
+            t = t * t * (3 - 2 * t)
+            graded = t * level + (1 - t) * graded
         change = float(np.abs(graded - self.z).max())
         self.z = graded
         return change
@@ -291,10 +321,11 @@ def main():
         g = shapely.transform(poly, lambda p: np.column_stack(terrain.game(p[:, 0], p[:, 1])))
         areas[mat] = g.intersection(world)
         print(f"{mat}: {areas[mat].area * UNIT_M ** 2 / 1e4:.1f} ha")
-    change = terrain.grade(areas)
+    change = terrain.grade(areas, act_footprints(out, terrain, to_utm))
     np.round(terrain.z / terrain.step).astype("<u2").tofile(out / "graded16.raw")
     write_dds_r32f(out / "graded.dds", (terrain.z / terrain.top).astype(np.float32))
-    print(f"graded the ground under the paving: the most it moved is {change * UNIT_M:.2f} m")
+    print(f"graded the ground under the paving and the act's buildings: the most it moved is "
+          f"{change * UNIT_M:.2f} m")
 
     mod = out / "mod"
     mesh_dir, tex_dir = mod / "Meshes" / MOD_PATH, mod / "Textures" / MOD_PATH
