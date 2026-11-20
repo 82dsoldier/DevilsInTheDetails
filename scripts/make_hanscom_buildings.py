@@ -45,6 +45,8 @@ OSM_BBOX = (42.4500, -71.3200, 42.4900, -71.2550)
 MOD_PATH = "DevilsInTheDetails/Hanscom"
 WALL_T = 0.3            # metres
 FOOTING = 2.0           # walls run this far below the floor
+PARAPET_M = 0.5         # the act's buildings' walls stand this far above the roof
+ROOF_T_M = 0.25         # their roof slab
 FLOORS_M = 3.5          # a floor's height, for buildings OSM gives only levels for
 DEFAULT_H = 6.0         # buildings OSM gives nothing for
 
@@ -299,6 +301,7 @@ def hollow(m, poly, ground_top, ground_low, height, openings, mats, ramp):
     t = WALL_T / UNIT_M
     z_floor = ground_top + paving.OFFSET                 # level with the paving outside
     z0, z1 = ground_low - FOOTING / UNIT_M, z_floor + height / UNIT_M
+    z_top = z1 + PARAPET_M / UNIT_M
     pts = list(poly.exterior.coords)[:-1]
     door = ramp_edge(poly, ramp)
     for i in range(len(pts)):
@@ -316,12 +319,17 @@ def hollow(m, poly, ground_top, ground_low, height, openings, mats, ramp):
                 c = at * L
                 ops.append((max(t, c - w / 2), min(L - t, c + w / 2), z_floor + h))
         # The openings start at the floor: the wall below them, down to the footing, is solid.
-        wall_box(m, mats["wall"], p0, p1, inward, z_floor, z1, t, ops)
+        # The walls rise PARAPET_M past the roof, so there's no slit between them for the sun.
+        wall_box(m, mats["wall"], p0, p1, inward, z_floor, z_top, t, ops)
         wall_box(m, mats["wall"], p0, p1, inward, z0, z_floor, t, ())
     inner = poly.buffer(-t, join_style="mitre")
     m.polygon("floor", inner, z_floor, True)
-    m.polygon("roof", poly, z1 + 1, True)
-    m.polygon("roof", inner, z1 - 1, False)             # the ceiling
+    m.polygon(mats["wall"], poly.difference(inner), z_top, True)    # the walls' top
+    # The roof: a slab ROOF_T thick, its edges inside the walls (a single sheet let light
+    # through along its seams).
+    slab = poly.buffer(-t / 2, join_style="mitre")
+    m.polygon("roof", slab, z1, True)
+    m.polygon("roof", slab, z1 - ROOF_T_M / UNIT_M, False)          # the ceiling
     return z_floor
 
 
