@@ -1051,7 +1051,7 @@ about airborne operations have heard of. It's the second worldspace.
     and so on (`PIECES` in `make_jump_audio.py`). They're written from memory of FM 3-21.220 and
     are **for the author to check**. Animating them for real needs custom animations (HKX), a job
     for later or for community help.
-- **Out the door: Nate steps out for real (2026-11-19).** It was a teleport to a marker 1,000 ft
+- **Out the door: Nate steps out for real (2026-11-19; superseded 2026-11-20, below).** It was a teleport to a marker 1,000 ft
   above Sicily DZ, which worked only while the DZ had no navmesh: the game sets a moved actor
   down on the navmesh under its target, by MoveTo or SetPosition alike, so once the landing
   ground was navmeshed he landed at once (tested: 24310 straight after the move, 2964 a tenth
@@ -1072,6 +1072,44 @@ about airborne operations have heard of. It's the second worldspace.
   - **Test from a save that has never seen the plane.** A save keeps where every moved actor
     was: an old one had the jumpmaster where the plane used to be (so he never loaded) and
     the stick on the ground still following Nate, so they followed him up and fell.
+- **The cabin is an interior again, in and out by load doors (2026-11-20; the first full jump
+  worked).** Boarding from Hanscom could not put the player in the cabin over Sicily: MoveTo and
+  SetPosition set him on the ground's navmesh 300 m below every time, whatever the timing, and a
+  load door into the open air dropped him before the hull's collision had loaded. So:
+  - **The cabin:** the interior cell `DevilsC130Cabin` ("C-130"), lit as vanilla
+    SlocumsJoeHQOffice (it shows the sky). Every piece of the plane moved in (`esp_interior.py`),
+    then turned to point north (`esp_rotate_cabin.py`): the door's tilt is about the world's
+    north-south axis, so at heading 284 it came in diagonally. Out of the doors, sky only.
+  - **Boarding:** the parked plane's door at Hanscom is a load door (`DevilsC130LoadDoor`,
+    `DevilsBoardPlane`: the rig check, then the boarding flag) to a hidden door under the
+    cabin floor; its marker is on the clear floor between the paratroop doors. On the centre
+    seats a jumper in power armor didn't fit, and the game put him on the DZ instead.
+  - **The jump:** from the green light, using a door slab (`DevilsJumpDoor`) in power armor
+    activates its doorway's exit (`DevilsC130JumpExit`), a load door with nothing to see or
+    touch (`C130_DoorExit.nif`, empty: as its own prompt it gave none). It teleports him to
+    the jump marker, which now sits on the old cabin's navmesh (0x01009A8B), still floating at
+    jump height over cell -4, -6: a door's teleport sets him on the navmesh under its marker,
+    and with nothing solid under that patch he falls. **Don't delete that navmesh.** (At the
+    old marker, just off its edge, he was set on the ground.)
+  - **"Aboard"** is now being in the cabin's cell (`PlayerAboard`).
+  - **The cabin's navmesh is written by script** (`esp_navwrite.py`): a flat grid over the whole
+    floor, wall to wall, the doors' aft edge to the pallets, linked to the three doors. Actors
+    are set on navmesh whenever they're placed (MoveTo, SetPosition, loading): with none they
+    loaded before the hull and fell through; the CK's floated 16-40 units over the floor and
+    covered only the middle of the aft half, so the hold lifted the men and dropped them twice a
+    second, and the jumpmaster and the outboard men stood off their marks.
+  - **The stick and the jumpmaster** are placed on their marks by SetPosition (`PutOn`), the
+    jumpmaster on `DevilsJumpmasterMark` (his hold allows 12 units: something by his mark pushes
+    him 4 off it). The seats are waited for, all together, before the men appear; a man whose
+    seat isn't drawn is left to his sit package.
+  - **The doors are one rigid piece** (the author: a real C-130's doesn't bend): the bottom
+    edge rides the track up the doorway, the top edge the track along the ceiling, so it swings
+    in as it rises (`door_segments`). The four other panels per door are gone.
+  - **Saves keep persistent references where they were.** A test save from before the cabin
+    was an interior had the seats, the open doors, the frames and the slabs stranded over
+    Sicily, and statics and furniture can't be moved by script; they were given fresh form IDs
+    (`esp_fresh_refs.py`). The jumpmaster still puts every movable persistent piece back on its
+    mark at load (`PlaceOnMarks`).
 - **The jump marker (worked out 2026-11-13):** an `XMarkerHeading`, `DevilsSicilyJumpMarker`,
   at **X -13650, Y -20430, Z 24300**,
   **rotation Z 284** (in cell -4, -5).
@@ -1110,8 +1148,9 @@ about airborne operations have heard of. It's the second worldspace.
   can come down without touching the plane), and a real door to board by. The way in is a
   tunnel or road from the Commonwealth (one load door in a vanilla cell). The layout comes from
   OpenStreetMap (runways 11/29, 2,137 m, and 05/23; the East Ramp, the military apron).
-  - **Boarding starts the flight:** the plane's door moves the player into the cabin and tells
-    the jumpmaster, instead of his polling the player's distance from a red light. (A save keeps
+  - **Boarding starts the flight:** the plane's door (a load door, see "The cabin is an
+    interior again") takes the player into the cabin and tells the jumpmaster, instead of his
+    polling the player's distance from a red light. (A save keeps
     its own copy of every persistent reference's position, so a save from before the plane
     moved had the light, and "aboard", 31,000 units away; tested 2026-11-20. The jumpmaster
     now also puts every persistent piece of the plane back on its plugin position at load.)

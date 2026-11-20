@@ -68,6 +68,10 @@ None: they just leave the plane, as before.}
 ObjectReference[] Property JumpDoors Auto Const Mandatory
 {The jump door activators (DevilsC130JumpDoor), starboard and port: the doorway shut by an
 invisible slab.}
+ObjectReference[] Property JumpExits Auto Const Mandatory
+{The way out of each open doorway (DevilsC130JumpExit, Initially Disabled), the same order: load
+doors to the exit point over Sicily, shown with the doorways.}
+
 ObjectReference[] Property DoorFrames Auto Const Mandatory
 {The open doorways (DevilsC130DoorFrame, Initially Disabled), the same order: shown in the jump
 doors' place from the green light while Nate's in power armor, so he steps out and falls.}
@@ -75,6 +79,13 @@ Float Property StragglerSpeed = 350.0 Auto Const
 {How fast the men out of the loaded area close on Nate, game units a second (350: 5 m/s, a run).}
 Float Property StragglerStep = 2.0 Auto Const
 {Seconds between their moves.}
+ObjectReference Property JumpmasterMark Auto Const Mandatory
+{DevilsJumpmasterMark: his spot aft of the starboard door, facing forward (his editor spot).}
+
+GlobalVariable Property Boarded Auto Const Mandatory
+{DevilsBoarded: set by the parked plane's door (DevilsBoardPlane) as the player boards; the
+flight starts on it, and he clears it.}
+
 GlobalVariable Property StickLanded Auto Const Mandatory
 {DevilsStickLanded: 1 once they're down. Their package DevilsStickFollowNate runs on it, ahead of
 the sit packages: they move up to Nate. 0 again at boarding.}
@@ -160,6 +171,7 @@ Event OnLoad()
 	Disable()
 	GreenLight.SetValue(0)
 	wentGreen = False
+	PlaceOnMarks()                    ; a save can hold them where the plane used to be
 	SetDoorways(False)                ; shut till the green light
 	SetLights(True, False)            ; red the whole way, till the green
 	SetDoors(True)                    ; open for boarding
@@ -174,7 +186,11 @@ Event OnLoad()
 	SetAll(NightLights, night)
 
 	Cell plane = GetParentCell()
-	While !PlayerAboard()
+	; The flight starts when the player boards through the parked plane's door at Hanscom
+	; (DevilsBoardPlane), not by where he is: a save could keep the lights, and with them
+	; "aboard", where the plane used to be (tested 2026-11-20). For testing without the door:
+	; set DevilsBoarded to 1, then into the cabin.
+	While Boarded.GetValue() < 1
 		If !plane.IsAttached()        ; the player went elsewhere
 			MoveToMyEditorLocation()
 			Enable()
@@ -183,8 +199,10 @@ Event OnLoad()
 		EndIf
 		Utility.Wait(1.0)
 	EndWhile
-	MoveToMyEditorLocation()
+	Boarded.SetValue(0)
 	Enable()
+	PutOn(Self, JumpmasterMark)       ; not MoveToMyEditorLocation: his spot is off the navmesh's
+	                                  ; edge, and a MoveTo set him on it, out of place
 	DressJumpmaster()                 ; he jumps too
 	SeatStick()                       ; already aboard and seated: Nate boards last
 	Fly()                             ; taxi, takeoff, climb, the flight
@@ -283,14 +301,19 @@ Function SeatStick()
 	StickLanded.SetValue(0)
 	hooked = False
 	up = new Bool[Stick.Length]
+	; The seats first, all together (up to 10 s): in the cabin they draw in slowly, and waiting on
+	; each in turn held the flight up half a minute (tested 2026-11-20).
+	Int wait = 0
+	While wait < 100 && !AllLoaded(StickSeats)
+		Utility.Wait(0.1)
+		wait += 1
+	EndWhile
 	Int i = 0
 	While i < Stick.Length
 		Stick[i].SetRestrained(False)
 		Stick[i].SetLinkedRef(StickSeats[i], SeatLink)
-		If Stick[i].GetParentCell() != GetParentCell()   ; on the ground from the last jump
-			Stick[i].Disable()
-			Stick[i].MoveToMyEditorLocation()
-		EndIf
+		Stick[i].Disable()            ; on the ground from the last jump, or where a save had him
+		Stick[i].MoveToMyEditorLocation()
 		Stick[i].Enable()
 		i += 1
 	EndWhile
@@ -302,7 +325,9 @@ Function SeatStick()
 			tries += 1
 		EndWhile
 		Dress(i)
-		Stick[i].SnapIntoInteraction(StickSeats[i])
+		If StickSeats[i].Is3DLoaded()    ; if not, his sit package takes him to it
+			Stick[i].SnapIntoInteraction(StickSeats[i])
+		EndIf
 		i += 1
 	EndWhile
 EndFunction
@@ -350,7 +375,7 @@ Function SettleHalf(Bool outboard)
 			EndIf
 			If (i < OutboardCount) == outboard && !settled[i]
 				If man.GetSitState() == 0 && (man.GetDistance(StickStands[i]) < SettleDistance || waited >= SettleSeconds)
-					man.MoveTo(StickStands[i])
+					PutOn(man, StickStands[i])
 					man.SetRestrained(True)
 					man.SetHeadTracking(False)   ; eyes front: no turning to look about
 					settled[i] = True
@@ -381,13 +406,32 @@ Function SettleHalf(Bool outboard)
 					turn = 360.0 - turn
 				EndIf
 				If turn > HoldDegrees || man.GetDistance(StickStands[i]) > HoldDistance
-					man.MoveTo(StickStands[i])
+					PutOn(man, StickStands[i])
 				EndIf
 			EndIf
 			i += 1
 		EndWhile
 		Utility.Wait(0.5)
 	EndWhile
+EndFunction
+
+Bool Function AllLoaded(ObjectReference[] refs)
+	Int i = 0
+	While i < refs.Length
+		If !refs[i].Is3DLoaded()
+			Return False
+		EndIf
+		i += 1
+	EndWhile
+	Return True
+EndFunction
+
+Function PutOn(Actor man, ObjectReference mark)
+	{Exactly on his mark, facing its way. Not MoveTo: that sets him on the nearest navmesh, and the
+	cabin's floated above the floor (each hold lifted him and dropped him, twice a second) and
+	stops short of the outboard marks (they stood off toward the walls) (tested 2026-11-20).}
+	man.SetPosition(mark.GetPositionX(), mark.GetPositionY(), mark.GetPositionZ())
+	man.SetAngle(0.0, 0.0, mark.GetAngleZ())
 EndFunction
 
 Function HookUp()
@@ -506,9 +550,10 @@ Function HoldJumpmaster()
 	turns or drifts off his spot he's put back on it. For the flight (`running`).}
 	SetRestrained(True)
 	SetHeadTracking(False)
-	Float heading = GetAngleZ()           ; just put on his editor spot (OnLoad)
-	Float px = GetPositionX()
-	Float py = GetPositionY()
+	Float heading = JumpmasterMark.GetAngleZ()   ; his mark's, not his own: a move is queued,
+	Float px = JumpmasterMark.GetPositionX()     ; and he may not be on it yet
+	Float py = JumpmasterMark.GetPositionY()
+	Float pz = JumpmasterMark.GetPositionZ()
 	While running && Is3DLoaded()
 		Float turn = Math.Abs(GetAngleZ() - heading)
 		If turn > 180.0
@@ -516,8 +561,9 @@ Function HoldJumpmaster()
 		EndIf
 		Float dx = GetPositionX() - px
 		Float dy = GetPositionY() - py
-		If turn > HoldDegrees || Math.Sqrt(dx * dx + dy * dy) > HoldDistance
-			MoveToMyEditorLocation()
+		If turn > HoldDegrees || Math.Sqrt(dx * dx + dy * dy) > 12.0   ; something by his mark
+			SetPosition(px, py, pz)       ; pushes him 4 units off it: re-placing him at 4 glitched
+			SetAngle(0.0, 0.0, heading)
 		EndIf
 		Utility.Wait(0.5)
 	EndWhile
@@ -550,8 +596,8 @@ Bool doorwaysOpen = False
 Function SetDoorways(Bool open)
 	{Open: the jump doors' slabs gone and the bare doorways in their place, so Nate can step out.}
 	doorwaysOpen = open
-	SetAll(DoorFrames, open)
-	SetAll(JumpDoors, !open)
+	SetAll(JumpExits, open)           ; the slabs stay: using one goes out its exit (DevilsJumpDoor);
+	                                  ; swapped for the exits, there was no prompt (tested)
 EndFunction
 
 Function WatchDoorways()
@@ -719,17 +765,10 @@ Function Crossfade(Int fromSound, Int toSound, Float seconds)
 EndFunction
 
 Bool Function PlayerAboard()
-	{Within 1,500 units of the first red light, by the doors: anywhere in the cabin, and nowhere
-	on the ground 350 m below. Measured from a light, not from him, since he may have fallen.}
-	If !RedLights
-		Return True
-	EndIf
-	ObjectReference mark = RedLights[0]
-	Actor player = Game.GetPlayer()
-	Float dx = player.GetPositionX() - mark.GetPositionX()
-	Float dy = player.GetPositionY() - mark.GetPositionY()
-	Float dz = player.GetPositionZ() - mark.GetPositionZ()
-	Return dx * dx + dy * dy + dz * dz < 1500.0 * 1500.0
+	{In the cabin's cell. The cabin is an interior (2026-11-20): boarding is a load door into it,
+	the jump a load door out of it, because moving the player by script into the cabin when it
+	flew over Sicily set him on the ground's navmesh every time.}
+	Return Game.GetPlayer().GetParentCell() == GetParentCell()
 EndFunction
 
 Bool Function IsNight()
@@ -737,6 +776,29 @@ Bool Function IsNight()
 	Float days = Utility.GetCurrentGameTime()
 	Float hour = (days - Math.Floor(days)) * 24.0
 	Return hour >= 20.0 || hour < 6.0
+EndFunction
+
+Function PlaceOnMarks()
+	{Every persistent piece of the plane back where the plugin puts it. A save keeps its own
+	copy of where each persistent reference is, so a save from before the plane was moved had
+	the lights (and with them "aboard") at the old spot, 31,000 units away (tested 2026-11-20).}
+	ToMarks(RedLights)
+	ToMarks(GreenLights)
+	ToMarks(DayLights)
+	ToMarks(NightLights)
+	ToMarks(DoorsClosed)
+	ToMarks(StickStands)
+	ToMarks(StickLandings)
+	; Not DoorsOpen, DoorFrames or StickSeats: the game won't move statics or furniture
+	; ("cannot be moved").
+EndFunction
+
+Function ToMarks(ObjectReference[] refs)
+	Int i = 0
+	While refs && i < refs.Length
+		refs[i].MoveToMyEditorLocation()
+		i += 1
+	EndWhile
 EndFunction
 
 Function SetLights(Bool red, Bool green)
