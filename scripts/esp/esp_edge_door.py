@@ -25,6 +25,8 @@ ESM = r"C:\Steam\steamapps\common\Fallout 4\Data\Fallout4.esm"
 COMMONWEALTH, HANSCOM = 0x0000003C, 0x0100A22E
 DOOR_MODEL = r"SetDressing\JunkWalls\JunkWall01.nif"
 DOOR_BOUNDS = (-138, -33, -8, 142, 119, 240)
+DOOR_LIKE = 0x000C387F                    # JunkWall01 (STAT): its MODT for the door
+FIRST_ID = 0x00FA60
 WALLS = [0x000C3895, 0x000C3897, 0x001D15DF, 0x001D15E1]   # JunkWall02, 03, 04, 05
 WALL_STEP = 260.0
 TEMPLATE = 0x01008B42                     # a record of ours, for the header layout
@@ -48,6 +50,9 @@ tes4 = top[0]
 th = sublist(tes4.body())
 assert [v for t, v in th if t == b"MAST"][0].rstrip(b"\0").lower() == b"fallout4.esm"
 ver, nrec, nxt = struct.unpack("<fiI", dict(th)[b"HEDR"])
+# Past the IDs the first version of this script used (a gate reference at 0100FA44 then): a save
+# from that test would otherwise lay its state on whatever has the ID now.
+nxt = max(nxt, FIRST_ID)
 recs = {n.fid: n for n, *_ in walk(top) if isinstance(n, Rec)}
 assert COMMONWEALTH not in recs, "the Commonwealth is already overridden"
 
@@ -133,10 +138,23 @@ br = math.radians(HS_ROAD_BEARING)
 ax, ay = hx + HS_ARRIVE_IN * math.sin(br), hy + HS_ARRIVE_IN * math.cos(br)
 az = height_at(hs, ax, ay)
 
-# The door base: a junk-wall piece that doesn't open.
+# The door base: a junk-wall piece that doesn't open, named, with the static's MODT.
+i = 0
+like = None
+while like is None:
+    size, = struct.unpack_from("<I", m, i + 4)
+    if m[i:i+4] == b"GRUP":
+        i += 24 if m[i+8:i+12] == b"STAT" else size
+        continue
+    if struct.unpack_from("<I", m, i + 12)[0] == DOOR_LIKE:
+        like = dict(sublist(Rec(m[i:i+24+size]).body()))
+    i += 24 + size
+assert like[b"MODL"].rstrip(b"\0").decode().lower() == DOOR_MODEL.lower()
 door = new_rec("DOOR", new_fid(), [(b"EDID", b"DevilsRoadBarricade\0"),
                                    (b"OBND", struct.pack("<6h", *DOOR_BOUNDS)),
-                                   (b"MODL", DOOR_MODEL.encode() + b"\0"), (b"FNAM", b"\x00")])
+                                   (b"FULL", b"Barricade\0"),
+                                   (b"MODL", DOOR_MODEL.encode() + b"\0"), (b"MODT", like[b"MODT"]),
+                                   (b"FNAM", b"\x00")])
 [n for n in top if isinstance(n, Group) and n.gtype == 0 and n.label == b"DOOR"][0].kids.append(door)
 
 xtel = lambda f, pos, rz: struct.pack("<I6fII", f, *pos, 0, 0, rz, 0, 0)
