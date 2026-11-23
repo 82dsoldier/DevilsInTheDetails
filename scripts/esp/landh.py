@@ -5,8 +5,9 @@ from esplib import *
 SICILY = 0x0100293F
 
 
-def load_heights(top):
-    """{(cx, cy): 33x33 heights in game units} for the Sicily world's cells."""
+def load_heights(top, world_fid=SICILY):
+    """{(cx, cy): 33x33 heights in game units} for a world's cells (Sicily's by default)."""
+    SICILY = world_fid
     cells, out = {}, {}
     def visit(nodes, world, cell):
         for n in nodes:

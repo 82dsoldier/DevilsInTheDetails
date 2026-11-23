@@ -616,6 +616,15 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     map toward Route 2A and Lexington; inside, Vandenberg Drive and Eglin Street lead north to
     the DRMO (1614) and the hangar line, about 600 m. That's the caravans' and the recruits'
     road: the map-edge door goes on Hanscom Drive at the south edge.
+  - **The doors (2026-11-23, `esp_edge_door.py`):** in the Commonwealth, on the elevated
+    four-lane highway that leaves Lexington's east side and runs due north off the map (the
+    author's pick): at its north end just inside the border (x -13500, y 107450, on the deck at
+    z 5486, among the junk walls already there), arriving facing south toward Lexington. At
+    Hanscom, the street that actually meets the south edge is **Langley Road** (OSM), at x 4344;
+    the door is on it just inside (4932, -77625), arriving facing up the road. (Hanscom Drive in
+    OSM stays south of the map; the stretch from the edge to the gate is service road, left out
+    of the streets.) Both doors are a vanilla junk-wall gate across the road: placeholders for
+    a proper checkpoint.
   - **Traffic (the author, 2026-11-23):** people coming and going on that road (caravans to
     the DRMO, recruits answering the beacon), so it needs navmesh.
 - **The hook: a recruiting beacon (idea).** The Devils' relay broadcasts a recruiting pitch
