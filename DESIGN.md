@@ -618,13 +618,20 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     road: the map-edge door goes on Hanscom Drive at the south edge.
   - **The doors (2026-11-23, `esp_edge_door.py`):** in the Commonwealth, on the elevated
     four-lane highway that leaves Lexington's east side and runs due north off the map (the
-    author's pick): at its north end just inside the border (x -13500, y 107450, on the deck at
+    author's pick): at its north end just inside the border (x -13420, y 107300, on the deck at
     z 5486, among the junk walls already there), arriving facing south toward Lexington. At
     Hanscom, the street that actually meets the south edge is **Langley Road** (OSM), at x 4344;
-    the door is on it just inside (4932, -77625), arriving facing up the road. (Hanscom Drive in
-    OSM stays south of the map; the stretch from the edge to the gate is service road, left out
-    of the streets.) Both doors are a vanilla junk-wall gate across the road: placeholders for
-    a proper checkpoint.
+    the door is on it about 1,200 units in (6100, -77235), arriving facing up the road. (Hanscom
+    Drive in OSM stays south of the map; the stretch from the edge to the gate is service road,
+    left out of the streets.)
+  - **Each door is a barricade of junk walls across the road** (the whole deck, on the
+    highway), the door itself our own `DevilsRoadBarricade`: a junk-wall piece that doesn't
+    open. The first try, a vanilla junk-wall gate, swung open before the load and showed the
+    broken highway past the border (the author, 2026-11-23). Placeholders for a proper
+    checkpoint.
+  - **No sea past the edge.** The CK's new-world defaults (land -2048, water 0) drew an ocean
+    below a cliff at every edge of Hanscom. Its default land is now 500 (the south edge near
+    the road), water -20000. Bragg and Sicily still have the old defaults.
   - **Traffic (the author, 2026-11-23):** people coming and going on that road (caravans to
     the DRMO, recruits answering the beacon), so it needs navmesh.
 - **The hook: a recruiting beacon (idea).** The Devils' relay broadcasts a recruiting pitch

@@ -15,7 +15,7 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_paving.py`**: Hanscom's graded terrain, paving and buildings into the plugin, from
   `out/hanscom/` (`make_hanscom_paving.py`, `make_hanscom_buildings.py`).
 - **`esp_edge_door.py`**: the road between the Commonwealth and Hanscom, a pair of linked load
-  doors (vanilla junk-wall gates): one on the elevated highway north of Lexington, at the map's
+  doors (junk-wall barricades): one on the elevated highway north of Lexington, at the map's
   border (overriding the Commonwealth's world record, without its offset tables, and its
   persistent cell), one where Langley Road leaves Hanscom's south edge. Run once.
 - **`esp_roads.py`**: Hanscom's streets into the plugin (`out/hanscom/roads.json`), the terrain
