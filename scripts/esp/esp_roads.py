@@ -1,7 +1,8 @@
 """Hanscom's streets into the plugin: a STAT and a reference per street model (out/hanscom/
 roads.json, from make_hanscom_paving.py), the terrain (VHGT) of every cell whose heights differ
 from graded16.raw, and the bounds (OBND) of the paving and building STATs already in, as their
-regenerated models have them. Safe to run again: models already in are only updated.
+regenerated models have them; street models no longer in roads.json are removed, with their
+references. Safe to run again: models already in are only updated.
 
     python esp_roads.py in.esp out.esp
 """
@@ -116,6 +117,19 @@ for m in others:
         set_bounds(s, m["bounds"])
         bounds += 1
 
+# Street models no longer in roads.json (the layout changed): their STATs and references go.
+wanted = {m["nif"].lower() for m in roads}
+gone = {s.fid for path, s in by_model.items()
+        if path.startswith("devilsinthedetails\\hanscom\\road_") and path not in wanted}
+removed = 0
+for n in [n for n, *_ in walk(top) if isinstance(n, Group)]:
+    keep = [k for k in n.kids if not (isinstance(k, Rec) and (
+        k.fid in gone or (k.type == "REFR" and struct.unpack("<I", dict(sublist(k.body()))[b"NAME"])[0] in gone)))]
+    removed += len(n.kids) - len(keep)
+    n.kids[:] = keep
+for path in [p for p, s in by_model.items() if s.fid in gone]:
+    del by_model[path]
+
 added = updated = 0
 for m in roads:
     s = by_model.get(m["nif"].lower())
@@ -133,8 +147,8 @@ for m in roads:
         (b"NAME", struct.pack("<I", sfid)), (b"DATA", struct.pack("<6f", *m["position"], 0, 0, 0))]))
     added += 1
 
-hd = [(t, struct.pack("<fiI", ver, nrec + 2 * added, nxt) if t == b"HEDR" else v) for t, v in sublist(tes4.body())]
+hd = [(t, struct.pack("<fiI", ver, nrec + 2 * added - removed, nxt) if t == b"HEDR" else v) for t, v in sublist(tes4.body())]
 tes4.set_body(pack_subs(hd))
 open(dst, "wb").write(b"".join(n.bytes() for n in top))
 print(f"{changed} cells' terrain rewritten; {added} street models added ({updated} already in); "
-      f"{bounds} paving/building bounds refreshed; next id {nxt:06X}")
+      f"{removed // 2} gone ({removed} records); {bounds} paving/building bounds refreshed; next id {nxt:06X}")

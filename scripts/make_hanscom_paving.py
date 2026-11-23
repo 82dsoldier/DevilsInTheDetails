@@ -81,12 +81,20 @@ def fetch_osm(path, query="aeroway"):
 
 
 # The streets: every public road in OSM's layout, by class, in metres wide (a lane is about
-# 3.5 m; OSM's `width`, or `lanes` x 3.5, wins where it's given). Bridges and tunnels are left
+# 3.5 m; OSM's `width`, or `lanes` x 3.5, wins where it's given, but never more than the lanes
+# and a shoulder: Vandenberg Drive's two one-way carriageways each carry the whole road's 15.2 m,
+# which made a 30 m sea of asphalt at the gate, tested 2026-11-23). Bridges and tunnels are left
 # out (the lidar is bare earth, so a bridge's road would dip into the stream under it), and so
-# are driveways and parking aisles (the lots are for later).
+# are unnamed service roads: they lead to parking lots and loading docks, not in yet, and ended
+# in the grass.
 ROAD_W = {"motorway": 22.0, "trunk": 16.0, "primary": 12.0, "secondary": 10.0, "tertiary": 8.0,
           "unclassified": 7.0, "residential": 7.0, "service": 4.5}
 LANE_M = 3.5
+SHOULDER_M = 1.5
+# A street's edges sink this far below the ground, so the ground covers them: on its OFFSET
+# alone, plus the terrain's rounding (VHGT counts in 8s), a street stood up to 25 cm proud and
+# looked like a floating slab (tested 2026-11-23).
+EDGE_SINK = 6
 # A street is graded by a fit of its own ground this wide, once: no outliers left out, as the
 # paving's are, since a street climbs and dips and leaving out its low points (tried) filled a
 # dip 4.5 m deep. Its mesh follows the ground at every height point (ROAD_GRID), not every
@@ -105,15 +113,18 @@ def road_areas(osm, to_utm):
             continue
         if t.get("bridge", "no") != "no" or t.get("tunnel", "no") != "no" or t.get("area") == "yes":
             continue
-        if kind == "service" and t.get("service") in ("driveway", "parking_aisle", "drive-through"):
+        if kind == "service" and not t.get("name"):
             continue
+        oneway = t.get("oneway", "no") not in ("no", "0", "false")
+        try:
+            lanes = int(t["lanes"])
+        except (KeyError, ValueError):
+            lanes = None
         try:
             w = float(t["width"])
         except (KeyError, ValueError):
-            try:
-                w = max(int(t["lanes"]) * LANE_M, ROAD_W[kind] * 0.75)
-            except (KeyError, ValueError):
-                w = ROAD_W[kind]
+            w = max(lanes * LANE_M, ROAD_W[kind] * 0.75) if lanes else ROAD_W[kind]
+        w = min(w, (lanes or (1 if oneway else 2)) * LANE_M + SHOULDER_M)
         pts = [to_utm.transform(p["lon"], p["lat"]) for p in g]
         parts.append(LineString(pts).buffer(w / 2, cap_style="round", join_style="round"))
     return unary_union(parts).simplify(SIMPLIFY_M)
@@ -271,8 +282,10 @@ class Terrain:
                 + z[r + 1, c] * (1 - tx) * ty + z[r + 1, c + 1] * tx * ty)
 
 
-def block_meshes(area_game, terrain, bx0, by0, grid=GRID):
-    """{material: (verts, tris, uvs)} for one block, in the block's local coordinates."""
+def block_meshes(area_game, terrain, bx0, by0, grid=GRID, sunk=None):
+    """{material: (verts, tris, uvs)} for one block, in the block's local coordinates. With
+    `sunk` (the areas shrunk a hair, prepared), vertices outside it, on the areas' edges, go
+    EDGE_SINK under the ground instead of OFFSET over it."""
     ox, oy = bx0 * CELL_UNITS, by0 * CELL_UNITS
     size = BLOCK * CELL_UNITS
     out = {}
@@ -306,6 +319,9 @@ def block_meshes(area_game, terrain, bx0, by0, grid=GRID):
             continue
         v = np.array(verts)
         z = terrain.at(v[:, 0], v[:, 1]) + OFFSET
+        if sunk is not None:
+            edge = ~shapely.contains_xy(sunk, v[:, 0], v[:, 1])
+            z[edge] -= OFFSET + EDGE_SINK
         local = [(x - ox, y - oy, zz) for (x, y), zz in zip(verts, z)]
         uvs = [(x / tile, y / tile) for x, y in verts]
         out[mat] = (local, tris, uvs)
@@ -362,13 +378,17 @@ def streets(out, terrain, to_utm, areas, world, refetch=False):
     return g.intersection(world).difference(unary_union(list(areas.values())))
 
 
-def write_models(areas, terrain, prefix, mesh_dir, tex, pyn, files, grid=GRID):
+def write_models(areas, terrain, prefix, mesh_dir, tex, pyn, files, grid=GRID, sink_edges=False):
     """One model per cell (BLOCK) of `areas`; returns their paving.json entries."""
     models = []
+    sunk = None
+    if sink_edges:
+        sunk = unary_union(list(areas.values())).buffer(-0.5)
+        shapely.prepare(sunk)
     cx0, cy0 = terrain.cell_x0, terrain.cell_y1 - terrain.cells[1] + 1
     for by in range(cy0, terrain.cell_y1 + 1, BLOCK):
         for bx in range(cx0, cx0 + terrain.cells[0], BLOCK):
-            meshes = block_meshes(areas, terrain, bx, by, grid)
+            meshes = block_meshes(areas, terrain, bx, by, grid, sunk)
             if not meshes:
                 continue
             name = f"{prefix}_{bx}_{by}"
@@ -430,7 +450,8 @@ def main():
 
     worst = 0.0
     models = write_models(areas, terrain, "Paving", mesh_dir, tex, pyn, files)
-    road_models = write_models({"asphalt": roads}, terrain, "Road", mesh_dir, tex, pyn, files, ROAD_GRID)
+    road_models = write_models({"asphalt": roads}, terrain, "Road", mesh_dir, tex, pyn, files, ROAD_GRID,
+                               sink_edges=True)
     (out / "roads.json").write_text(json.dumps(
         {"note": "place each model at its position (game units) with no rotation",
          "offset": OFFSET, "models": road_models}, indent=1))
