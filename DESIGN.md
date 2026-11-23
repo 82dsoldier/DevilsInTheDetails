@@ -567,8 +567,22 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   With the 150 m margin, **51 x 38 cells** (2,985 x 2,224 m). Heightmap: `make_heightmap.py
   --area hanscom` (33.9 to 75.0 m, 41 m of relief, 2879 game units top to bottom). The lidar is
   bare earth: the runways show faintly, the buildings not at all, as with the other maps.
+- **Streets (2026-11-23):** every public road in OpenStreetMap's layout inside the map, base
+  and town alike (driveways, parking aisles, bridges and paths left out), as asphalt meshes on
+  graded ground, one model per cell (`Road_<x>_<y>.nif`, 688 of them, from
+  `make_hanscom_paving.py`; into the plugin by `scripts/esp/esp_roads.py`). Widths by class, or
+  OSM's lanes. The streets are graded after the field and the act's pads and never touch them,
+  so the paving and the act's buildings sit where they did; their grading is gentler than the
+  paving's (a 5 m fit, no outliers dropped: dropping the low points filled a dip 4.5 m deep).
 - **The way in (decided): a road out of Boston,** a map-edge transition (one load door in a
   vanilla cell), coming in at the south gate. Not a tunnel.
+  - **The south gate is the real Vandenberg Gate** (OSM: Sartain Gate), on Hanscom Drive about
+    60 m inside the map's south edge (game x 8,970, y -73,890). Hanscom Drive runs south off the
+    map toward Route 2A and Lexington; inside, Vandenberg Drive and Eglin Street lead north to
+    the DRMO (1614) and the hangar line, about 600 m. That's the caravans' and the recruits'
+    road: the map-edge door goes on Hanscom Drive at the south edge.
+  - **Traffic (the author, 2026-11-23):** people coming and going on that road (caravans to
+    the DRMO, recruits answering the beacon), so it needs navmesh.
 - **The hook: a recruiting beacon (idea).** The Devils' relay broadcasts a recruiting pitch
   ("Able-bodied? Got a rig? The 82nd is hiring."), with the 2077 "report to division
   headquarters" loop they've kept for two hundred years running under it. Nate walks in as a

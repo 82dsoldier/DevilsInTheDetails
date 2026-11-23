@@ -439,7 +439,8 @@ def main():
         g = shapely.transform(poly, lambda p: np.column_stack(terrain.game(p[:, 0], p[:, 1])))
         areas[mat] = g.intersection(world)
     assert set(paving.ACT_BUILDINGS) == set(ROLES)
-    terrain.grade(areas, paving.act_footprints(out, terrain, to_utm))   # the paving's ground
+    roads = paving.streets(out, terrain, to_utm, areas, world)
+    terrain.grade(areas, paving.act_footprints(out, terrain, to_utm), roads)   # the paving's ground
     ramp = areas["concrete"]
 
     mod = out / "mod"

@@ -28,7 +28,9 @@ Writes to out/hanscom/:
   mod/Textures/DevilsInTheDetails/Hanscom/paving_<material>{,_n,_s}.dds
   graded16.raw     the heightmap with the ground under the paving graded
   graded.dds       the same for the Creation Kit's importer (same min and max as heightmap.dds)
+  mod/Meshes/DevilsInTheDetails/Hanscom/Road_<bx>_<by>.nif   the streets (osm_roads.json)
   paving.json      each model: its file, where to place it, its bounds
+  roads.json       the same for the streets
   paving.png       the layout on the cell grid, for checking by eye
 """
 import argparse
@@ -70,12 +72,51 @@ GRADE_OUTLIER_M = 0.4   # points further than this off the fit are left out of i
 BLEND_M = 12.0          # from the paving's edge back to the natural ground
 
 
-def fetch_osm(path):
+def fetch_osm(path, query="aeroway"):
     s, w, n, e = OSM_BBOX
-    q = f'[out:json][timeout:60];way["aeroway"]({s},{w},{n},{e});out geom tags;'
-    r = requests.post(OVERPASS, data={"data": q}, headers={"User-Agent": "map-tool/1.0"}, timeout=120)
+    q = f'[out:json][timeout:90];way["{query}"]({s},{w},{n},{e});out geom tags;'
+    r = requests.post(OVERPASS, data={"data": q}, headers={"User-Agent": "map-tool/1.0"}, timeout=180)
     r.raise_for_status()
     path.write_text(r.text)
+
+
+# The streets: every public road in OSM's layout, by class, in metres wide (a lane is about
+# 3.5 m; OSM's `width`, or `lanes` x 3.5, wins where it's given). Bridges and tunnels are left
+# out (the lidar is bare earth, so a bridge's road would dip into the stream under it), and so
+# are driveways and parking aisles (the lots are for later).
+ROAD_W = {"motorway": 22.0, "trunk": 16.0, "primary": 12.0, "secondary": 10.0, "tertiary": 8.0,
+          "unclassified": 7.0, "residential": 7.0, "service": 4.5}
+LANE_M = 3.5
+# A street is graded by a fit of its own ground this wide, once: no outliers left out, as the
+# paving's are, since a street climbs and dips and leaving out its low points (tried) filled a
+# dip 4.5 m deep. Its mesh follows the ground at every height point (ROAD_GRID), not every
+# second, as a street is narrow and on slopes the coarser grid let the ground show through.
+ROAD_SIGMA_M = 5.0
+ROAD_GRID = 128
+
+
+def road_areas(osm, to_utm):
+    """The streets, one polygon in UTM metres."""
+    parts = []
+    for el in osm["elements"]:
+        t, g = el.get("tags", {}), el.get("geometry")
+        kind = t.get("highway")
+        if el["type"] != "way" or not g or kind not in ROAD_W or len(g) < 2:
+            continue
+        if t.get("bridge", "no") != "no" or t.get("tunnel", "no") != "no" or t.get("area") == "yes":
+            continue
+        if kind == "service" and t.get("service") in ("driveway", "parking_aisle", "drive-through"):
+            continue
+        try:
+            w = float(t["width"])
+        except (KeyError, ValueError):
+            try:
+                w = max(int(t["lanes"]) * LANE_M, ROAD_W[kind] * 0.75)
+            except (KeyError, ValueError):
+                w = ROAD_W[kind]
+        pts = [to_utm.transform(p["lon"], p["lat"]) for p in g]
+        parts.append(LineString(pts).buffer(w / 2, cap_style="round", join_style="round"))
+    return unary_union(parts).simplify(SIMPLIFY_M)
 
 
 # The act's buildings (make_hanscom_buildings.py's ROLES), by their OSM names: each stands on a
@@ -171,36 +212,51 @@ class Terrain:
         self.step = meta["game_units_per_pixel_step"]
         self.top = meta["height_range_game_units"]
 
-    def grade(self, areas, pads=()):
+    def grade(self, areas, pads=(), roads=None):
         """Grade the ground under the paving (see the module's notes), then level a pad under
         each of `pads` (the act's buildings: act_footprints) at the median of the graded
-        ground under it (cut and fill, like a foundation), blending back over BLEND_M. Returns the largest
-        change."""
+        ground under it (cut and fill, like a foundation), blending back over BLEND_M. Then the
+        streets (`roads`, game units), the same way as the paving, without touching the ground
+        under the paving or the pads (so the field and the act's buildings stay as they were
+        before there were streets). Returns the largest change."""
         xs, ys = np.meshgrid(np.arange(self.nx) * POINT_UNITS + self.x0,
                              self.y1 - np.arange(self.ny) * POINT_UNITS)
         paved = np.zeros(self.z.shape, bool)
         for g in areas.values():
             paved |= shapely.contains_xy(g, xs, ys)
-        sigma = GRADE_SIGMA_M / POINT_M
-        use = paved.copy()
-        for _ in range(4):
-            w = ndimage.gaussian_filter(use.astype(float), sigma)
-            fit = ndimage.gaussian_filter(np.where(use, self.z, 0.0), sigma) / np.maximum(w, 1e-9)
-            use = paved & (np.abs(self.z - fit) < GRADE_OUTLIER_M / UNIT_M)
-        d = ndimage.distance_transform_edt(~paved) * POINT_M          # metres outside the paving
-        t = np.clip(1 - d / BLEND_M, 0, 1)
-        t = t * t * (3 - 2 * t)                                        # smoothstep
-        graded = np.clip(t * fit + (1 - t) * self.z, 0, self.top)
+        graded = self._fit(paved, self.z)
+        fixed = paved.copy()
         for pad in pads:
             inside = shapely.contains_xy(pad, xs, ys)
             level = float(np.median(graded[inside]))
-            d = ndimage.distance_transform_edt(~inside) * POINT_M
-            t = np.clip(1 - d / BLEND_M, 0, 1)
-            t = t * t * (3 - 2 * t)
-            graded = t * level + (1 - t) * graded
+            graded = self._blend(inside, np.full(graded.shape, level), graded)
+            fixed |= self._blend(inside, np.ones(graded.shape), np.zeros(graded.shape)) > 0
+        if roads is not None and not roads.is_empty:
+            street = shapely.contains_xy(roads, xs, ys) & ~fixed
+            g2 = self._fit(street, graded, ROAD_SIGMA_M, passes=1)
+            graded = np.where(fixed, graded, g2)
         change = float(np.abs(graded - self.z).max())
         self.z = graded
         return change
+
+    def _fit(self, mask, z, sigma_m=GRADE_SIGMA_M, passes=4):
+        """z, with the ground under `mask` a smooth fit of itself, blended back outside it;
+        each pass after the first leaves out the points more than GRADE_OUTLIER_M off the fit."""
+        sigma = sigma_m / POINT_M
+        use = mask.copy()
+        for _ in range(passes):
+            w = ndimage.gaussian_filter(use.astype(float), sigma)
+            fit = ndimage.gaussian_filter(np.where(use, z, 0.0), sigma) / np.maximum(w, 1e-9)
+            use = mask & (np.abs(z - fit) < GRADE_OUTLIER_M / UNIT_M)
+        return np.clip(self._blend(mask, fit, z), 0, self.top)
+
+    @staticmethod
+    def _blend(mask, inner, outer):
+        """`inner` on `mask`, easing to `outer` over BLEND_M outside it (smoothstep)."""
+        d = ndimage.distance_transform_edt(~mask) * POINT_M
+        t = np.clip(1 - d / BLEND_M, 0, 1)
+        t = t * t * (3 - 2 * t)
+        return t * inner + (1 - t) * outer
 
     def game(self, e, n):
         return self.x0 + (e - self.west) / UNIT_M, self.y1 - (self.north - n) / UNIT_M
@@ -215,7 +271,7 @@ class Terrain:
                 + z[r + 1, c] * (1 - tx) * ty + z[r + 1, c + 1] * tx * ty)
 
 
-def block_meshes(area_game, terrain, bx0, by0):
+def block_meshes(area_game, terrain, bx0, by0, grid=GRID):
     """{material: (verts, tris, uvs)} for one block, in the block's local coordinates."""
     ox, oy = bx0 * CELL_UNITS, by0 * CELL_UNITS
     size = BLOCK * CELL_UNITS
@@ -224,8 +280,8 @@ def block_meshes(area_game, terrain, bx0, by0):
         part = poly.intersection(box(ox, oy, ox + size, oy + size))
         if part.is_empty:
             continue
-        xs = np.arange(ox, ox + size, GRID)
-        squares = np.array([box(x, y, x + GRID, y + GRID) for y in xs - ox + oy for x in xs])
+        xs = np.arange(ox, ox + size, grid)
+        squares = np.array([box(x, y, x + grid, y + grid) for y in xs - ox + oy for x in xs])
         squares = squares[shapely.intersects(squares, part)]
         pieces = shapely.intersection(squares, part)
         tri_sets = shapely.constrained_delaunay_triangles(pieces)
@@ -294,6 +350,41 @@ def write_block_nif(path, name, meshes, tex, pyn):
     nif.save()
 
 
+def streets(out, terrain, to_utm, areas, world, refetch=False):
+    """The streets in game units, inside the world and off the field's paving (fetched once
+    into out/hanscom/osm_roads.json)."""
+    path = out / "osm_roads.json"
+    if refetch or not path.exists():
+        print("Fetching the streets from OpenStreetMap...")
+        fetch_osm(path, "highway")
+    poly = road_areas(json.loads(path.read_text()), to_utm)
+    g = shapely.transform(poly, lambda p: np.column_stack(terrain.game(p[:, 0], p[:, 1])))
+    return g.intersection(world).difference(unary_union(list(areas.values())))
+
+
+def write_models(areas, terrain, prefix, mesh_dir, tex, pyn, files, grid=GRID):
+    """One model per cell (BLOCK) of `areas`; returns their paving.json entries."""
+    models = []
+    cx0, cy0 = terrain.cell_x0, terrain.cell_y1 - terrain.cells[1] + 1
+    for by in range(cy0, terrain.cell_y1 + 1, BLOCK):
+        for bx in range(cx0, cx0 + terrain.cells[0], BLOCK):
+            meshes = block_meshes(areas, terrain, bx, by, grid)
+            if not meshes:
+                continue
+            name = f"{prefix}_{bx}_{by}"
+            path = mesh_dir / f"{name}.nif"
+            write_block_nif(path, name, meshes, tex, pyn)
+            files.append(path)
+            allv = np.array([v for m in meshes.values() for v in m[0]])
+            lo, hi = allv.min(axis=0), allv.max(axis=0)
+            models.append({"name": name, "nif": f"{MOD_PATH}/{name}.nif".replace("/", "\\"),
+                           "position": [bx * CELL_UNITS, by * CELL_UNITS, 0],
+                           "cell": [bx, by],
+                           "bounds": [int(math.floor(c)) for c in lo] + [int(math.ceil(c)) for c in hi],
+                           "triangles": sum(len(m[1]) for m in meshes.values())})
+    return models
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--install", help="the game's Data folder, to copy the files into")
@@ -322,7 +413,9 @@ def main():
         g = shapely.transform(poly, lambda p: np.column_stack(terrain.game(p[:, 0], p[:, 1])))
         areas[mat] = g.intersection(world)
         print(f"{mat}: {areas[mat].area * UNIT_M ** 2 / 1e4:.1f} ha")
-    change = terrain.grade(areas, act_footprints(out, terrain, to_utm))
+    roads = streets(out, terrain, to_utm, areas, world, args.refetch)
+    print(f"streets: {roads.area * UNIT_M ** 2 / 1e4:.1f} ha")
+    change = terrain.grade(areas, act_footprints(out, terrain, to_utm), roads)
     np.round(terrain.z / terrain.step).astype("<u2").tofile(out / "graded16.raw")
     write_dds_r32f(out / "graded.dds", (terrain.z / terrain.top).astype(np.float32))
     print(f"graded the ground under the paving and the act's buildings: the most it moved is "
@@ -335,35 +428,23 @@ def main():
     files = write_textures(tex_dir)
     tex = "textures\\" + MOD_PATH.replace("/", "\\")
 
-    models, worst = [], 0.0
-    cx0, cy0 = terrain.cell_x0, terrain.cell_y1 - terrain.cells[1] + 1
-    for by in range(cy0, terrain.cell_y1 + 1, BLOCK):
-        for bx in range(cx0, cx0 + terrain.cells[0], BLOCK):
-            meshes = block_meshes(areas, terrain, bx, by)
-            if not meshes:
-                continue
-            name = f"Paving_{bx}_{by}"
-            path = mesh_dir / f"{name}.nif"
-            write_block_nif(path, name, meshes, tex, pyn)
-            files.append(path)
-            allv = np.array([v for m in meshes.values() for v in m[0]])
-            lo, hi = allv.min(axis=0), allv.max(axis=0)
-            models.append({"name": name, "nif": f"{MOD_PATH}/{name}.nif".replace("/", "\\"),
-                           "position": [bx * CELL_UNITS, by * CELL_UNITS, 0],
-                           "cell": [bx, by],
-                           "bounds": [int(math.floor(c)) for c in lo] + [int(math.ceil(c)) for c in hi],
-                           "triangles": sum(len(m[1]) for m in meshes.values())})
+    worst = 0.0
+    models = write_models(areas, terrain, "Paving", mesh_dir, tex, pyn, files)
+    road_models = write_models({"asphalt": roads}, terrain, "Road", mesh_dir, tex, pyn, files, ROAD_GRID)
+    (out / "roads.json").write_text(json.dumps(
+        {"note": "place each model at its position (game units) with no rotation",
+         "offset": OFFSET, "models": road_models}, indent=1))
     # How far the terrain pokes through between the mesh's grid lines, under the paving.
-    for mat, g in areas.items():
+    for mat, g, G in [(m, g, GRID) for m, g in areas.items()] + [("road", roads, ROAD_GRID)]:
         xs, ys = np.meshgrid(np.arange(terrain.nx) * POINT_UNITS + terrain.x0,
                              terrain.y1 - np.arange(terrain.ny) * POINT_UNITS)
         inside = shapely.contains_xy(g, xs, ys)
         if inside.any():
-            gx = (np.floor((xs[inside] - terrain.x0) / GRID) * GRID) + terrain.x0
-            gy = (np.floor((ys[inside] - terrain.x0) / GRID) * GRID) + terrain.x0
-            tx, ty = (xs[inside] - gx) / GRID, (ys[inside] - gy) / GRID
-            mesh_z = (terrain.at(gx, gy) * (1 - tx) * (1 - ty) + terrain.at(gx + GRID, gy) * tx * (1 - ty)
-                      + terrain.at(gx, gy + GRID) * (1 - tx) * ty + terrain.at(gx + GRID, gy + GRID) * tx * ty)
+            gx = (np.floor((xs[inside] - terrain.x0) / G) * G) + terrain.x0
+            gy = (np.floor((ys[inside] - terrain.x0) / G) * G) + terrain.x0
+            tx, ty = (xs[inside] - gx) / G, (ys[inside] - gy) / G
+            mesh_z = (terrain.at(gx, gy) * (1 - tx) * (1 - ty) + terrain.at(gx + G, gy) * tx * (1 - ty)
+                      + terrain.at(gx, gy + G) * (1 - tx) * ty + terrain.at(gx + G, gy + G) * tx * ty)
             worst = max(worst, float((terrain.at(xs[inside], ys[inside]) - mesh_z).max()))
     (out / "paving.json").write_text(json.dumps(
         {"note": "place each model at its position (game units) with no rotation",
@@ -380,13 +461,18 @@ def main():
             dr.polygon([px(*q) for q in p.exterior.coords], fill=col)
             for hole in p.interiors:
                 dr.polygon([px(*q) for q in hole.coords], fill=(50, 70, 45))
+    for p in getattr(roads, "geoms", [roads]):
+        dr.polygon([px(*q) for q in p.exterior.coords], fill=(90, 85, 70))
+        for hole in p.interiors:
+            dr.polygon([px(*q) for q in hole.coords], fill=(50, 70, 45))
     for i in range(terrain.cells[0] + 1):
         dr.line([(i * CELL_UNITS * S, 0), (i * CELL_UNITS * S, H)], fill=(0, 0, 0) if i % BLOCK else (200, 60, 60))
     for j in range(terrain.cells[1] + 1):
         dr.line([(0, j * CELL_UNITS * S), (W, j * CELL_UNITS * S)], fill=(0, 0, 0) if j % BLOCK else (200, 60, 60))
     img.save(out / "paving.png")
 
-    print(f"{len(models)} models, {sum(m['triangles'] for m in models)} triangles; terrain pokes "
+    print(f"{len(models)} paving models, {sum(m['triangles'] for m in models)} triangles; "
+          f"{len(road_models)} street models, {sum(m['triangles'] for m in road_models)} triangles; terrain pokes "
           f"through the mesh by at most {worst - OFFSET:.1f} units (OFFSET {OFFSET} clears it if < 0)")
     if args.install:
         data = Path(args.install)

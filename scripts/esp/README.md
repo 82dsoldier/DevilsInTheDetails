@@ -14,6 +14,8 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_navwrite.py`**: writes the C-130 cabin's navmesh (a flat grid over the whole floor).
 - **`esp_paving.py`**: Hanscom's graded terrain, paving and buildings into the plugin, from
   `out/hanscom/` (`make_hanscom_paving.py`, `make_hanscom_buildings.py`).
+- **`esp_roads.py`**: Hanscom's streets into the plugin (`out/hanscom/roads.json`), the terrain
+  they regraded, and fresh bounds for the regenerated paving and buildings. Safe to run again.
 
 The libraries:
 
