@@ -426,6 +426,38 @@ A settler family's son was taken in the conscription. As an officer, Nate can si
   (volunteers instead of conscription), and nobody loses face.
 - Either way, the family and the settlers warm to Nate.
 
+#### Devils lore: prove it or disprove it (the author, 2026-11-23)
+
+Quests about whether a Devils legend is true. All three are **ideas with potential, nothing
+decided** yet: no locations, givers or outcomes are settled. They're the mod's question on a small
+scale: does the story of who you are matter more than whether it's true? Each is a search through
+places, not a follow or fetch quest, and can feed the same hidden **standing with the Devils** as
+the recruiting drive.
+
+- **1. The diary.** The real 504th got its nickname at Anzio in 1944 from a dead German officer's
+  diary ("American parachutists, devils in baggy pants, are less than 100 meters from my outpost
+  line..."). The original diary has never been produced, as far as we know, and its authenticity
+  is doubted. (Check the history before writing dialogue that leans on it.)
+  - **In the world:** to the Devils it's scripture: their name was given by an enemy who feared
+    them, and every recruit learns the quote. A settler scholar, or a cynical Devil, says it was
+    invented to sell newspapers.
+  - **The trail** runs through pre-war ruins: a military archive, a museum display case, a
+    veteran's footlocker.
+  - **Two possible endings:** proof (a translation or a photo of the page), or a 1944
+    public-affairs memo suggesting the line was polished, or invented, for the press.
+  - **The choice:** hand over the truth (it shakes the hardliner and may help the reformer), bury
+    it, or have the **Cue and Ale settlers forge the page**: they've been faking blinker fluid
+    for two hundred years.
+- **2. "The Old Guard never left."** A Devils legend that the original garrison still holds the
+  line somewhere under the post. It's true: it's **Top and his ghouls**. Answers the open question
+  of whether the Devils know the garrison is still alive (see "Open questions"). The player chases
+  the legend and decides whether to tell the Devils. Lives at Bragg, not Hanscom.
+- **3. RonMike never left his post.** The faith says he's always stood where he stands. The player
+  finds proof he was moved twice: in 1979 (for real), and again by the Devils' own ancestors (see
+  "Where he stands"). Light and funny; could be a side note to the diary.
+- **A thread between them (possible):** the scholar who doubts the diary also doubts the Old
+  Guard, and is wrong about one of them.
+
 
 ### Story shape
 
