@@ -606,6 +606,34 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   the recruiting sergeant points the way, isn't decided.) Players who brought their own just
   jump in it.
 
+#### The recruiting drive and the settlement (the author, 2026-11-23)
+
+The ramp where the bird parks (around Hangar 1715) becomes a settlement, and the player is
+also sent out to bring in recruits.
+
+- **Recruiting (decided):** from the first time Nate talks to the recruiting sergeant, he can
+  ask NPCs round the Commonwealth to join up: a new line on ordinary people (settlers, generic
+  townsfolk; never companions or named characters). They answer at random: yes, no, or "tell
+  me more", which leads to a speech check (vanilla persuasion, colour-coded by Charisma).
+  **Five** recruits. Each one who says yes **walks to Hanscom** and joins the line at the
+  recruiting station (the traffic on Hanscom Drive; why it needs navmesh). NPC answers are
+  silent subtitles unless they're ever voiced.
+- **Each recruit wins Nate some standing with the Devils** (a hidden score).
+- **Not the leak:** the raider scout is never one of Nate's recruits. He'd already have to be
+  in disguise as a settler, which doesn't hold up.
+- **The Devils take a cut (decided):** they don't hand over a settlement for free. The racket
+  comes home to the player: it's his settlement under their "protection".
+- **What opens the settlement (proposed, not decided):** enough standing with the Devils, by
+  any route, rather than the recruiting alone: recruits, scrap sold at the DRMO, the leak dealt
+  with (either way), the mock door, the avionics part for the grounded bird. Past the line, the
+  Devils' commander offers the ramp ("You've been useful. The ramp's yours to fix up. We take
+  our cut, same as everyone."). A player who hates recruiting gets there another way.
+- **Why:** the author wants the world alive and the space used, with **no follow quests and
+  few fetch quests**. Most of the life should be systemic, not quests: recruits walking in,
+  caravans to the DRMO (hit while the leak is open), a Devils collector who comes round for the
+  cut (pay, stall, talk him down, or refuse and live with it), the settlement's own people
+  working the ramp under the bird.
+
 #### The leak
 
 Supply caravans bringing scrap to the DRMO keep getting hit on the road out of Boston, and the
