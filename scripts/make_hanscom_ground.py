@@ -1,5 +1,6 @@
 """Hanscom's ground cover: how much of each vanilla landscape texture every terrain point gets,
-for scripts/esp/esp_ground_paint.py (which paints them, the streets' asphalt included).
+for scripts/esp/esp_ground_paint.py. The streets themselves are raised meshes
+(make_hanscom_roads.py); the paint gives them gravel shoulders.
 
 The cover is OpenStreetMap's (© OpenStreetMap contributors, ODbL) land use and natural areas,
 fetched once into out/hanscom/osm_landcover.json; ground OSM says nothing about is dead wild
@@ -45,8 +46,9 @@ CLASSES = [
     ("dirt", 0x021336, ["landuse=industrial", "landuse=commercial", "landuse=retail",
                         "landuse=construction", "landuse=brownfield", "landuse=landfill",
                         "railway=*", "natural=sand", "natural=bare_rock", "leisure=track"]),  # LDirtGravel01
-    ("asphalt", 0x021C68, ["amenity=parking"]),                   # LAsphalt01, and the streets
+    ("asphalt", 0x021C68, ["amenity=parking"]),                   # LAsphalt01
 ]
+SHOULDER = 1             # points (1.8 m) of gravel past a street's edge
 LINE_W = {"natural=tree_row": 8.0, "railway=*": 5.0}             # metres, for lines
 PATCH_SIGMA = 6.0        # points: the dirt patches' size
 PATCH_SHARE = 0.18       # about this much of the open ground
@@ -147,8 +149,11 @@ def main():
     noise = ndimage.gaussian_filter(np.random.default_rng(SEED).standard_normal((terrain.ny, terrain.nx)), PATCH_SIGMA)
     t = np.quantile(noise, 1 - PATCH_SHARE)
     cover[1] = np.clip((noise - t) / (noise.std() * 0.5), 0, 1)
-    # The streets' asphalt (make_hanscom_road_paint.py) with the parking lots'.
-    cover[-1] = np.maximum(cover[-1], np.load(out / "road_paint.npy"))
+    # The streets are raised meshes now (make_hanscom_roads.py): under and along them, gravel, a
+    # shoulder SHOULDER points past each edge, so a street stands out from the grass.
+    street = np.load(out / "road_paint.npy")
+    shoulder = ndimage.maximum_filter(street, size=2 * SHOULDER + 1)
+    cover[6] = np.maximum(cover[6], shoulder)
 
     # Each class covers those below it: its weight is its cover less what's on top of it.
     weights = np.zeros_like(cover)

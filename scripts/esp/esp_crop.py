@@ -27,9 +27,10 @@ top = parse(open(src, "rb").read())
 tes4 = top[0]
 th = sublist(tes4.body())
 ver, nrec, nxt = struct.unpack("<fiI", dict(th)[b"HEDR"])
-# New records after the crop start past every ID the uncropped builds used (up to 011600), so a
+# New records after the crop start past every ID earlier builds used (to 011D1B: the uncropped
+# ones, and the first cropped one, before its streets were meshes again), so a
 # save from one of them can't lay its state on a different record with the same ID.
-nxt = max(nxt, 0x011600)
+nxt = max(nxt, 0x011E00)
 g1 = [n for n, *_ in walk(top) if isinstance(n, Group) and n.gtype == 1 and struct.unpack("<I", n.label)[0] == HANSCOM][0]
 inside = lambda cx, cy: KEEP[0] <= cx <= KEEP[1] and KEEP[2] <= cy <= KEEP[3]
 

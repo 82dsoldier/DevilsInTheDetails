@@ -625,6 +625,15 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   woods; marsh on wetlands and ponds; dirt on industrial lots, rail beds and sand; asphalt on
   the streets and parking lots. Edges blend over about a point. The filler ring is the wild
   grass.
+- **The streets are raised meshes again (the author, 2026-11-24; `make_hanscom_roads.py`).**
+  Painted, they lay flat and their colour was close to the grass's, so they blended away;
+  vanilla's roads stand a little proud, poured. Each street now sits 8 units (11 cm) over the
+  ground with a 40-unit lip at each edge sloping to 6 under it (a low poured edge, never the
+  first meshes' sunk walls), in vanilla's road asphalt (`Asphalt01.BGSM`), with collision, on
+  the plugin's own terrain heights. Gravel is painted along the shoulders. Vanilla's road kit
+  (fixed straights, curves, junctions at about 10.7 m wide) was the other way: lane lines and
+  curbs, but gaps at every odd junction and bend. In the build, `esp_roads.py` runs after
+  `esp_road_paint.py`, before the doors and the ring.
 - **Cropped to the act (the author, 2026-11-24; `scripts/esp/esp_crop.py`).** True scale (3 by
   2.2 km) was too big to walk; a Skyrim mod built like that got frustrating fast. The fenced map
   is now just the act: cells x -1 to 12, y -11 to -5 (about 820 by 410 m), from the parked C-130
@@ -633,8 +642,10 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   up to the base where it crosses the new south fence line (15820, -44928), so the notch round
   Langley Road went; the breach stays on the south side below the DRMO. The navmesh in the
   removed cells went with them; the rest needs finalizing again in the Creation Kit. The build
-  order, from a plugin without the doors: `esp_crop.py`, `esp_edge_door.py`, `esp_edge_ring.py`,
-  `esp_edge_gate.py`, `esp_road_paint.py`, `esp_perimeter.py`, `esp_ground_paint.py`. The notes
+  order, from a plugin without the doors: `esp_crop.py`, `esp_road_paint.py` (the old street
+  meshes out), `esp_roads.py` (the raised ones in, from `make_hanscom_roads.py`),
+  `esp_edge_door.py`, `esp_edge_ring.py`, `esp_edge_gate.py`, `esp_perimeter.py`,
+  `esp_ground_paint.py`. The notes
   below on the doors, the checkpoint and the perimeter are from before the crop: positions there
   are the old map's.
 - **The way in (decided): a road out of Boston,** a map-edge transition (one load door in a
