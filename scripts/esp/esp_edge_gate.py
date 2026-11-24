@@ -28,6 +28,10 @@ GATE_LIKE = 0x0001978F                 # PreWarFenceChainLinkGateStatic01: x -2.
 GATE_W = 372.0
 FENCE = 0x0019C915                     # PreWarFenceChainLink01: x 0..259
 FENCE_W = 259.0
+# The fence models reach 64 below their origin (the gate 32), for slopes; on this gentle ground
+# that buried them (the author, 2026-11-24). Lifted, the fence still sinks 20, the gate stands
+# 12 clear, and their tops stay level.
+FENCE_LIFT = 44.0
 POST = 0x0019C91E                      # PreWarFenceChainLinkPost01
 JERSEY = 0x00001E02                    # JerseyBarricade01: x -64..64, z 0..64
 SANDBAGS = 0x00045762                  # SandbagWall01 (moveable static): x -111..120
@@ -42,7 +46,7 @@ ARRIVE_IN = 300.0
 # base (negative: outside the gate).
 JERSEYS = [(-200, -350, 0), (-72, -350, 0), (72, -650, 0), (200, -650, 0)]
 SANDBAG_WALLS = [(420, 160, 0), (560, 60, 90)]
-TOWER_AT = (-520, 260, 180)
+TOWER_AT = (-520, 260, 0)              # 180 faced it backward (the author, 2026-11-24)
 
 src, dst = sys.argv[1:3]
 top = parse(open(src, "rb").read())
@@ -133,7 +137,7 @@ def ref(base, u, v, z, turn=0.0, flags=0x400, extra=()):
 
 # The gate (the door), hinge end on the left.
 gx, gy = at(-GATE_W / 2, 0)
-gz = ground(-GATE_W / 2, GATE_W / 2, 0)
+gz = ground(-GATE_W / 2, GATE_W / 2, 0) + FENCE_LIFT
 door = new_rec("REFR", new_fid(), [(b"NAME", struct.pack("<I", gate.fid)), (b"XTEL", hs_xtel),
                                    (b"DATA", struct.pack("<6f", gx, gy, gz, 0, 0, br))], 0x400)
 hs_g8.kids.append(door)
@@ -148,11 +152,11 @@ for side in (-1, 1):
     for k in range(PANELS):
         near = GATE_W / 2 + k * FENCE_W
         u0 = near if side > 0 else -(near + FENCE_W)
-        ref(FENCE, u0, 0, ground(u0, u0 + FENCE_W, 0))
+        ref(FENCE, u0, 0, ground(u0, u0 + FENCE_W, 0) + FENCE_LIFT)
         added += 1
     for k in range(PANELS + 1):
         u = side * (GATE_W / 2 + k * FENCE_W)
-        ref(POST, u, 0, height_at(hs, *at(u, 0)))
+        ref(POST, u, 0, height_at(hs, *at(u, 0)) + FENCE_LIFT)
         added += 1
 for u, v, t in JERSEYS:
     ref(JERSEY, u, v, ground(u - 64, u + 64, v) - 2, t)
