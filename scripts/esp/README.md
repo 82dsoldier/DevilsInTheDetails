@@ -18,6 +18,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
   doors (junk-wall barricades): one on the elevated highway north of Lexington, at the map's
   border (overriding the Commonwealth's world record, without its offset tables, and its
   persistent cell), one where Langley Road leaves Hanscom's south edge. Run once.
+- **`esp_edge_gate.py`**: Hanscom's end of that road made a Devils checkpoint (chain-link fence
+  and gate, Jersey barriers, sandbags, a guard tower) in place of the junk walls; the door gets a
+  fresh ID and the Commonwealth door is pointed at it. Run once, after `esp_edge_door.py`.
 - **`esp_edge_ring.py`**: a ring of filler terrain cells (3 wide) round Hanscom, the edge's
   heights eased to the world's default land, so the map doesn't end in a gap. Run once, after
   any terrain change to the map's edge cells (it reads their heights).

@@ -629,6 +629,13 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     open. The first try, a vanilla junk-wall gate, swung open before the load and showed the
     broken highway past the border (the author, 2026-11-23). Placeholders for a proper
     checkpoint.
+  - **The Hanscom end is a Devils checkpoint (the author, 2026-11-24; `esp_edge_gate.py`):**
+    the junk walls looked nothing like a gate from inside. Now a chain-link fence across Langley
+    Road and four panels past each side, its gate the load door (`DevilsHanscomGate`, vanilla's
+    static pre-war chain-link gate), Jersey barriers staggered outside so traffic weaves up to
+    it, a sandbagged position by the road inside and a guard tower across from it. No guards
+    yet: they come with the traffic. The Commonwealth end keeps its junk walls (out in the
+    wasteland, a junk barricade fits).
   - **No sea past the edge.** The CK's new-world defaults (land -2048, water 0) drew an ocean
     below a cliff at every edge of Hanscom. Its default land is now 500 (the south edge near
     the road), water -20000. But the loaded cells past the last one draw nothing at all (sky
