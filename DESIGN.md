@@ -618,6 +618,13 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   about one point, 1.8 m) and `scripts/esp/esp_road_paint.py` (the layers into the plugin, the
   446 street meshes out). No curbs or lane lines; vanilla kit pieces could go where players
   look closely (the gate, the ramp) later.
+- **The ground is painted (2026-11-24):** vanilla landscape textures by OSM's land use
+  (`make_hanscom_ground.py`, `scripts/esp/esp_ground_paint.py`): dead wild grass where OSM says
+  nothing, broken by patches of grassy dirt; dead lawn on the grass areas, parks and pitches
+  (the airfield's infields among them); weeds on meadows and farmland; forest floor in the
+  woods; marsh on wetlands and ponds; dirt on industrial lots, rail beds and sand; asphalt on
+  the streets and parking lots. Edges blend over about a point. The filler ring is the wild
+  grass.
 - **The way in (decided): a road out of Boston,** a map-edge transition (one load door in a
   vanilla cell), coming in at the south gate. Not a tunnel.
   - **The south gate is the real Vandenberg Gate** (OSM: Sartain Gate), on Hanscom Drive about

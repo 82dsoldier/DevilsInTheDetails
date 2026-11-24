@@ -35,6 +35,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_road_paint.py`**: Hanscom's streets painted on the terrain with vanilla's asphalt
   (`out/hanscom/road_paint.npy`, from `make_hanscom_road_paint.py`), and the street meshes out.
   Run once (it refuses cells already painted).
+- **`esp_ground_paint.py`**: all of Hanscom's ground painted with vanilla's landscape textures
+  (`out/hanscom/ground_paint.npz`, from `make_hanscom_ground.py`), the streets' asphalt included;
+  replaces the terrain's layers, so it supersedes `esp_road_paint.py`'s. Safe to run again.
 
 The libraries:
 
