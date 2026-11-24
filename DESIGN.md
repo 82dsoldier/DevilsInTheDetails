@@ -709,6 +709,17 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
 - **The recruiting station:** a recruiting sergeant with the whole pitch, working the line of
   Commonwealth drifters who answered the beacon. (Not the forced recruit: that belongs at Bragg,
   in "Bringing a conscript home".)
+  - **SSG Dale Brannock (the author, 2026-11-24).** An ex-drill sergeant stuck behind a
+    recruiting table, and he hates it: he recruits by insulting you until you want to prove
+    him wrong. (The author's first thought was SSG Hulka from *Stripes*; he's his own man, a
+    nod at most.) **His look:** fatigues and a maroon beret with the **1-504 flash** (gold
+    border, blue field, a gold bar across, the "Strike Hold" crest on it), and **subdued jump
+    wings** (black on olive drab) over his left pocket (the author's reference photos).
+    Vanilla has no beret, so the beret and the wings are worn models of ours.
+  - **Built so far (`scripts/esp/esp_brannock.py`):** `DevilsBrannock`, essential and unique,
+    a vanilla Minutemen face and its MaleRough voice (template, Use Traits only), in vanilla
+    post-war fatigues, standing on the ramp just outside the recruiting station's big doorway,
+    facing the ramp. Next: the beret and the wings, then his pitch (silent subtitles).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
