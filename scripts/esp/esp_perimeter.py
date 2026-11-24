@@ -12,6 +12,9 @@ border region at the edge, so the gate on the road in is the only way in or out.
   - The breach (BREACH): a stretch with no fence at all, where raiders come through (the
     settlement quest closes it with 10 junk items; the author, 2026-11-24). Posts stand at its
     ends.
+  - Where the line crosses a building, the building is the wall: the panels wholly inside its
+    footprint go, and the ones at each end run into its wall, so there's no gap (the fence ran
+    through a building by the gate; the author, 2026-11-24).
   - A guard tower inside each corner.
   - DevilsHanscomBorder: a border region (record flag 0x40, like vanilla's Border) round the
     map's edge, so the breach doesn't let the player walk off the map.
@@ -20,10 +23,14 @@ The pieces are ordinary (temporary) references in the cells they stand in.
 
     python esp_perimeter.py in.esp out.esp
 """
-import sys, struct, math, random
+import sys, struct, math, random, json
+from pathlib import Path
 import numpy as np
+import shapely
+from shapely.geometry import Polygon
 from esplib import *
 from landh import load_heights, height_at
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 HANSCOM = 0x0100A22E
 TEMPLATE = 0x01008B42
@@ -158,8 +165,33 @@ def place_rot(base, x, y, z, rot):
     added += 1
 
 
+def footprints():
+    """Every building's footprint (OSM's, as make_hanscom_buildings.py builds them), game units."""
+    from pyproj import Transformer
+    import make_hanscom_paving as hpv
+    from make_heightmap import out_dir
+    out = out_dir("hanscom")
+    meta = json.loads((out / "heightmap.json").read_text())
+    to_utm = Transformer.from_crs("EPSG:4326", meta["utm_crs"], always_xy=True)
+    terrain = hpv.Terrain(out)
+    polys = []
+    for el in json.loads((out / "osm_buildings.json").read_text())["elements"]:
+        tags, geom = el.get("tags", {}), el.get("geometry")
+        if "building" not in tags or not geom or len(geom) < 4:
+            continue
+        e, n = np.array([to_utm.transform(p["lon"], p["lat"]) for p in geom]).T
+        poly = Polygon(np.column_stack(terrain.game(e, n))).buffer(0)
+        if poly.geom_type == "Polygon":
+            polys.append(poly)
+    return shapely.union_all(polys)
+
+
+buildings = footprints()
+shapely.prepare(buildings)
+in_building = lambda x, y: bool(shapely.contains_xy(buildings, x, y))
+
 rng = random.Random(SEED)
-counts = {"fence": 0, "road": 0, "patch": 0, "breach": 0, "tilted": 0}
+counts = {"fence": 0, "road": 0, "patch": 0, "breach": 0, "tilted": 0, "building": 0}
 worst = 0.0
 in_breach = False
 for (ax, ay), (bx, by) in zip(path, path[1:]):
@@ -192,6 +224,9 @@ for (ax, ay), (bx, by) in zip(path, path[1:]):
             counts["breach"] += 1
             continue
         in_breach = False
+        if in_building(px, py) and in_building(qx, qy):
+            counts["building"] += 1
+            continue
         # Closed roads and patches are junk walls: Jersey barriers and sandbags (tried first) are
         # waist high, and anyone could hop them (the author, 2026-11-24).
         if max(asphalt(px, py), asphalt(mx, my), asphalt(qx, qy)) > ROAD:
@@ -214,6 +249,7 @@ for (ax, ay), (bx, by) in zip(path, path[1:]):
 for cx, cy in [(x0, y0), (x0, y1), (x1, y1), (x1, y0)]:
     ix, iy = math.copysign(1, -cx), math.copysign(1, -cy)        # inward
     tx, ty = cx + ix * TOWER_IN, cy + iy * TOWER_IN
+    assert not in_building(tx, ty), f"the corner tower at {tx:.0f}, {ty:.0f} is in a building"
     place(TOWER, tx, ty, min(height_at(hs, tx + a, ty + b) for a in (-150, 150) for b in (-150, 150)) + TOWER_Z,
           math.atan2(ix, iy))
 
