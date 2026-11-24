@@ -719,7 +719,15 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   - **Built so far (`scripts/esp/esp_brannock.py`):** `DevilsBrannock`, essential and unique,
     a vanilla Minutemen face and its MaleRough voice (template, Use Traits only), in vanilla
     post-war fatigues, standing on the ramp just outside the recruiting station's big doorway,
-    facing the ramp. Next: the beret and the wings, then his pitch (silent subtitles).
+    facing the ramp.
+  - **The beret and the wings (2026-11-24; `make_uniform.py`, `scripts/esp/esp_uniform.py`):**
+    worn models of ours on the vanilla skeleton. The beret: a leather band at the brow
+    (fitted to the vanilla military cap's head), a felt crown that overhangs it and drops over
+    the right ear, the front left stiffened over the left eye with the 1-504 flash painted on it
+    (drawn in code, not from the photos), on the HEAD bone, slot 30 like vanilla's caps
+    (`DevilsBeret`). The wings: an 8.5 x 3.2 cm subdued patch shaped to the vanilla fatigues'
+    chest over the left pocket, on the torso's bones, slot 55 (`DevilsJumpWings`). Both in
+    `DevilsBrannockOutfit`. Next: his pitch (silent subtitles).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before

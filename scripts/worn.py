@@ -33,6 +33,11 @@ BONES = {
                (-2.4586915969848633e-07, 0.9994111657142639, 0.03431236743927002),
                (-1.0, -2.514570951461792e-07, 5.960464477539063e-08))),
     # The thighs: his left is -X.
+    # The head (from the vanilla military cap, Clothes\Ronnie\MCap.nif, skinned to it alone).
+    "HEAD": ((0.0003204345703125, -3.814697265625e-05, 2.920367114711553e-05),
+             ((4.172325134277344e-07, 0.0649806559085846, 0.9978865385055542),
+              (2.9802322387695312e-08, 0.9978865385055542, -0.0649806559085846),
+              (-1.0, 5.587935447692871e-08, 4.172325134277344e-07))),
     "LLeg_Thigh": ((-52.27887, -2.76568, -0.88223),
                    ((-0.127248, -0.038602, -0.991119), (-0.289087, 0.957303, -0.00017),
                     (0.948808, 0.286498, -0.132974))),
@@ -68,9 +73,10 @@ def _xf(TransformBuf, t, r):
     return b
 
 
-def write_worn(path, name, shapes, tex, pyn, materials):
+def write_worn(path, name, shapes, tex, pyn, materials, prefix="c130_"):
     """shapes: {shape name: (material, Mesh, weights)}, weights(vertex in metres) -> {bone: w}.
-    materials: the cabin's MATERIALS table (for double-sided)."""
+    materials: the cabin's MATERIALS table (for double-sided), or one like it. Textures are
+    named <prefix><material>{,_n,_s}.dds under tex."""
     NifFile, NiShapeBuf, PynBufferTypes, TransformBuf, SF1, SF2 = pyn
     nif = NifFile()
     nif.initialize("FO4", str(path), root_type="NiNode", root_name=name)
@@ -109,9 +115,9 @@ def write_worn(path, name, shapes, tex, pyn, materials):
         if materials[mat][1].get("double_sided"):
             sp.shaderflags2_set(SF2.DOUBLE_SIDED)
         sp.Spec_Str, sp.Glossiness = 1.0, 1.0
-        shape.set_texture("Diffuse", f"{tex}\\c130_{mat}.dds")
-        shape.set_texture("Normal", f"{tex}\\c130_{mat}_n.dds")
-        shape.set_texture("Specular", f"{tex}\\c130_{mat}_s.dds")
+        shape.set_texture("Diffuse", f"{tex}\\{prefix}{mat}.dds")
+        shape.set_texture("Normal", f"{tex}\\{prefix}{mat}_n.dds")
+        shape.set_texture("Specular", f"{tex}\\{prefix}{mat}_s.dds")
         shape.save_shader_attributes()
     nif.save()
 
