@@ -809,6 +809,10 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     (its Pip-Boy log: "SSG Brannock signed me up with the Devils at Hanscom Field...") and
     shows objective 10, **"Report to jump school"**, its marker on an XMarker outside the
     jump school's doorway (alias `JumpSchool`). The mock door comes next.
+    - **Tested 2026-11-24:** the line's script runs (OnBegin and OnEnd, traced), stage 10 is
+      done, the objective is displayed (`sqo`), and his greeting turns to "Back again... sir?".
+      The quest's pop-up and Pip-Boy entry not seen yet: the test save has no Pip-Boy or HUD
+      (it skipped the opening). **To check on a proper playthrough.**
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before

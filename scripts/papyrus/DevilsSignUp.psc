@@ -20,6 +20,7 @@ int Property ObjectiveToShow = 10 Auto Const
 {Report to jump school.}
 
 Event OnEnd(ObjectReference akSpeakerRef, bool abHasBeenSaid)
+	Debug.Trace(self + " signing up: rank " + RankValue + ", stage " + StageToSet)
 	Rank.SetValue(RankValue)
 	MyQuest.SetStage(StageToSet)
 	MyQuest.SetObjectiveDisplayed(ObjectiveToShow)
