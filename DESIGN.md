@@ -786,7 +786,15 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
       - "Where are we going?" → "Bragg. North Carolina. Home of the Airborne. Where else?"
       - "What's the catch?" → "The catch is the bird's grounded and every raider on the road
         knows when the caravans run. Welcome to the Devils."
-  - Next: build the pitch as dialogue (silent subtitles).
+  - **Built (2026-11-24; `scripts/esp/esp_recruit_dialogue.py`, `make_silent_voice.py`):**
+    vanilla's own dialogue (the wheel and the camera), laid out as vanilla's MS02Donny is: quest
+    `DevilsRecruiting` (start-game enabled, priority 60, alias 0 = Brannock), a greeting topic
+    and three scenes (`DevilsRecruitBefore`, `...Prior`, `...After`), each one player-dialogue
+    action, the questions looping back to the choices. Officer or enlisted is the global
+    `DevilsNateRank` (0 not signed, 1 officer, 2 corporal), set by vanilla's
+    `DefaultTopicInfoSetGlobal` on the sign-up line's end: no new Papyrus. Every line has a
+    silent voice file as long as it takes to read (MaleRough for him, both player voices for
+    Nate), and the quest has its SEQ file (`Data\SEQ\DevilsInTheDetails.seq`).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before

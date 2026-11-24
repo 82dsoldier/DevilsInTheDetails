@@ -23,6 +23,7 @@ PLUGIN = "DevilsInTheDetails.esp"
 FOLDERS = ["Meshes/DevilsInTheDetails", "Textures/DevilsInTheDetails", "Sound/FX/DevilsInTheDetails",
            "Sound/Voice/DevilsInTheDetails.esp", "Materials/DevilsInTheDetails"]
 SCRIPTS = "Scripts/Devils*.pex"
+SEQ = "SEQ/DevilsInTheDetails.seq"          # the start-game quests, for their dialogue
 
 
 def mirror(src, dst):
@@ -72,6 +73,11 @@ def main():
             t.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, t)
             copied += 1
+    if (data / SEQ).exists():
+        t = od / "Data" / SEQ
+        t.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(data / SEQ, t)
+        copied += 1
     print(f"mod files -> OneDrive DevilsInTheDetails/Data: {copied} copied (the rest unchanged)")
 
 
