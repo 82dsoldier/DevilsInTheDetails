@@ -8,7 +8,8 @@ scripts) are mirrored to OneDrive; only the ones that changed are copied again.
 
     python scripts/backup_mod.py [--data "<Fallout 4>/Data"] [--onedrive <folder>]
 
-OneDrive is the personal one ($OneDrive, as Windows sets it), under DevilsInTheDetails/.
+OneDrive is the one Windows names in $OneDrive (the author's is a business tenant), under
+DevilsInTheDetails/
 """
 import argparse
 import os
