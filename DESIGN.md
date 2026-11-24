@@ -609,6 +609,15 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
   a street meets the dirt instead of standing proud of it like a slab (the first try did). The streets are graded after the field and the act's pads and never touch them,
   so the paving and the act's buildings sit where they did; their grading is gentler than the
   paving's (a 5 m fit, no outliers dropped: dropping the low points filled a dip 4.5 m deep).
+- **The streets are paint now, not meshes (the author, 2026-11-24).** Where the ground beside a
+  street fell away, the mesh's sunk edge stood as a wall, its texture stretched down it.
+  Vanilla's road kit (fixed straights, curves and junctions) won't follow OSM's real layout
+  without placing hundreds of pieces by hand, so the streets are painted on the terrain with
+  vanilla's asphalt landscape texture (`LAsphalt01`), with the same layout and grading:
+  `make_hanscom_road_paint.py` (how much asphalt each terrain point gets, edges blended over
+  about one point, 1.8 m) and `scripts/esp/esp_road_paint.py` (the layers into the plugin, the
+  446 street meshes out). No curbs or lane lines; vanilla kit pieces could go where players
+  look closely (the gate, the ramp) later.
 - **The way in (decided): a road out of Boston,** a map-edge transition (one load door in a
   vanilla cell), coming in at the south gate. Not a tunnel.
   - **The south gate is the real Vandenberg Gate** (OSM: Sartain Gate), on Hanscom Drive about

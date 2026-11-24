@@ -25,7 +25,11 @@ record of how it was made (DESIGN.md names several). The ones to know:
   heights eased to the world's default land, so the map doesn't end in a gap. Run once, after
   any terrain change to the map's edge cells (it reads their heights).
 - **`esp_roads.py`**: Hanscom's streets into the plugin (`out/hanscom/roads.json`), the terrain
-  they regraded, and fresh bounds for the regenerated paving and buildings. Safe to run again.
+  they regraded, and fresh bounds for the regenerated paving and buildings. Safe to run again,
+  but it puts the street meshes back: follow it with `esp_road_paint.py`.
+- **`esp_road_paint.py`**: Hanscom's streets painted on the terrain with vanilla's asphalt
+  (`out/hanscom/road_paint.npy`, from `make_hanscom_road_paint.py`), and the street meshes out.
+  Run once (it refuses cells already painted).
 
 The libraries:
 
