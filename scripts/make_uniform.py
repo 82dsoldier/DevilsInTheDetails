@@ -12,7 +12,7 @@ author's reference photos, 2026-11-24). Vanilla has no beret.
           across, and the regiment's crest on it (a blue shield with a gold sword and oak
           leaf, the gold "STRIKE HOLD" scroll under it). Drawn here, not taken from a photo,
           and painted into the beret's texture where the stiffened front stands up.
-  Wings   subdued (black thread on olive drab cloth) parachutist badge, 8.5 by 3.2 cm, over
+  Wings   subdued (black thread on olive drab cloth) parachutist badge, 6.0 by 3.15 cm, above
           his left breast pocket, shaped to his chest (the vanilla FatiguesM.nif's front,
           measured, CHEST_*), 3 mm off it. On his torso's bones, body slot 55.
 
@@ -45,30 +45,49 @@ CENTRE = (0.010, -0.006)              # his head's middle, seen from above (the 
 BAND_A, BAND_B = 0.103, 0.123         # the band's half-width and half-length (the cap's, + 4 mm)
 BAND_Z, BAND_TILT = 1.792, 0.008      # the band's foot, and how much higher in front than behind
 BAND_H = 0.020
-TOP_Z = 1.915                         # the crown's top (the cap's is 1.902)
-TOP_SHIFT = (0.025, -0.005)           # the crown's top, off the head's middle, to his right
+# A beret lies tight and flat (the author, 2026-11-24: the first, puffed out all round 20%,
+# "looks more like a jester's hat"; data/reference/...Alexander_Woody...jpg). Its crown
+# barely overhangs the band (OVERHANG, of the band's size), stands up stiff at the front left
+# for the flash (STIFF_UP over the band), dips just behind the flash (BEHIND_AT), slants down
+# to the right, and its spare cloth is pulled over and hangs straight down over his right ear
+# (RIGHT_OUT more overhang there, RIGHT_DROP below the band's top).
+# How far his head reaches above the brow, each 15 degrees round from his right, as a fraction
+# of the band's size that way (the cap's, measured): the back of the head bulges out past the
+# band, so there the band and crown follow it, HEAD_CLEAR out.
+HEAD_REACH = [0.965, 0.929, 0.919, 0.919, 0.851, 0.65, 0.531, 0.613, 0.749, 0.949, 0.949, 0.932,
+              0.959, 1.005, 1.05, 1.05, 1.037, 1.056, 1.067, 1.067, 1.053, 1.02, 0.999, 0.995]
+HEAD_CLEAR = 0.03
+TOP = (0.005, -0.008, 1.912)          # the crown's middle: just over his head (the cap's top 1.902)
+OVERHANG = 0.04
+STIFF_UP = 0.065
+CROWN_UP = 0.032                      # the crown's edge over the band's top, elsewhere
+BEHIND_AT, BEHIND_DIP = math.radians(170), 0.008
+RIGHT_OUT, RIGHT_DROP = 0.09, 0.042
 FLASH_AT = math.radians(120)          # around the head from his right: over his left eye
 FLASH_W, FLASH_H = 0.044, 0.050
 FLASH_UP = 0.004                      # its foot over the band's top
-STIFF = 0.45                          # radians: how far round the stiffened front reaches
+STIFF = 0.42                          # radians: how far round the stiffened front reaches
 N_AROUND = 96
 V_SPAN = 0.22                         # metres of beret, band foot to top, along the texture's v
 BERET_TEX = (2048, 512)
 
 # --- The wings ------------------------------------------------------------------------------
 CHEST_X = [-0.13, -0.11, -0.09, -0.07, -0.05, -0.03]
-CHEST_Z = [1.425, 1.44, 1.455, 1.47, 1.485]
+CHEST_Z = [1.455, 1.470, 1.485, 1.500, 1.515, 1.530]
 CHEST_Y = [                           # his front's y at each (z, x): FatiguesM.nif's, measured
-    [0.1108, 0.1228, 0.1303, 0.1315, 0.1332, 0.1432],
-    [0.1041, 0.1168, 0.1229, 0.1275, 0.1281, 0.1374],
     [0.0971, 0.1107, 0.1154, 0.1200, 0.1234, 0.1309],
     [0.0907, 0.1026, 0.1071, 0.1116, 0.1160, 0.1236],
     [0.0858, 0.0918, 0.0975, 0.1020, 0.1064, 0.1141],
+    [0.0756, 0.0811, 0.0867, 0.0923, 0.0970, 0.1019],
+    [0.0648, 0.0703, 0.0759, 0.0816, 0.0869, 0.0897],
+    [0.0549, 0.0603, 0.0653, 0.0701, 0.0751, 0.0906],
 ]
-WINGS_AT = (-0.085, 1.455)            # its middle: x (his left is -x) and height
-WINGS_W, WINGS_H = 0.085, 0.032
+# Above the pocket, not on it (the first, at 1.455, sat on it; the author, 2026-11-24), and
+# the badge's own shape, about twice as wide as tall (the first, 8.5 x 3.2 cm, was too wide).
+WINGS_AT = (-0.085, 1.497)            # its middle: x (his left is -x) and height
+WINGS_W, WINGS_H = 0.060, 0.0315
 WINGS_OFF = 0.003
-WINGS_TEX = (512, 192)
+WINGS_TEX = (512, 270)
 
 MAROON = (92, 22, 34)
 GOLD = (214, 172, 62)
@@ -91,25 +110,34 @@ def beret_grid():
     """Points (around x along), metres, and each column's angle."""
     thetas = np.linspace(-math.pi / 2, 3 * math.pi / 2, N_AROUND + 1)
     cx, cy = CENTRE
-    top = np.array([cx + TOP_SHIFT[0], cy + TOP_SHIFT[1], TOP_Z])
+    top = np.array(TOP)
+    bump = lambda th, at, w: math.exp(-((((th - at + math.pi) % (2 * math.pi)) - math.pi) / w) ** 2)
     cols = []
     for th in thetas:
-        right = max(0.0, math.cos(th))
-        d = (th - FLASH_AT + math.pi) % (2 * math.pi) - math.pi
-        stiff = math.exp(-(d / STIFF) ** 2)
-        e = np.array([cx + BAND_A * math.cos(th), cy + BAND_B * math.sin(th)])
+        right = max(0.0, math.cos(th)) ** 1.3
+        stiff = bump(th, FLASH_AT, STIFF)
+        behind = bump(th, BEHIND_AT, 0.45) * (1 - stiff)
+        f = (math.degrees(th) % 360) / 15
+        i0 = int(f) % 24
+        reach = _lerp(HEAD_REACH[i0], HEAD_REACH[(i0 + 1) % 24], f - int(f))
+        size = max(1.0, reach + HEAD_CLEAR)
+        e = np.array([cx + size * BAND_A * math.cos(th), cy + size * BAND_B * math.sin(th)])
         zb = BAND_Z + BAND_TILT * math.sin(th)
         zt = zb + BAND_H
-        k = 1.20 + 0.20 * right - 0.15 * stiff
-        zr = zt + 0.030 - 0.045 * right ** 1.5 + 0.025 * stiff
+        k = 1.0 + OVERHANG * (1 - stiff) + RIGHT_OUT * right
+        ze = zt + CROWN_UP * (1 - stiff) * (1 - right) + STIFF_UP * stiff - BEHIND_DIP * behind - RIGHT_DROP * right
         rel = e - np.array([cx, cy])
         at = lambda r, z: np.array([cx + r * rel[0], cy + r * rel[1], z])
-        a, r = at(1.0, zt), at(k, zr)
-        q1 = at(_lerp(k * 0.9, 1.0, stiff), _lerp(zt + 0.012, zr, stiff))
-        q2 = at(0.8 * k, TOP_Z)
+        a, edge = at(1.0, zt), at(k, ze)
+        # Band to the crown's edge: straight up where it's stiff; elsewhere out and up; on the
+        # right, out over the band and then down over his ear.
+        q1 = at(1.0 + (k - 1.0) * (0.5 + 0.6 * right), _lerp(_lerp(zt, ze, 0.6), ze, stiff) + 0.03 * right)
+        # The crown's edge to its middle: flat across his head; on the right, back up from the
+        # hanging cloth first.
+        q2 = at(_lerp(0.75 * k, 1.02 * k, right), top[2] + 0.004)
         pts = [at(1.0, zb), at(1.0, zb + BAND_H / 2), a]
-        pts += [_bez(a, q1, r, t) for t in np.linspace(0, 1, 11)[1:]]
-        pts += [_bez(r, q2, top, t) for t in np.linspace(0, 1, 13)[1:]]
+        pts += [_bez(a, q1, edge, t) for t in np.linspace(0, 1, 11)[1:]]
+        pts += [_bez(edge, q2, top, t) for t in np.linspace(0, 1, 13)[1:]]
         cols.append(pts)
     return np.array(cols), thetas
 
@@ -241,46 +269,57 @@ def _bilinear(x, z):
 
 
 def tex_wings():
-    """Black embroidered wings on olive drab: the canopy and its shroud lines in the middle, a
-    wing curling up each side, feathered along its underside."""
+    """The parachutist badge, black thread on olive drab (the author's reference: the badge's
+    own shape, data/reference/5-5-Inch-Army-Jump-Wings...avif, subdued). The canopy in the
+    middle, its gores in thread with the cloth between, its lines narrowing to a point below;
+    each side, a wing that rises from the canopy's skirt in a round loop, open in the middle,
+    and fans its feathers out and down, flaring sideways (not curling up at the tips)."""
     W, H = WINGS_TEX
     S = 4
-    img = Image.new("RGB", (W * S, H * S), OD)
+    w, h = W * S, H * S
+    img = Image.new("RGB", (w, h), OD)
     d = ImageDraw.Draw(img)
-    cx, cy = W * S / 2, H * S * 0.5
-    # The canopy: a dome, its lines down to a point.
-    cw, chh = W * S * 0.19, H * S * 0.30
-    d.chord([cx - cw / 2, cy - chh * 1.25, cx + cw / 2, cy + chh * 0.75], 180, 360, fill=THREAD)
-    for k in range(-3, 4):
-        d.line([(cx + k * cw / 7, cy - chh * 0.25), (cx, cy + chh * 1.05)], fill=THREAD, width=S * 3)
+    X = lambda f: f * w                       # the badge's span, 0 to 1 across
+    Y = lambda f: f * h                       # 0 to 1 down
+    line = max(2, S * 2)
+    # The canopy: a dome, its skirt, and gores.
+    d.chord([X(0.315), Y(0.0), X(0.685), Y(0.46)], 180, 360, fill=THREAD)
+    d.polygon([(X(0.315), Y(0.23)), (X(0.685), Y(0.23)), (X(0.5), Y(1.0))], fill=THREAD)
+    for k in range(1, 12):
+        f = k / 12
+        d.line([(X(0.315 + 0.37 * f), Y(0.235)), (X(0.5), Y(0.97))], fill=OD, width=line)
+    for k in range(1, 8):
+        f = k / 8
+        d.arc([X(0.5 - 0.185 * (1 - f) - 0.0), Y(0.0), X(0.5 + 0.185 * (1 - f)), Y(0.46)], 200, 340,
+              fill=OD, width=line) if False else None
+        d.line([(X(0.5 + (f - 0.5) * 0.30), Y(0.03 + 0.18 * abs(f - 0.5) ** 1.5)), (X(0.5 + (f - 0.5) * 0.36), Y(0.225))],
+               fill=OD, width=line)
+    d.line([(X(0.315), Y(0.235)), (X(0.685), Y(0.235))], fill=OD, width=line)
+    FC, FRX, FRY = (0.26, 0.40), 0.22, 0.45                # the feathers' fan: its middle, reach
+    fan = lambda phi, r=1.0: (FC[0] + FRX * r * math.cos(math.radians(phi)),
+                              FC[1] - FRY * r * math.sin(math.radians(phi)))
     for side in (-1, 1):
-        # A wing: its top edge sweeps out from the canopy and rises to the tip, which curls
-        # back in; its underside is a row of feather tips back to the root.
-        sx = lambda f: cx + side * f * W * S
-        root_top, root_bot = (sx(0.085), cy - chh * 0.15), (sx(0.085), cy + chh * 0.55)
-        top = [root_top]
-        for t in np.linspace(0, 1, 16)[1:]:
-            top.append((sx(0.085 + 0.37 * t), cy - chh * (0.15 + 0.95 * t ** 2.2)))
-        tip = top[-1]
-        curl = [(sx(0.47), tip[1] + chh * 0.35), (sx(0.445), tip[1] + chh * 0.75)]
-        under = []
-        n_f = 7
+        sx = lambda f: X(0.5 + side * (f - 0.5))          # mirrored: f < 0.5 is out from the middle
+        # The wing: up from the canopy's skirt and round the loop's top, down its outer side to
+        # the feathers, whose tips fan out sideways and down round to the shroud lines.
+        loop = [(0.335, 0.28), (0.31, 0.13), (0.25, 0.045), (0.17, 0.025), (0.10, 0.06),
+                (0.055, 0.15), (0.04, 0.27)]
+        n_f = 9
+        tips = []
         for k in range(n_f + 1):
-            t = 1 - k / n_f
-            x = 0.085 + 0.34 * t
-            y = cy + chh * (0.55 - 0.55 * t ** 2.4)
-            under.append((sx(x), y + chh * 0.28))                  # a feather's tip
+            phi = 175 + 90 * k / n_f
+            tips.append(fan(phi, 1.0))
             if k < n_f:
-                tn = 1 - (k + 0.5) / n_f
-                under.append((sx(0.085 + 0.34 * tn), cy + chh * (0.55 - 0.55 * tn ** 2.4) - chh * 0.02))
-        d.polygon(top + curl + under + [root_bot], fill=THREAD)
-        # Feather lines: the cloth showing between the rows.
+                tips.append(fan(phi + 45 / n_f, 0.86))         # the notch between two feathers
+        root = [(0.37, 0.74), (0.375, 0.42)]
+        d.polygon([(sx(fx), Y(fy)) for fx, fy in loop + tips + root], fill=THREAD)
+        # The loop's open middle.
+        d.ellipse([min(sx(0.12), sx(0.29)), Y(0.10), max(sx(0.12), sx(0.29)), Y(0.36)], fill=OD)
+        # The cloth between the feathers, fanning out from under the loop.
         for k in range(1, n_f):
-            t = 1 - k / n_f
-            x = sx(0.085 + 0.34 * t)
-            y = cy + chh * (0.55 - 0.55 * t ** 2.4)
-            d.line([(x, y + chh * 0.22), (x - side * W * S * 0.025, y - chh * 0.35)], fill=OD, width=S * 2)
-        d.line([(sx(0.10), cy + chh * 0.05), (sx(0.44), tip[1] + chh * 0.45)], fill=OD, width=S * 2)
+            phi = 175 + 90 * (k + 0.5) / n_f
+            (x0, y0), (x1, y1) = fan(phi, 0.45), fan(phi, 0.84)
+            d.line([(sx(x0), Y(y0)), (sx(x1), Y(y1))], fill=OD, width=line)
     img = img.resize((W, H), Image.LANCZOS)
     a = np.asarray(img, np.float32) / 255
     rng = np.random.default_rng(55)

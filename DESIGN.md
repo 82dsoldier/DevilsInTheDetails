@@ -727,7 +727,16 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     (drawn in code, not from the photos), on the HEAD bone, slot 30 like vanilla's caps
     (`DevilsBeret`). The wings: an 8.5 x 3.2 cm subdued patch shaped to the vanilla fatigues'
     chest over the left pocket, on the torso's bones, slot 55 (`DevilsJumpWings`). Both in
-    `DevilsBrannockOutfit`. Next: his pitch (silent subtitles).
+    `DevilsBrannockOutfit`.
+    - **Second pass (the author's notes, 2026-11-24):** the first beret puffed out 20% all
+      round ("more like a jester's hat"); a beret lies tight and flat, stiff at the front left
+      for the flash, dipping just behind it, slanting down to the right where the spare cloth
+      hangs straight over the ear (reference photo: 1st Lt. Alexander Woody, 82nd, 2012). Now
+      4% overhang, following the head's own reach above the brow (the back of the head bulges
+      past the band), checked clear of the head everywhere. The wings sat on the pocket, too
+      wide, and curled up at the tips: now above the pocket, 6.0 x 3.15 cm, drawn to the badge's
+      own shape (round open loops, feathers fanning out sideways and down).
+  - Next: his pitch (silent subtitles).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
