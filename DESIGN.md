@@ -649,11 +649,16 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     looked silly, and nothing stopped anyone walking off the map. So the same chain-link runs
     the whole way round, 128 units inside the map's edge, panels tilted with the ground. It
     joins the checkpoint's arms, round a notch that leaves the stretch of Langley Road outside
-    the gate open. Where it crosses a street (179 places): Jersey barriers, every road in but
-    one closed. About one panel in 25 is down and patched (junk wall, sandbags or Jersey
-    barriers). A guard tower inside each corner. **The breach:** three panels missing on the
+    the gate open. Where it crosses a street (179 places): junk walls, every road in but
+    one closed. About one panel in 25 is down and patched with a junk wall (Jersey barriers
+    and sandbags, tried first, were waist high: anyone could hop them). A guard tower inside
+    each corner. **The breach:** three panels missing on the
     south side below the DRMO (x 26,000 to 26,800), for the settlement quest's raiders (see
     "The standing it takes"). A border region (`DevilsHanscomBorder`) at the map's edge keeps
+    the player from walking off through it. The game goes by each cell's list of its regions
+    (`XCLR`, which the Creation Kit fills in), not the region's outline: with the outline alone,
+    no cell was inside, and the Commonwealth door sent the player straight back. Every map cell
+    lists it; the filler ring's cells don't.
     the player from walking off through it.
   - **No sea past the edge.** The CK's new-world defaults (land -2048, water 0) drew an ocean
     below a cliff at every edge of Hanscom. Its default land is now 500 (the south edge near

@@ -6,10 +6,10 @@ border region at the edge, so the gate on Langley Road is the only way in or out
   - It meets the checkpoint's fence (esp_edge_gate.py, run first): its north arm, round a notch
     that leaves the stretch of Langley Road outside the gate open, and its south arm, which
     reaches the edge.
-  - Where it crosses a street, Jersey barriers instead of the fence: the Devils closed every
+  - Where it crosses a street, junk walls instead of the fence: the Devils closed every
     road in but one.
   - Here and there (PATCH_EVERY, at random but the same every run) a panel is down and patched:
-    a junk wall, sandbags, or a pair of Jersey barriers.
+    a junk wall.
   - The breach (BREACH): a stretch with no fence at all, where raiders come through (the
     settlement quest closes it with 10 junk items; the author, 2026-11-24). Posts stand at its
     ends.
@@ -33,14 +33,18 @@ X_MIN, X_MAX, Y_MIN, Y_MAX = -25 * CELL, 26 * CELL, -19 * CELL, 19 * CELL   # th
 INSET = 128.0
 FENCE, FENCE_W, POST = 0x0019C915, 259.0, 0x0019C91E
 FENCE_LIFT = 10.0                       # as esp_edge_gate.py's
-JERSEY = 0x00001E02                     # 128 long, centred
-SANDBAGS = 0x00045762                   # about 231 long, centred
 JUNK_WALLS = [0x000C3895, 0x000C3897, 0x001D15DF, 0x001D15E1]   # about 280 long, centred
 TOWER, TOWER_Z = 0x001AE17A, 152.0      # its origin sits 152 above its base
 TOWER_IN = 500.0                        # from the corner, each way
 PATCH_EVERY = 25                        # about one panel in this many is a patch
 ROAD = 0.25                             # asphalt at a panel's middle (0 to 1) that makes it a road
 SEED = 1715
+# The border region's polygon is the map's edge, but what the game goes by is each cell's list of
+# its regions (XCLR, which the Creation Kit fills in): a cell inside the border lists it, as
+# vanilla's do (cell 0,0 lists Border). With only the polygon, no cell was inside, and the
+# Commonwealth door sent the player back to itself (tested 2026-11-24). So every map cell lists
+# it; the filler ring's cells don't, and are outside.
+BORDER_OUT = 0.0
 # The checkpoint (esp_edge_gate.py): its fence's ends, on the line across the road at the gate.
 GATE_CENTRE, GATE_BEARING, GATE_W = (6100.0, -77235.0), 71.3, 372.0
 ARM_NORTH, ARM_SOUTH = 4, 1             # its panels each side
@@ -188,21 +192,13 @@ for (ax, ay), (bx, by) in zip(path, path[1:]):
             counts["breach"] += 1
             continue
         in_breach = False
+        # Closed roads and patches are junk walls: Jersey barriers and sandbags (tried first) are
+        # waist high, and anyone could hop them (the author, 2026-11-24).
         if max(asphalt(px, py), asphalt(mx, my), asphalt(qx, qy)) > ROAD:
-            for f in (0.25, 0.75):
-                jx, jy = px + f * FENCE_W * dx, py + f * FENCE_W * dy
-                place(JERSEY, jx, jy, height_at(hs, jx, jy) - 2, rz)
+            place(rng.choice(JUNK_WALLS), mx, my, z, rz + math.pi * rng.randrange(2))
             counts["road"] += 1
         elif rng.randrange(PATCH_EVERY) == 0:
-            kind = rng.choice(["junk", "junk", "sandbags", "jersey"])
-            if kind == "junk":
-                place(rng.choice(JUNK_WALLS), mx, my, z, rz + math.pi * rng.randrange(2))
-            elif kind == "sandbags":
-                place(SANDBAGS, mx, my, height_at(hs, mx, my), rz + math.pi * rng.randrange(2))
-            else:
-                for f in (0.25, 0.75):
-                    jx, jy = px + f * FENCE_W * dx, py + f * FENCE_W * dy
-                    place(JERSEY, jx, jy, height_at(hs, jx, jy) - 2, rz)
+            place(rng.choice(JUNK_WALLS), mx, my, z, rz + math.pi * rng.randrange(2))
             counts["patch"] += 1
         else:
             d = np.array([qx - px, qy - py, hq - hp])
@@ -226,7 +222,21 @@ vanilla_rclr = b"\x62\x73\x73\x00"           # vanilla Border's colour
 regn = new_rec("REGN", new_fid(), [
     (b"EDID", b"DevilsHanscomBorder\0"), (b"RCLR", vanilla_rclr), (b"WNAM", struct.pack("<I", HANSCOM)),
     (b"RPLI", struct.pack("<I", 0)),
-    (b"RPLD", struct.pack("<8f", X_MIN, Y_MIN, X_MIN, Y_MAX, X_MAX, Y_MAX, X_MAX, Y_MIN))], flags=0x40)
+    (b"RPLD", struct.pack("<8f", X_MIN - BORDER_OUT, Y_MIN - BORDER_OUT, X_MIN - BORDER_OUT, Y_MAX + BORDER_OUT,
+                          X_MAX + BORDER_OUT, Y_MAX + BORDER_OUT, X_MAX + BORDER_OUT, Y_MIN - BORDER_OUT))], flags=0x40)
+inside = 0
+for n, *_ in walk(g1.kids):
+    if isinstance(n, Rec) and n.type == "CELL" and not n.flags & 0x400:
+        sub = sublist(n.body())
+        cx, cy = struct.unpack_from("<ii", dict(sub)[b"XCLC"])
+        if not (X_MIN <= cx * CELL < X_MAX and Y_MIN <= cy * CELL < Y_MAX):
+            continue
+        regions = dict(sub).get(b"XCLR", b"")
+        sub = [(t, v) for t, v in sub if t != b"XCLR"]
+        at_ = max(i for i, (t, _) in enumerate(sub) if t in (b"XCLC", b"MHDT", b"LTMP", b"XCLW")) + 1
+        sub.insert(at_, (b"XCLR", regions + struct.pack("<I", regn.fid)))
+        n.set_body(pack_subs(sub))
+        inside += 1
 navi = [i for i, n in enumerate(top) if isinstance(n, Group) and n.gtype == 0 and n.label == b"NAVI"][0]
 ghdr = bytearray(top[navi].hdr)
 ghdr[8:12] = b"REGN"
@@ -235,4 +245,4 @@ top.insert(navi, Group(bytes(ghdr), [regn]))
 tes4.set_body(pack_subs([(t, struct.pack("<fiI", ver, nrec + added + 2, nxt) if t == b"HEDR" else v) for t, v in th]))
 open(dst, "wb").write(b"".join(n.bytes() for n in top))
 print(f"{added} references: {counts}; steepest panel {worst:.0f} units end to end; "
-      f"border {regn.fid:08X}; next id {nxt:06X}")
+      f"border {regn.fid:08X} ({inside} cells inside); next id {nxt:06X}")
