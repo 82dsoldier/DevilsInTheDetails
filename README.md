@@ -3,6 +3,13 @@
 A Fallout 4 mod set on Fort Bragg, NC, in the 1-504 PIR barracks area of the early 1990s.
 The story and plan are in [DESIGN.md](DESIGN.md).
 
+## The plugin
+
+`plugin/DevilsInTheDetails.esp` is the plugin as installed: it holds work no script rebuilds
+(the navmesh, everything done in the Creation Kit), so it's kept here. `python
+scripts/backup_mod.py` copies the installed plugin here (commit it after) and backs it and the
+mod's other installed files (meshes, textures, sounds, compiled scripts) up to OneDrive.
+
 ## Map scripts
 
 Need Python 3.12 with `rasterio numpy pillow requests pyproj`.
