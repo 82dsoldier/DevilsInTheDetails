@@ -22,9 +22,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
   and gate, Jersey barriers, sandbags, a guard tower) in place of the junk walls; the door gets a
   fresh ID and the Commonwealth door is pointed at it. Run once, after `esp_edge_door.py`.
 - **`esp_perimeter.py`**: Hanscom's perimeter fence, the whole way round inside the map's edge
-  and joined to the checkpoint (run `esp_edge_gate.py` first), with Jersey barriers at street
+  and joined to the checkpoint (run `esp_edge_gate.py` first), with junk walls at street
   crossings, patched sections, corner towers, the settlement quest's breach, and a border
-  region at the edge. Run once. Its note on rotations: the game's is world = Rx(-rx) Ry(-ry)
+  region at the edge (listed in every map cell's XCLR). Run once. Its note on rotations: the game's is world = Rx(-rx) Ry(-ry)
   Rz(-rz) local (found from vanilla fence panels on slopes).
 - **`esp_edge_ring.py`**: a ring of filler terrain cells (3 wide) round Hanscom, the edge's
   heights eased to the world's default land, so the map doesn't end in a gap. Run once, after
