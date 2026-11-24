@@ -178,7 +178,24 @@ the raids continue: whoever is left has to deal with them.
 
 **Nate is a pre-war Army veteran: the only living person with valid 2077 military credentials.**
 
-- The **armory**, deep in the underground complex, still recognizes an active-duty officer's ID.
+- **His MOS: nuclear surety (decided, the author, 2026-11-24).** What opens doors is his
+  clearance, not his rank: he was Personnel Reliability Program (PRP) certified, with a Top
+  Secret clearance and two-person-rule access to special weapons storage. Enlisted, he was a
+  **55G, Nuclear Weapons Maintenance Specialist**; an officer, a **special-weapons officer**.
+  **Officer or enlisted is the player's choice**, made when SSG Brannock asks "Prior service?"
+  at Hanscom (enlisted Nate signs on as a **corporal**, not a private). "Better than everything
+  hinging on him being an officer" (the author).
+  - **What the clearance does, either way:** the armory and its vault (PRP-certified personnel
+    are exactly who special-weapons storage lets in), the two-part authenticator (the real
+    Sealed Authenticator System nuclear crews used: a code split in two, checked by two
+    people), the reactor's controls, and authorizing the artillery.
+  - **What the rank changes:** an officer relieves Top's post himself; an enlisted Nate carries
+    the recall order and stands in as the cleared man (Top grumbles about the stripes, but the
+    clearance is real). An officer can sign a conscript's discharge; an enlisted Nate has to go
+    through the chain of command ("done right"). Salutes ("All the way, sir!") are for an
+    officer; an enlisted Nate gets a nod and "Airborne, Corporal." Wherever below Nate is
+    called an officer, read: cleared, and an officer only if the player chose it.
+- The **armory**, deep in the underground complex, still recognizes his cleared ID.
   Suddenly both sides need the player.
 - **But the ID is only half of it** (see "The MacGuffin" below): the armory works on the
   two-person rule, and the other half is held by the factions themselves.
@@ -190,7 +207,7 @@ the raids continue: whoever is left has to deal with them.
 ### The MacGuffin: the Key to the Post and the codebook
 
 Real weapons storage used the **two-person rule**: nobody opens it alone. The armory needs
-**a valid officer's ID (Nate) plus a 2077 authenticator in two parts**, and each faction holds one
+**a valid cleared ID (Nate's) plus a 2077 authenticator in two parts**, and each faction holds one
 part without knowing what it is.
 
 - **The Key to the Post (the Devils have it).** For two hundred years, every commander of the
@@ -747,7 +764,29 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
       followed the beret's mapping and stretched up over the crown and squashed at its foot
       (the author's screenshot). Now a patch cut to the flash's outline, laid on the stiffened
       front 1.5 mm off the felt, with its own texture, so it keeps its shape.
-  - Next: his pitch (silent subtitles).
+  - **His pitch (decided, the author, 2026-11-24): a short exchange.** Long NPC conversations
+    are exposition ("if you have to tell the audience, you're probably not doing it right").
+    Like a real recruiter, he gives nothing away until Nate signs; after, anything.
+    - **Before:** greeting (at random) "Line's right there. You gonna stand in it, or just
+      admire it?" / "You lost, or you here to waste my time?"
+      - "I want to sign up." → "Course you do. Everybody does, till the first jump. Prior
+        service?"
+        - "I was an officer." → "An officer. Course you were. Two hundred years on ice and you
+          still expect a salute." *(signs him up)* "Welcome to the Devils... sir." (sneering)
+        - "Enlisted." → "Then you know which end of the rifle goes bang. Prior service don't
+          start at private. You'll come in as a corporal. Don't make me regret it." *(signs him
+          up)*
+      - "What is this place?" → "Recruiting station. I recruit. You station. Simple."
+      - "Who are you people?" → "The people standing between this field and every raider east
+        of Concord. Sign, and you'll find out the rest."
+      - "Never mind." → "Then get out of my line."
+    - **After:** greeting "Back again... sir?" (officer) / "Corporal. What do you need?"
+      - "So what happens now?" → "Now you learn to fall out of an airplane. Jump school's two
+        doors down. Mock door first, then the bird."
+      - "Where are we going?" → "Bragg. North Carolina. Home of the Airborne. Where else?"
+      - "What's the catch?" → "The catch is the bird's grounded and every raider on the road
+        knows when the caravans run. Welcome to the Devils."
+  - Next: build the pitch as dialogue (silent subtitles).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
