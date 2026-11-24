@@ -30,8 +30,9 @@ FENCE = 0x0019C915                     # PreWarFenceChainLink01: x 0..259
 FENCE_W = 259.0
 # The fence models reach 64 below their origin (the gate 32), for slopes; on this gentle ground
 # that buried them, and lifting them 44 floated them (the author, 2026-11-24): halfway.
-# Gate and fence lift together, so their tops stay level.
-FENCE_LIFT = 22.0
+# The gate is right at 22; the fence still stood a little high there (the author, 2026-11-24).
+FENCE_LIFT = 10.0
+GATE_LIFT = 22.0
 POST = 0x0019C91E                      # PreWarFenceChainLinkPost01
 JERSEY = 0x00001E02                    # JerseyBarricade01: x -64..64, z 0..64
 SANDBAGS = 0x00045762                  # SandbagWall01 (moveable static): x -111..120
@@ -137,7 +138,7 @@ def ref(base, u, v, z, turn=0.0, flags=0x400, extra=()):
 
 # The gate (the door), hinge end on the left.
 gx, gy = at(-GATE_W / 2, 0)
-gz = ground(-GATE_W / 2, GATE_W / 2, 0) + FENCE_LIFT
+gz = ground(-GATE_W / 2, GATE_W / 2, 0) + GATE_LIFT
 door = new_rec("REFR", new_fid(), [(b"NAME", struct.pack("<I", gate.fid)), (b"XTEL", hs_xtel),
                                    (b"DATA", struct.pack("<6f", gx, gy, gz, 0, 0, br))], 0x400)
 hs_g8.kids.append(door)
