@@ -29,9 +29,9 @@ GATE_W = 372.0
 FENCE = 0x0019C915                     # PreWarFenceChainLink01: x 0..259
 FENCE_W = 259.0
 # The fence models reach 64 below their origin (the gate 32), for slopes; on this gentle ground
-# that buried them (the author, 2026-11-24). Lifted, the fence still sinks 20, the gate stands
-# 12 clear, and their tops stay level.
-FENCE_LIFT = 44.0
+# that buried them, and lifting them 44 floated them (the author, 2026-11-24): halfway.
+# Gate and fence lift together, so their tops stay level.
+FENCE_LIFT = 22.0
 POST = 0x0019C91E                      # PreWarFenceChainLinkPost01
 JERSEY = 0x00001E02                    # JerseyBarricade01: x -64..64, z 0..64
 SANDBAGS = 0x00045762                  # SandbagWall01 (moveable static): x -111..120
