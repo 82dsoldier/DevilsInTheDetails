@@ -18,6 +18,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
   doors (junk-wall barricades): one on the elevated highway north of Lexington, at the map's
   border (overriding the Commonwealth's world record, without its offset tables, and its
   persistent cell), one where Langley Road leaves Hanscom's south edge. Run once.
+- **`esp_edge_ring.py`**: a ring of filler terrain cells (3 wide) round Hanscom, the edge's
+  heights eased to the world's default land, so the map doesn't end in a gap. Run once, after
+  any terrain change to the map's edge cells (it reads their heights).
 - **`esp_roads.py`**: Hanscom's streets into the plugin (`out/hanscom/roads.json`), the terrain
   they regraded, and fresh bounds for the regenerated paving and buildings. Safe to run again.
 

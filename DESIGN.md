@@ -631,7 +631,13 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     checkpoint.
   - **No sea past the edge.** The CK's new-world defaults (land -2048, water 0) drew an ocean
     below a cliff at every edge of Hanscom. Its default land is now 500 (the south edge near
-    the road), water -20000. Bragg and Sicily still have the old defaults.
+    the road), water -20000. But the loaded cells past the last one draw nothing at all (sky
+    through a gap; the water had hidden it), so **a ring of filler terrain, 3 cells wide, goes
+    all round** (`esp_edge_ring.py`, 570 cells): the edge's heights carried straight out and
+    eased to the default land at the ring's outer edge, where the flat default takes over.
+    Bragg and Sicily still have the old defaults and no ring.
+  - **The Commonwealth's name** in the override is plain text: the master's is a string-table
+    ID, which our unlocalized plugin printed as garbage on the door's prompt.
   - **Traffic (the author, 2026-11-23):** people coming and going on that road (caravans to
     the DRMO, recruits answering the beacon), so it needs navmesh.
 - **The hook: a recruiting beacon (idea).** The Devils' relay broadcasts a recruiting pitch

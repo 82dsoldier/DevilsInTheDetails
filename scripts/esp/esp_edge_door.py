@@ -109,7 +109,9 @@ while j < len(b):
         assert t2 in (b"OFST", b"CLSZ"), t2
         j += 10 + 6 + n
         continue
-    if t not in (b"OFST", b"CLSZ"):
+    if t == b"FULL":                       # the master's is a string-table ID; ours aren't localized
+        keep.append((t, b"Commonwealth\0"))
+    elif t not in (b"OFST", b"CLSZ"):
         keep.append((t, b[j+6:j+6+n]))
     j += 6 + n
 w.set_body(pack_subs(keep))
