@@ -11,7 +11,7 @@ author's reference photos, 2026-11-24). Vanilla has no beret.
   Flash   the 1st Battalion, 504th PIR's: a shield, gold border, blue field, a thin gold bar
           across, and the regiment's crest on it (a blue shield with a gold sword and oak
           leaf, the gold "STRIKE HOLD" scroll under it). Drawn here, not taken from a photo,
-          and painted into the beret's texture where the stiffened front stands up.
+          and its own patch (cut to its outline) laid on the stiffened front, over his left eye.
   Wings   subdued (black thread on olive drab cloth) parachutist badge, 6.0 by 3.15 cm, above
           his left breast pocket, shaped to his chest (the vanilla FatiguesM.nif's front,
           measured, CHEST_*), 3 mm off it. On his torso's bones, body slot 55.
@@ -29,7 +29,9 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import shapely
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from shapely.geometry import Polygon, box
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import make_c130_blockout as c                                    # noqa: E402
@@ -69,6 +71,8 @@ RIGHT_OUT, RIGHT_DROP = 0.09, 0.042
 FLASH_AT = math.radians(120)          # around the head from his right: over his left eye
 FLASH_W, FLASH_H = 0.044, 0.054
 FLASH_UP = 0.008                      # its foot over the band's top
+FLASH_LIFT = 0.0015                   # the patch off the felt
+FLASH_TEX, FLASH_TEX_FILL = 512, FLASH_W / FLASH_H     # the flash fills this much of its square
 STIFF = 0.42                          # radians: how far round the stiffened front reaches
 N_AROUND = 96
 V_SPAN = 0.22                         # metres of beret, band foot to top, along the texture's v
@@ -99,7 +103,7 @@ BLUE = (34, 62, 168)
 DARK_BLUE = (22, 40, 120)
 OD = (82, 90, 60)
 THREAD = (22, 22, 20)
-MATERIALS = {"beret": (None, {"double_sided": True}), "wings": (None, {})}
+MATERIALS = {"beret": (None, {"double_sided": True}), "flash": (None, {}), "wings": (None, {})}
 
 
 def _lerp(a, b, t):
@@ -110,41 +114,112 @@ def _bez(p0, p1, p2, t):
     return (1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t * t * p2
 
 
+def _bump(th, at, w):
+    return math.exp(-((((th - at + math.pi) % (2 * math.pi)) - math.pi) / w) ** 2)
+
+
+def beret_column(th):
+    """One line of the beret from the band's foot over to the crown's middle, at angle th
+    round his head (from his right): (its points, and the band-to-edge curve (a, q1, edge))."""
+    cx, cy = CENTRE
+    top = np.array(TOP)
+    right = max(0.0, math.cos(th)) ** 1.3
+    stiff = _bump(th, FLASH_AT, STIFF)
+    behind = _bump(th, BEHIND_AT, 0.45) * (1 - stiff)
+    f = (math.degrees(th) % 360) / 15
+    i0 = int(f) % 24
+    reach = _lerp(HEAD_REACH[i0], HEAD_REACH[(i0 + 1) % 24], f - int(f))
+    size = max(1.0, reach + HEAD_CLEAR)
+    e = np.array([cx + size * BAND_A * math.cos(th), cy + size * BAND_B * math.sin(th)])
+    zb = BAND_Z + BAND_TILT * math.sin(th)
+    zt = zb + BAND_H
+    k = 1.0 + OVERHANG * (1 - stiff) + RIGHT_OUT * right
+    ze = zt + CROWN_UP * (1 - stiff) * (1 - right) + STIFF_UP * stiff - BEHIND_DIP * behind - RIGHT_DROP * right
+    rel = e - np.array([cx, cy])
+    at = lambda r, z: np.array([cx + r * rel[0], cy + r * rel[1], z])
+    a, edge = at(1.0, zt), at(k, ze)
+    # Band to the crown's edge: straight up where it's stiff; elsewhere out and up; on the
+    # right, out over the band and then down over his ear.
+    q1 = at(1.0 + (k - 1.0) * (0.5 + 0.6 * right), _lerp(_lerp(zt, ze, 0.6), ze, stiff) + 0.03 * right)
+    # The crown's edge to its middle: flat across his head, slanting down to his right; on the
+    # right, back up from the hanging cloth first.
+    q2 = at(_lerp(0.85 * k, 1.02 * k, right), 0.0)
+    q2[2] = top[2] + 0.002 - SLANT * max(0.0, q2[0] - X_HIGH)
+    pts = [at(1.0, zb), at(1.0, zb + BAND_H / 2), a]
+    pts += [_bez(a, q1, edge, t) for t in np.linspace(0, 1, 11)[1:]]
+    pts += [_bez(edge, q2, top, t) for t in np.linspace(0, 1, 13)[1:]]
+    return pts, (a, q1, edge)
+
+
 def beret_grid():
     """Points (around x along), metres, and each column's angle."""
     thetas = np.linspace(-math.pi / 2, 3 * math.pi / 2, N_AROUND + 1)
+    return np.array([beret_column(th)[0] for th in thetas]), thetas
+
+
+def flash_outline():
+    """The flash's outline, metres: across (s, to the viewer's right as he faces you) and up
+    (h, from its foot): straight sides, then a round bottom the whole width."""
+    w2, low = FLASH_W / 2, FLASH_H * 0.30
+    pts = [(-w2, FLASH_H), (w2, FLASH_H)]
+    for a in np.linspace(0, math.pi, 40):
+        pts.append((w2 * math.cos(a), low - low * math.sin(a)))
+    return Polygon(pts)
+
+
+def flash_mesh():
+    """The flash as its own patch on the beret's stiffened front (painted into the beret's
+    texture, it stretched up over the crown and squashed at its foot; the author, 2026-11-24):
+    each point of its outline laid on the beret's band-to-edge curve there, FLASH_LIFT out."""
+    poly = flash_outline()
+    grid = 0.006
+    xs = np.arange(-FLASH_W / 2 - grid, FLASH_W / 2 + grid, grid)
+    hs = np.arange(-grid, FLASH_H + grid, grid)
+    squares = np.array([box(x, h, x + grid, h + grid) for h in hs for x in xs])
+    squares = squares[shapely.intersects(squares, poly)]
+    m = c.Mesh()
+    index = {}
+    th0 = FLASH_AT
+    speed = math.hypot(BAND_A * math.sin(th0), BAND_B * math.cos(th0))       # metres per radian
     cx, cy = CENTRE
-    top = np.array(TOP)
-    bump = lambda th, at, w: math.exp(-((((th - at + math.pi) % (2 * math.pi)) - math.pi) / w) ** 2)
-    cols = []
-    for th in thetas:
-        right = max(0.0, math.cos(th)) ** 1.3
-        stiff = bump(th, FLASH_AT, STIFF)
-        behind = bump(th, BEHIND_AT, 0.45) * (1 - stiff)
-        f = (math.degrees(th) % 360) / 15
-        i0 = int(f) % 24
-        reach = _lerp(HEAD_REACH[i0], HEAD_REACH[(i0 + 1) % 24], f - int(f))
-        size = max(1.0, reach + HEAD_CLEAR)
-        e = np.array([cx + size * BAND_A * math.cos(th), cy + size * BAND_B * math.sin(th)])
-        zb = BAND_Z + BAND_TILT * math.sin(th)
-        zt = zb + BAND_H
-        k = 1.0 + OVERHANG * (1 - stiff) + RIGHT_OUT * right
-        ze = zt + CROWN_UP * (1 - stiff) * (1 - right) + STIFF_UP * stiff - BEHIND_DIP * behind - RIGHT_DROP * right
-        rel = e - np.array([cx, cy])
-        at = lambda r, z: np.array([cx + r * rel[0], cy + r * rel[1], z])
-        a, edge = at(1.0, zt), at(k, ze)
-        # Band to the crown's edge: straight up where it's stiff; elsewhere out and up; on the
-        # right, out over the band and then down over his ear.
-        q1 = at(1.0 + (k - 1.0) * (0.5 + 0.6 * right), _lerp(_lerp(zt, ze, 0.6), ze, stiff) + 0.03 * right)
-        # The crown's edge to its middle: flat across his head; on the right, back up from the
-        # hanging cloth first.
-        q2 = at(_lerp(0.85 * k, 1.02 * k, right), 0.0)
-        q2[2] = top[2] + 0.002 - SLANT * max(0.0, q2[0] - X_HIGH)
-        pts = [at(1.0, zb), at(1.0, zb + BAND_H / 2), a]
-        pts += [_bez(a, q1, edge, t) for t in np.linspace(0, 1, 11)[1:]]
-        pts += [_bez(edge, q2, top, t) for t in np.linspace(0, 1, 13)[1:]]
-        cols.append(pts)
-    return np.array(cols), thetas
+
+    def place(sv, h):
+        th = th0 + sv / speed
+        _, (a, q1, edge) = beret_column(th)
+        curve = np.array([_bez(a, q1, edge, t) for t in np.linspace(0, 1, 200)])
+        z = a[2] + FLASH_UP + h
+        i = int(np.clip(np.searchsorted(curve[:, 2], z), 1, len(curve) - 1))
+        f = (z - curve[i - 1, 2]) / max(curve[i, 2] - curve[i - 1, 2], 1e-9)
+        p = curve[i - 1] + (curve[i] - curve[i - 1]) * f
+        out = np.array([p[0] - cx, p[1] - cy, 0.0])
+        out /= np.linalg.norm(out)
+        return p + out * FLASH_LIFT, out
+
+    for gc in shapely.constrained_delaunay_triangles(shapely.intersection(squares, poly)):
+        for tri in getattr(gc, "geoms", [gc]):
+            if tri.is_empty or tri.area < 1e-8:
+                continue
+            ids = []
+            for sv, h in list(tri.exterior.coords)[:3]:
+                key = (round(sv, 6), round(h, 6))
+                if key not in index:
+                    p, n = place(sv, h)
+                    uv = ((sv + FLASH_W / 2) / FLASH_W * FLASH_TEX_FILL, 1 - h / FLASH_H)
+                    index[key] = m.vert(tuple(p), tuple(n), uv)
+                ids.append(index[key])
+            if len(set(ids)) == 3:
+                m.tri(*ids)
+    return m
+
+
+def tex_flash():
+    """The flash's texture: drawn at its own shape's proportions, in the left of a square."""
+    size = FLASH_TEX
+    w = int(size * FLASH_TEX_FILL)
+    img = Image.new("RGB", (size, size), GOLD)
+    flash = draw_flash(w, size)
+    img.paste(flash, (0, 0), flash)
+    return img
 
 
 def beret_mesh():
@@ -230,16 +305,6 @@ def tex_beret(thetas, v_rows):
     rgb[:band_px] = np.array([28, 22, 20], np.float32) * (1 + 0.1 * felt[:band_px, :, None])
     height[:band_px] = 0.1
     img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB")
-    # The flash: its width in u at the band (the band's speed there), its height in v, upright
-    # on the beret (v runs up it, the image down: flipped).
-    th = FLASH_AT
-    speed = math.hypot(BAND_A * math.sin(th), BAND_B * math.cos(th))      # metres per radian
-    du = FLASH_W / speed / (2 * math.pi)
-    u0 = (th + math.pi / 2) / (2 * math.pi)
-    w_px, h_px = int(du * W), int(FLASH_H / V_SPAN * H)
-    flash = draw_flash(w_px, h_px).transpose(Image.FLIP_TOP_BOTTOM)
-    y0 = int((BAND_H + FLASH_UP) / V_SPAN * H)
-    img.paste(flash, (int(u0 * W - w_px / 2), y0), flash)
     return img, height
 
 
@@ -362,7 +427,12 @@ def main():
     img, height = tex_beret(thetas, v)
     files = save_set(tex_dir, "beret", img, height, 0.03, 0.15)
     img.save(out / "beret_texture.png")
-    worn.write_worn(mesh_dir / "Beret.nif", "Beret", {"Beret": ("beret", beret, worn.rigid("HEAD"))},
+    flash = flash_mesh()
+    fimg = tex_flash()
+    files += save_set(tex_dir, "flash", fimg, np.zeros((FLASH_TEX, FLASH_TEX)), 0.05, 0.2)
+    fimg.save(out / "flash_texture.png")
+    worn.write_worn(mesh_dir / "Beret.nif", "Beret", {"Beret": ("beret", beret, worn.rigid("HEAD")),
+                                                     "Flash": ("flash", flash, worn.rigid("HEAD"))},
                     tex, pyn, MATERIALS, PREFIX)
     files.append(mesh_dir / "Beret.nif")
 

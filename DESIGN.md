@@ -743,6 +743,10 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
       are centred over the left breast pocket, just above its flap: the pocket found on the
       vanilla fatigues' texture (`ba2.py` reads texture archives now) and carried through the
       model's UVs to his chest, x 4.4 to 17.6 cm left of centre, the flap's top 1.47 m up.
+    - **The flash is its own patch (2026-11-24):** painted into the beret's texture, it
+      followed the beret's mapping and stretched up over the crown and squashed at its foot
+      (the author's screenshot). Now a patch cut to the flash's outline, laid on the stiffened
+      front 1.5 mm off the felt, with its own texture, so it keeps its shape.
   - Next: his pitch (silent subtitles).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
