@@ -87,7 +87,7 @@ CHEST_Y = [                           # his front's y at each (z, x): FatiguesM.
 WINGS_AT = (-0.085, 1.497)            # its middle: x (his left is -x) and height
 WINGS_W, WINGS_H = 0.060, 0.0315
 WINGS_OFF = 0.003
-WINGS_TEX = (512, 270)
+WINGS_TEX = (512, 256)                # powers of two: 512 x 270 crashed the game (2026-11-24)
 
 MAROON = (92, 22, 34)
 GOLD = (214, 172, 62)
@@ -329,6 +329,8 @@ def tex_wings():
 
 
 def save_set(tex_dir, name, img, height, shine, smooth):
+    pow2 = lambda n: n > 0 and n & (n - 1) == 0
+    assert pow2(img.width) and pow2(img.height), f"{name}: {img.size} isn't powers of two (the game crashes)"
     files = []
     f = tex_dir / f"{PREFIX}{name}.dds"
     save_dds(img, f)
