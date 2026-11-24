@@ -8,8 +8,10 @@ signs, then anything. Built as vanilla builds a small conversation (modelled on 
                            / never mind. The two questions loop back to the choices; signing up
                            goes on to the Prior scene.
     DevilsRecruitPrior     "I was an officer." / "Enlisted." His answer sets DevilsNateRank
-                           (vanilla's DefaultTopicInfoSetGlobal on the line's end): 1 officer,
-                           2 enlisted (a corporal). 0 is not signed.
+                           (DevilsSignUp, on the line's end): 1 officer, 2 enlisted (a
+                           corporal), 0 not signed; and shows the quest, "All the Way": stage
+                           10's log entry and objective 10, "Report to jump school", its marker
+                           on an XMarker outside the jump school's doorway (alias 1).
     DevilsRecruitAfter     what happens now / where are we going / what's the catch / that's all.
 
 Every line is silent for now: scripts/make_silent_voice.py writes a quiet voice file for each,
@@ -24,7 +26,16 @@ from pathlib import Path
 from esplib import *
 
 TEMPLATE = 0x01008B42
-SET_GLOBAL = "DefaultTopicInfoSetGlobal"
+SIGN_UP = "DevilsSignUp"              # scripts/papyrus/DevilsSignUp.psc
+QUEST_NAME = "All the Way"            # the 82nd's motto
+LOG_10 = ("SSG Brannock signed me up with the Devils at Hanscom Field. Before I go anywhere near the "
+          "C-130, I have to get through jump school.")
+OBJECTIVE_10 = "Report to jump school"
+XMARKER = 0x0000003B
+HANSCOM = 0x0100A22E
+# Jump school's big doorway on the ramp side (make_hanscom_buildings.py's East Coast Aero Club),
+# and out of it: the objective's marker stands just outside.
+JUMP_SCHOOL_DOOR, JUMP_SCHOOL_OUT = (34703.0, -22108.0), (0.148, 0.989)
 NEUTRAL, IRRITATED, AMUSED = 0x000D755D, 0x000C8670, 0x000FA84D
 GET_IS_ID, GET_GLOBAL, GET_IS_ALIAS_REF = 72, 74, 566
 PRIORITY = 60
@@ -109,12 +120,14 @@ def info(responses, emotion, voice, conds=(), prompt=None, scene=None, flags=0, 
     return new_rec("INFO", fid, s)
 
 
-def set_global(glob, value):
-    """VMAD: vanilla's DefaultTopicInfoSetGlobal, the global set to value when the line ends."""
+def sign_up(value):
+    """VMAD: DevilsSignUp, which (when the line ends) sets DevilsNateRank to value, the quest's
+    stage 10 and shows its objective 10."""
     def ws(t): t = t.encode(); return struct.pack("<H", len(t)) + t
-    props = (ws("SetGlobalOnEnd") + struct.pack("<BB", 1, 1) + struct.pack("<HhI", 0, -1, glob)
-             + ws("OnEndValue") + struct.pack("<BB", 4, 1) + struct.pack("<f", value))
-    return struct.pack("<hhH", 6, 2, 1) + ws(SET_GLOBAL) + b"\x00" + struct.pack("<H", 2) + props
+    obj = lambda f: struct.pack("<BB", 1, 1) + struct.pack("<HhI", 0, -1, f)
+    props = (ws("MyQuest") + obj(quest_fid) + ws("Rank") + obj(rank_fid)
+             + ws("RankValue") + struct.pack("<BB", 4, 1) + struct.pack("<f", value))
+    return struct.pack("<hhH", 6, 2, 1) + ws(SIGN_UP) + b"\x00" + struct.pack("<H", 3) + props
 
 
 quest_fid = new_fid()
@@ -151,6 +164,7 @@ def scene(fid, name, choices):
 
 # The global: 0 not signed, 1 officer, 2 enlisted (a corporal).
 rank = new_rec("GLOB", new_fid(), [(b"EDID", z("DevilsNateRank")), (b"FNAM", b"f"), (b"FLTV", struct.pack("<f", 0.0))])
+rank_fid = rank.fid
 [n for n in top if isinstance(n, Group) and n.gtype == 0 and n.label == b"GLOB"][0].kids.append(rank)
 before_scn, prior_scn, after_scn = new_fid(), new_fid(), new_fid()
 him = [ctda(GET_IS_ALIAS_REF, 0, 1.0)]
@@ -175,11 +189,11 @@ scene(before_scn, "DevilsRecruitBefore", {"pos": (pos, pos_a), "neu": (neu, neu_
 off = topic("scene", [info(["I was an officer."], NEUTRAL, P, prompt="I was an officer.")])
 off_a = topic("scene", [info(["An officer. Course you were. Two hundred years on ice and you still expect a salute.",
                               "Welcome to the Devils... sir."], AMUSED, "brannock", him,
-                             vmad=set_global(rank.fid, 1.0))])
+                             vmad=sign_up(1.0))])
 enl = topic("scene", [info(["Enlisted."], NEUTRAL, P, prompt="Enlisted.")])
 enl_a = topic("scene", [info(["Then you know which end of the rifle goes bang. Prior service don't start at "
                               "private. You'll come in as a corporal. Don't make me regret it."], IRRITATED,
-                             "brannock", him, vmad=set_global(rank.fid, 2.0))])
+                             "brannock", him, vmad=sign_up(2.0))])
 # The wheel shows all four directions, so the other two get lines too (two left empty showed as
 # bare arrows; the author, 2026-11-24).
 p_neg = topic("scene", [info(["Forget it."], NEUTRAL, P, prompt="Forget it.")])
@@ -219,12 +233,30 @@ topic("greeting", [
 ])
 
 # The quest: start-game enabled, priority over the generic hellos, Brannock as alias 0.
+# The jump school's marker: an XMarker just outside its doorway, persistent, in Hanscom's
+# persistent cell, for the objective to point at.
+from landh import load_heights, height_at
+hs = load_heights(top, HANSCOM)
+mx, my = JUMP_SCHOOL_DOOR[0] + 300 * JUMP_SCHOOL_OUT[0], JUMP_SCHOOL_DOOR[1] + 300 * JUMP_SCHOOL_OUT[1]
+g1 = [n for n, *_ in walk(top) if isinstance(n, Group) and n.gtype == 1 and struct.unpack("<I", n.label)[0] == HANSCOM][0]
+pcell = [k for k in g1.kids if isinstance(k, Rec) and k.type == "CELL" and k.flags & 0x400][0]
+g6 = [k for k in g1.kids if isinstance(k, Group) and k.gtype == 6 and struct.unpack("<I", k.label)[0] == pcell.fid][0]
+g8 = [k for k in g6.kids if isinstance(k, Group) and k.gtype == 8][0]
+marker = new_rec("REFR", new_fid(), [(b"NAME", fid4(XMARKER)),
+                                     (b"DATA", struct.pack("<6f", mx, my, height_at(hs, mx, my) + 8, 0, 0, 0))], 0x400)
+g8.kids.append(marker)
+
 quest = new_rec("QUST", quest_fid, [
-    (b"EDID", z("DevilsRecruiting")),
-    (b"DNAM", struct.pack("<HBB", 0x0111, PRIORITY, 0x80) + bytes.fromhex("0000000006000000")),
+    (b"EDID", z("DevilsRecruiting")), (b"FULL", z(QUEST_NAME)),
+    (b"DNAM", struct.pack("<HBB", 0x0111, PRIORITY, 0x80) + bytes.fromhex("0000000007000000")),
     (b"FLTR", z("DevilsInTheDetails\\")), (b"NEXT", b""),
-    (b"ANAM", fid4(1)),
+    (b"INDX", struct.pack("<HBB", 10, 0, 0)), (b"QSDT", b"\x00"), (b"NAM2", z("Signed up")), (b"CNAM", z(LOG_10)),
+    (b"QOBJ", struct.pack("<H", 10)), (b"FNAM", fid4(0)), (b"NNAM", z(OBJECTIVE_10)),
+    (b"QSTA", struct.pack("<iII", 1, 0, 0)),
+    (b"ANAM", fid4(2)),
     (b"ALST", fid4(0)), (b"ALID", z("Brannock")), (b"FNAM", fid4(0x200)), (b"ALUA", fid4(BRANNOCK)),
+    (b"VTCK", fid4(0)), (b"ALED", b""),
+    (b"ALST", fid4(1)), (b"ALID", z("JumpSchool")), (b"FNAM", fid4(0)), (b"ALFR", fid4(marker.fid)),
     (b"VTCK", fid4(0)), (b"ALED", b""),
 ])
 qgroup = new_group(b"QUST", 0)
@@ -241,5 +273,5 @@ OUT.mkdir(parents=True, exist_ok=True)
                                             "lines": lines}, indent=1))
 SEQ.parent.mkdir(parents=True, exist_ok=True)
 SEQ.write_bytes(struct.pack("<I", quest_fid))
-print(f"DevilsRecruiting {quest_fid:08X}, DevilsNateRank {rank.fid:08X}; {len(lines)} lines; scenes "
+print(f"marker {marker.fid:08X}; DevilsRecruiting {quest_fid:08X}, DevilsNateRank {rank.fid:08X}; {len(lines)} lines; scenes "
       f"{before_scn:08X} {prior_scn:08X} {after_scn:08X}; {added} records and groups")

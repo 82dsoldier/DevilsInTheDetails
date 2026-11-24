@@ -802,6 +802,13 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     need the game's Dialogue Subtitles on** (Settings, Display; `bDialogueSubtitles` in
     Fallout4Prefs.ini): with them off there's nothing to read. Say so in the mod's description
     until he's voiced.
+  - **Signing up shows (the author, 2026-11-24: "something after you enlist... to tell you
+    what to do next or at least that you've moved the story along").** The quest has a name,
+    **"All the Way"** (the 82nd's motto), a side quest; the sign-up line's own script
+    (`DevilsSignUp.psc`, in place of the vanilla set-global) records the rank, sets stage 10
+    (its Pip-Boy log: "SSG Brannock signed me up with the Devils at Hanscom Field...") and
+    shows objective 10, **"Report to jump school"**, its marker on an XMarker outside the
+    jump school's doorway (alias `JumpSchool`). The mock door comes next.
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
