@@ -41,12 +41,15 @@ TOWER = 0x001AE17A                     # ShackGuardTower (the workshop tower as 
 # Along the road: the gate's centre at Langley Road's middle, where the placeholder's door was.
 CENTRE = (6100.0, -77235.0)
 BEARING = 71.3                         # up the road, into the base
-PANELS = 4                             # fence panels each side of the gate (the road is 7 m: 490 units)
+# Fence panels each side of the gate (the road is 7 m: 490 units): to the left (north) 4, where
+# the perimeter fence (esp_perimeter.py) meets it; to the right (south) 1, to the map edge.
+PANELS = {-1: 4, 1: 1}
 ARRIVE_IN = 300.0
 # (across, along, turn) in the road's frame: across is to the right going in, along is into the
 # base (negative: outside the gate).
 JERSEYS = [(-200, -350, 0), (-72, -350, 0), (72, -650, 0), (200, -650, 0)]
-SANDBAG_WALLS = [(420, 160, 0), (560, 60, 90)]
+# Between the road (half-width 245) and the perimeter fence, which runs about 487 to the right.
+SANDBAG_WALLS = [(365, 150, 0), (305, 330, 90)]
 TOWER_AT = (-520, 260, 0)              # 180 faced it backward (the author, 2026-11-24)
 
 src, dst = sys.argv[1:3]
@@ -150,12 +153,12 @@ cw_ref.set_body(pack_subs([(t, new_xtel if t == b"XTEL" else v) for t, v in subl
 
 # The fence: panels out from each side of the gate, a post at every joint.
 for side in (-1, 1):
-    for k in range(PANELS):
+    for k in range(PANELS[side]):
         near = GATE_W / 2 + k * FENCE_W
         u0 = near if side > 0 else -(near + FENCE_W)
         ref(FENCE, u0, 0, ground(u0, u0 + FENCE_W, 0) + FENCE_LIFT)
         added += 1
-    for k in range(PANELS + 1):
+    for k in range(PANELS[side] + 1):
         u = side * (GATE_W / 2 + k * FENCE_W)
         ref(POST, u, 0, height_at(hs, *at(u, 0)) + FENCE_LIFT)
         added += 1

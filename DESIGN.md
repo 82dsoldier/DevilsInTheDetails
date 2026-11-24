@@ -645,6 +645,16 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     it, a sandbagged position by the road inside and a guard tower across from it. No guards
     yet: they come with the traffic. The Commonwealth end keeps its junk walls (out in the
     wasteland, a junk barricade fits).
+  - **The perimeter (the author, 2026-11-24; `esp_perimeter.py`):** a gate with no fence
+    looked silly, and nothing stopped anyone walking off the map. So the same chain-link runs
+    the whole way round, 128 units inside the map's edge, panels tilted with the ground. It
+    joins the checkpoint's arms, round a notch that leaves the stretch of Langley Road outside
+    the gate open. Where it crosses a street (179 places): Jersey barriers, every road in but
+    one closed. About one panel in 25 is down and patched (junk wall, sandbags or Jersey
+    barriers). A guard tower inside each corner. **The breach:** three panels missing on the
+    south side below the DRMO (x 26,000 to 26,800), for the settlement quest's raiders (see
+    "The standing it takes"). A border region (`DevilsHanscomBorder`) at the map's edge keeps
+    the player from walking off through it.
   - **No sea past the edge.** The CK's new-world defaults (land -2048, water 0) drew an ocean
     below a cliff at every edge of Hanscom. Its default land is now 500 (the south edge near
     the road), water -20000. But the loaded cells past the last one draw nothing at all (sky
@@ -698,6 +708,13 @@ also sent out to bring in recruits.
   with (either way), the mock door, the avionics part for the grounded bird. Past the line, the
   Devils' commander offers the ramp ("You've been useful. The ramp's yours to fix up. We take
   our cut, same as everyone."). A player who hates recruiting gets there another way.
+- **The standing it takes (the author, 2026-11-24):** X reputation with the Devils, from (at
+  least) three things: finding the agent (the leak), bringing in recruits, and **fixing the
+  breach in the perimeter fence**. Raiders come through a stretch of the fence that's down,
+  now and then: raids to fight off, and a quest to close it. **Nate fixes it with 10 junk
+  items** (anything marked junk), brought to the breach. The rest of the perimeter already
+  shows the Devils' patches (junk walls, sandbags, Jersey barriers where the chain-link is
+  down), so the fix fits in.
 - **Why:** the author wants the world alive and the space used, with **no follow quests and
   few fetch quests**. Most of the life should be systemic, not quests: recruits walking in,
   caravans to the DRMO (hit while the leak is open), a Devils collector who comes round for the
