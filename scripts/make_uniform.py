@@ -57,34 +57,38 @@ BAND_H = 0.020
 HEAD_REACH = [0.965, 0.929, 0.919, 0.919, 0.851, 0.65, 0.531, 0.613, 0.749, 0.949, 0.949, 0.932,
               0.959, 1.005, 1.05, 1.05, 1.037, 1.056, 1.067, 1.067, 1.053, 1.02, 0.999, 0.995]
 HEAD_CLEAR = 0.03
-TOP = (0.005, -0.008, 1.912)          # the crown's middle: just over his head (the cap's top 1.902)
+TOP = (-0.005, -0.020, 1.908)
+# The crown slants down to his right, from the flash's side (from X_HIGH), as the cloth is pulled
+# over to hang on that side (the author, 2026-11-24: the first passes were round on top).
+X_HIGH, SLANT = -0.03, 0.22          # the crown's middle: just over his head (the cap's top 1.902)
 OVERHANG = 0.04
-STIFF_UP = 0.065
+STIFF_UP = 0.085
 CROWN_UP = 0.032                      # the crown's edge over the band's top, elsewhere
 BEHIND_AT, BEHIND_DIP = math.radians(170), 0.008
 RIGHT_OUT, RIGHT_DROP = 0.09, 0.042
 FLASH_AT = math.radians(120)          # around the head from his right: over his left eye
-FLASH_W, FLASH_H = 0.044, 0.050
-FLASH_UP = 0.004                      # its foot over the band's top
+FLASH_W, FLASH_H = 0.044, 0.054
+FLASH_UP = 0.008                      # its foot over the band's top
 STIFF = 0.42                          # radians: how far round the stiffened front reaches
 N_AROUND = 96
 V_SPAN = 0.22                         # metres of beret, band foot to top, along the texture's v
 BERET_TEX = (2048, 512)
 
 # --- The wings ------------------------------------------------------------------------------
-CHEST_X = [-0.13, -0.11, -0.09, -0.07, -0.05, -0.03]
+CHEST_X = [-0.16, -0.14, -0.12, -0.10, -0.08, -0.06]
 CHEST_Z = [1.455, 1.470, 1.485, 1.500, 1.515, 1.530]
 CHEST_Y = [                           # his front's y at each (z, x): FatiguesM.nif's, measured
-    [0.0971, 0.1107, 0.1154, 0.1200, 0.1234, 0.1309],
-    [0.0907, 0.1026, 0.1071, 0.1116, 0.1160, 0.1236],
-    [0.0858, 0.0918, 0.0975, 0.1020, 0.1064, 0.1141],
-    [0.0756, 0.0811, 0.0867, 0.0923, 0.0970, 0.1019],
-    [0.0648, 0.0703, 0.0759, 0.0816, 0.0869, 0.0897],
-    [0.0549, 0.0603, 0.0653, 0.0701, 0.0751, 0.0906],
+    [0.0731, 0.0891, 0.1050, 0.1131, 0.1177, 0.1223],
+    [0.0669, 0.0828, 0.0987, 0.1049, 0.1094, 0.1138],
+    [0.0620, 0.0779, 0.0891, 0.0947, 0.0997, 0.1042],
+    [0.0568, 0.0728, 0.0783, 0.0839, 0.0896, 0.0946],
+    [0.0502, 0.0621, 0.0676, 0.0731, 0.0788, 0.0844],
+    [0.0447, 0.0522, 0.0577, 0.0629, 0.0677, 0.0725],
 ]
-# Above the pocket, not on it (the first, at 1.455, sat on it; the author, 2026-11-24), and
-# the badge's own shape, about twice as wide as tall (the first, 8.5 x 3.2 cm, was too wide).
-WINGS_AT = (-0.085, 1.497)            # its middle: x (his left is -x) and height
+# Centred over his left breast pocket, just above its flap (the author, 2026-11-24). The
+# pocket, read off the vanilla fatigues' texture (ArmyFatigues_d.dds) through the model's UVs:
+# x -0.044 to -0.176 (his left), its flap's top 1.47 m up.
+WINGS_AT = (-0.110, 1.490)            # its middle: x (his left is -x) and height
 WINGS_W, WINGS_H = 0.060, 0.0315
 WINGS_OFF = 0.003
 WINGS_TEX = (512, 256)                # powers of two: 512 x 270 crashed the game (2026-11-24)
@@ -134,7 +138,8 @@ def beret_grid():
         q1 = at(1.0 + (k - 1.0) * (0.5 + 0.6 * right), _lerp(_lerp(zt, ze, 0.6), ze, stiff) + 0.03 * right)
         # The crown's edge to its middle: flat across his head; on the right, back up from the
         # hanging cloth first.
-        q2 = at(_lerp(0.75 * k, 1.02 * k, right), top[2] + 0.004)
+        q2 = at(_lerp(0.85 * k, 1.02 * k, right), 0.0)
+        q2[2] = top[2] + 0.002 - SLANT * max(0.0, q2[0] - X_HIGH)
         pts = [at(1.0, zb), at(1.0, zb + BAND_H / 2), a]
         pts += [_bez(a, q1, edge, t) for t in np.linspace(0, 1, 11)[1:]]
         pts += [_bez(edge, q2, top, t) for t in np.linspace(0, 1, 13)[1:]]
@@ -179,12 +184,12 @@ def draw_flash(w_px, h_px):
 
     def shield(inset):
         x0, x1, y0 = inset, W - inset, inset
-        yb = H * 0.62
-        pts = [(x0, y0), (x1, y0), (x1, yb)]
-        for t in np.linspace(0, 1, 24):
-            pts.append((_lerp(x1, W / 2, t), _lerp(yb, H - inset, math.sin(t * math.pi / 2))))
-        for t in np.linspace(1, 0, 24):
-            pts.append((_lerp(x0, W / 2, t), _lerp(yb, H - inset, math.sin(t * math.pi / 2))))
+        # As wide all the way down, then a round bottom across the whole width (the first
+        # narrowed to a point; the author, 2026-11-24).
+        yb = H * 0.70
+        pts = [(x0, y0), (x1, y0)]
+        for a in np.linspace(0, math.pi, 40):
+            pts.append((W / 2 + (x1 - W / 2) * math.cos(a), yb + (H - inset - yb) * math.sin(a)))
         return pts
     border = W * 0.11
     d.polygon(shield(0), fill=GOLD)

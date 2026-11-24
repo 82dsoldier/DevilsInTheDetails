@@ -736,6 +736,13 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
       past the band), checked clear of the head everywhere. The wings sat on the pocket, too
       wide, and curled up at the tips: now above the pocket, 6.0 x 3.15 cm, drawn to the badge's
       own shape (round open loops, feathers fanning out sideways and down).
+    - **Third pass (2026-11-24):** still round on top, not tucked behind the flash: the front
+      left now stands up to the beret's top and the crown slants down from there across his
+      head to the cloth over his right ear (as far as his head allows, 2 mm clear). The flash
+      is as wide all the way down, with a round bottom (it had narrowed to a point). The wings
+      are centred over the left breast pocket, just above its flap: the pocket found on the
+      vanilla fatigues' texture (`ba2.py` reads texture archives now) and carried through the
+      model's UVs to his chest, x 4.4 to 17.6 cm left of centre, the flap's top 1.47 m up.
   - Next: his pitch (silent subtitles).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
