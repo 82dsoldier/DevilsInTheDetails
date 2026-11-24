@@ -180,7 +180,15 @@ enl = topic("scene", [info(["Enlisted."], NEUTRAL, P, prompt="Enlisted.")])
 enl_a = topic("scene", [info(["Then you know which end of the rifle goes bang. Prior service don't start at "
                               "private. You'll come in as a corporal. Don't make me regret it."], IRRITATED,
                              "brannock", him, vmad=set_global(rank.fid, 2.0))])
-scene(prior_scn, "DevilsRecruitPrior", {"pos": (off, off_a), "neu": (enl, enl_a)})
+# The wheel shows all four directions, so the other two get lines too (two left empty showed as
+# bare arrows; the author, 2026-11-24).
+p_neg = topic("scene", [info(["Forget it."], NEUTRAL, P, prompt="Forget it.")])
+p_neg_a = topic("scene", [info(["Then get out of my line."], IRRITATED, "brannock", him)])
+p_que = topic("scene", [info(["Why does it matter?"], NEUTRAL, P, prompt="Why does it matter?")])
+p_que_a = topic("scene", [info(["Officers get saluted. Everybody else gets a rifle. Which were you?"], IRRITATED,
+                               "brannock", him, scene=prior_scn)])
+scene(prior_scn, "DevilsRecruitPrior", {"pos": (off, off_a), "neu": (enl, enl_a), "neg": (p_neg, p_neg_a),
+                                        "que": (p_que, p_que_a)})
 
 # After: anything.
 a_pos = topic("scene", [info(["So what happens now?"], NEUTRAL, P, prompt="So what happens now?")])

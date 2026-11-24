@@ -776,6 +776,10 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
         - "Enlisted." → "Then you know which end of the rifle goes bang. Prior service don't
           start at private. You'll come in as a corporal. Don't make me regret it." *(signs him
           up)*
+        - "Forget it." → "Then get out of my line." (not signed; he can come back)
+        - "Why does it matter?" → "Officers get saluted. Everybody else gets a rifle. Which were
+          you?" (back to the choice). These two fill the wheel: it always shows four
+          directions, and two left empty showed as bare arrows (the author, 2026-11-24).
       - "What is this place?" → "Recruiting station. I recruit. You station. Simple."
       - "Who are you people?" → "The people standing between this field and every raider east
         of Concord. Sign, and you'll find out the rest."
@@ -794,7 +798,10 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     `DevilsNateRank` (0 not signed, 1 officer, 2 corporal), set by vanilla's
     `DefaultTopicInfoSetGlobal` on the sign-up line's end: no new Papyrus. Every line has a
     silent voice file as long as it takes to read (MaleRough for him, both player voices for
-    Nate), and the quest has its SEQ file (`Data\SEQ\DevilsInTheDetails.seq`).
+    Nate), and the quest has its SEQ file (`Data\SEQ\DevilsInTheDetails.seq`). **Silent lines
+    need the game's Dialogue Subtitles on** (Settings, Display; `bDialogueSubtitles` in
+    Fallout4Prefs.ini): with them off there's nothing to read. Say so in the mod's description
+    until he's voiced.
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
