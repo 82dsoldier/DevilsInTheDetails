@@ -6,8 +6,9 @@
     Lexington. The Commonwealth (WRLD 0000003C) and its persistent cell are overridden to hold
     the door and the barricade (the world record without its OFST and CLSZ tables, which are
     the master's).
-  Hanscom: where Langley Road leaves the map's south edge, in a barricade across the road, its
-    arrival marker on the road a little inside, facing up the road into the base.
+  Hanscom: on the road up to the base where it crosses the (cropped) map's south fence line,
+    in a barricade across the road, its arrival marker on the road a little inside, facing up the
+    road into the base. (Before the crop, 2026-11-24, where Langley Road left the old south edge.)
 The door is our own DevilsRoadBarricade: a junk-wall piece that doesn't open (a vanilla gate
 swung open first and showed the broken highway past the border). The rest of each barricade is
 vanilla junk walls, persistent, in the world's persistent cell.
@@ -36,12 +37,13 @@ CW_DOOR = (-13420.0, 107300.0, 5486.0)
 CW_WALLS_X = [-13160.0, -13680.0, -13940.0, -14200.0, -14460.0, -14720.0]
 CW_ARRIVE = (-13420.0, 107000.0, 5500.0)
 CW_FACING = 180.0                         # south, toward Lexington
-# Hanscom: Langley Road crosses the south edge (y -77824) at x 4344, heading 71 degrees inside.
-HS_DOOR_XY = (6100.0, -77235.0)        # on the road, far enough in for the barricade
-HS_ROAD_BEARING = 71.3
+# Hanscom: the road up to the base crosses the cropped map's fence line (y -44928) at x 15820,
+# heading 9 degrees east of north (esp_crop.py; before it, Langley Road at 6100, -77235, 71.3).
+HS_DOOR_XY = (15820.0, -44928.0)
+HS_ROAD_BEARING = 9.3
 HS_WALLS = [-2, -1, 1, 2]                 # pieces either side of the door, across the road
 HS_ARRIVE_IN = 300.0
-HS_DEFAULT_LAND = 500.0                   # the south edge near the road: 506 to 548
+HS_DEFAULT_LAND = 350.0                   # the cropped map's edge: 41 to 1071, 347 on average
 HS_DEFAULT_WATER = -20000.0
 
 src, dst = sys.argv[1:3]
@@ -132,7 +134,7 @@ cw_g1 = relabel(hs_g1, COMMONWEALTH, [cw_cell, relabel(hs_g6, cw_cell_fid, [cw_g
 wrld_group = [n for n in top if isinstance(n, Group) and n.gtype == 0 and n.label == b"WRLD"][0]
 wrld_group.kids[0:0] = [w, cw_g1]          # the master's world first, as in load order
 
-# Hanscom's end: on Langley Road at the south edge, the ground from the plugin's terrain.
+# Hanscom's end: on the road at the south fence line, the ground from the plugin's terrain.
 hs = load_heights(top, HANSCOM)
 hx, hy = HS_DOOR_XY
 hz = height_at(hs, hx, hy)

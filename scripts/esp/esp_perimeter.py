@@ -1,11 +1,10 @@
 """Hanscom's perimeter: a chain-link fence the whole way round, just inside the map's edge, and a
-border region at the edge, so the gate on Langley Road is the only way in or out.
+border region at the edge, so the gate on the road in is the only way in or out.
 
   - The fence runs INSET in from the edge, panel after panel along the ground (each at the
     lower ground of its two ends, lifted as the checkpoint's are), a post at every joint.
-  - It meets the checkpoint's fence (esp_edge_gate.py, run first): its north arm, round a notch
-    that leaves the stretch of Langley Road outside the gate open, and its south arm, which
-    reaches the edge.
+  - It meets the checkpoint's fence (esp_edge_gate.py, run first), which stands on its south
+    line, at both of its ends.
   - Where it crosses a street, junk walls instead of the fence: the Devils closed every
     road in but one.
   - Here and there (PATCH_EVERY, at random but the same every run) a panel is down and patched:
@@ -29,7 +28,10 @@ from landh import load_heights, height_at
 HANSCOM = 0x0100A22E
 TEMPLATE = 0x01008B42
 CELL = 4096.0
-X_MIN, X_MAX, Y_MIN, Y_MAX = -25 * CELL, 26 * CELL, -19 * CELL, 19 * CELL   # the map, not the ring
+# The fenced map (esp_crop.py's PLAY): cells x -1..12, y -11..-5. Outside it, the real Hanscom's
+# cells kept as scenery, and the filler ring.
+X_MIN, X_MAX, Y_MIN, Y_MAX = -1 * CELL, 13 * CELL, -11 * CELL, -4 * CELL
+PAINT_X0, PAINT_Y1 = -25 * CELL, 19 * CELL    # road_paint.npy's grid: the whole of the old map
 INSET = 128.0
 FENCE, FENCE_W, POST = 0x0019C915, 259.0, 0x0019C91E
 FENCE_LIFT = 10.0                       # as esp_edge_gate.py's
@@ -46,9 +48,8 @@ SEED = 1715
 # it; the filler ring's cells don't, and are outside.
 BORDER_OUT = 0.0
 # The checkpoint (esp_edge_gate.py): its fence's ends, on the line across the road at the gate.
-GATE_CENTRE, GATE_BEARING, GATE_W = (6100.0, -77235.0), 71.3, 372.0
-ARM_NORTH, ARM_SOUTH = 4, 1             # its panels each side
-NOTCH_WEST = 3700.0                     # the notch's west side: west of where Langley leaves the map
+GATE_CENTRE, GATE_BEARING, GATE_W = (15820.0, -44928.0), 9.3, 372.0
+ARM_LEFT, ARM_RIGHT = 1, 1              # its panels each side
 # The breach: on the south side, below the DRMO, this stretch of x.
 BREACH = (26000.0, 26800.0)
 OUT = "C:/source/repos/BraggMap/out/hanscom/"
@@ -113,7 +114,7 @@ def place(base, x, y, z, rz):
 
 
 def asphalt(x, y):
-    r, c = int(round((Y_MAX - y) / 128)), int(round((x - X_MIN) / 128))
+    r, c = int(round((PAINT_Y1 - y) / 128)), int(round((x - PAINT_X0) / 128))
     return float(paint[r, c]) if 0 <= r < paint.shape[0] and 0 <= c < paint.shape[1] else 0.0
 
 
@@ -121,13 +122,12 @@ def asphalt(x, y):
 gb = math.radians(GATE_BEARING)
 across = (math.cos(gb), -math.sin(gb))
 arm = lambda u: (GATE_CENTRE[0] + u * across[0], GATE_CENTRE[1] + u * across[1])
-north_end = arm(-(GATE_W / 2 + ARM_NORTH * FENCE_W))
-south_end = arm(GATE_W / 2 + ARM_SOUTH * FENCE_W)
+left_end = arm(-(GATE_W / 2 + ARM_LEFT * FENCE_W))
+right_end = arm(GATE_W / 2 + ARM_RIGHT * FENCE_W)
 x0, x1, y0, y1 = X_MIN + INSET, X_MAX - INSET, Y_MIN + INSET, Y_MAX - INSET
-# Clockwise from the notch: west along the south side, up the west, along the north, down the
-# east, west along the south to the checkpoint's south arm. (Its north arm to the notch closes it.)
-path = [north_end, (NOTCH_WEST, north_end[1]), (NOTCH_WEST, y0), (x0, y0), (x0, y1), (x1, y1), (x1, y0),
-        south_end]
+# From the checkpoint's right (east) end round to its left: east along the south side, up the
+# east, along the north, down the west, east along the south to the gate.
+path = [right_end, (x1, y0), (x1, y1), (x0, y1), (x0, y0), left_end]
 
 def euler(d):
     """(rx, ry, rz) that turn a model's own x along the unit vector d, its z as near up as can be.

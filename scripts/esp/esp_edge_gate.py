@@ -1,5 +1,5 @@
 """Hanscom's end of the road from the Commonwealth: a Devils checkpoint, in place of the junk-wall
-placeholder esp_edge_door.py put across Langley Road.
+placeholder esp_edge_door.py put across the road.
 
   - A chain-link fence across the road and out past both sides, its gate the load door: our own
     DevilsHanscomGate, on vanilla's static (non-opening) pre-war chain-link gate.
@@ -38,17 +38,19 @@ JERSEY = 0x00001E02                    # JerseyBarricade01: x -64..64, z 0..64
 SANDBAGS = 0x00045762                  # SandbagWall01 (moveable static): x -111..120
 TOWER = 0x001AE17A                     # ShackGuardTower (the workshop tower as a static): z -152..88
 
-# Along the road: the gate's centre at Langley Road's middle, where the placeholder's door was.
-CENTRE = (6100.0, -77235.0)
-BEARING = 71.3                         # up the road, into the base
-# Fence panels each side of the gate (the road is 7 m: 490 units): to the left (north) 4, where
-# the perimeter fence (esp_perimeter.py) meets it; to the right (south) 1, to the map edge.
-PANELS = {-1: 4, 1: 1}
+# Along the road: the gate's centre on the road's middle, where the placeholder's door was: on
+# the cropped map's south fence line (esp_crop.py; before the crop, Langley Road, 6100, -77235,
+# 71.3, with a notch in the perimeter round the road outside).
+CENTRE = (15820.0, -44928.0)
+BEARING = 9.3                          # up the road, into the base
+# Fence panels each side of the gate (the road is 8 m: 570 units), on the perimeter's line; the
+# perimeter fence (esp_perimeter.py) goes on from their ends.
+PANELS = {-1: 1, 1: 1}
 ARRIVE_IN = 300.0
 # (across, along, turn) in the road's frame: across is to the right going in, along is into the
 # base (negative: outside the gate).
 JERSEYS = [(-200, -350, 0), (-72, -350, 0), (72, -650, 0), (200, -650, 0)]
-# Between the road (half-width 245) and the perimeter fence, which runs about 487 to the right.
+# Inside, by the road (half-width 285).
 SANDBAG_WALLS = [(365, 150, 0), (305, 330, 90)]
 TOWER_AT = (-520, 260, 0)              # 180 faced it backward (the author, 2026-11-24)
 

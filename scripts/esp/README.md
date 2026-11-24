@@ -14,6 +14,10 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_navwrite.py`**: writes the C-130 cabin's navmesh (a flat grid over the whole floor).
 - **`esp_paving.py`**: Hanscom's graded terrain, paving and buildings into the plugin, from
   `out/hanscom/` (`make_hanscom_paving.py`, `make_hanscom_buildings.py`).
+- **`esp_crop.py`**: Hanscom cut down to the first act's cells (plus three cells of scenery
+  round them), everything in the other cells removed. Hanscom's build from there, on a plugin
+  without the doors: `esp_crop.py`, `esp_edge_door.py`, `esp_edge_ring.py`, `esp_edge_gate.py`,
+  `esp_road_paint.py`, `esp_perimeter.py`, `esp_ground_paint.py`.
 - **`esp_edge_door.py`**: the road between the Commonwealth and Hanscom, a pair of linked load
   doors (junk-wall barricades): one on the elevated highway north of Lexington, at the map's
   border (overriding the Commonwealth's world record, without its offset tables, and its
