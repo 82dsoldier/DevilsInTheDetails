@@ -1217,8 +1217,10 @@ def tarmac_parts():
     return {"apron": ("tarmac", False, m)}
 
 
-def write_nif(path, root_name, built, s, tex, pyn):
-    """One static model from {name: (material, collides, Mesh)}: material None is collision only."""
+def write_nif(path, root_name, built, s, tex, pyn, prefix="c130", materials=None):
+    """One static model from {name: (material, collides, Mesh)}: material None is collision only.
+    Other models built with this file's Mesh pass their own texture prefix and materials."""
+    materials = MATERIALS if materials is None else materials
     NifFile, NiShapeBuf, PynBufferTypes, BSXFlags, bhkPhysicsSystem, CollisionShape, \
         PhysicsProps, pack_shapes, HAVOC_SCALE_FACTOR, SF1, SF2 = pyn
     nif = NifFile()
@@ -1229,7 +1231,7 @@ def write_nif(path, root_name, built, s, tex, pyn):
             continue
         verts = [tuple(c * s for c in v) for v in m.verts]
         if mat:
-            opts = MATERIALS[mat][1]
+            opts = materials[mat][1]
             props = NiShapeBuf()
             props.bufType = PynBufferTypes.BSTriShapeBufType
             props.hasFullPrecision = 1
@@ -1246,9 +1248,9 @@ def write_nif(path, root_name, built, s, tex, pyn):
                 sp.Emissive_Color[0], sp.Emissive_Color[1], sp.Emissive_Color[2] = 1.0, 0.96, 0.85
                 sp.Emissive_Color[3] = 1.0
                 sp.Emissive_Mult = 1.5
-            shape.set_texture("Diffuse", f"{tex}\\c130_{mat}.dds")
-            shape.set_texture("Normal", f"{tex}\\c130_{mat}_n.dds")
-            shape.set_texture("Specular", f"{tex}\\c130_{mat}_s.dds")
+            shape.set_texture("Diffuse", f"{tex}\\{prefix}_{mat}.dds")
+            shape.set_texture("Normal", f"{tex}\\{prefix}_{mat}_n.dds")
+            shape.set_texture("Specular", f"{tex}\\{prefix}_{mat}_s.dds")
             sp.Spec_Str, sp.Glossiness = 1.0, 1.0      # the _s map sets each material's shine
             shape.save_shader_attributes()
             if opts.get("alpha"):

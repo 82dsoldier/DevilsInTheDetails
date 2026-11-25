@@ -898,6 +898,18 @@ practise standing in the door and stepping out, as at jump school.
   - **Outside, in a sawdust pit** beside jump school, not inside the shell.
   - **The instructor is "Sergeant Airborne":** a black-hat instructor with no name given (every
     instructor answers to it). Loud and deadpan; the comedy comes from him.
+  - **On the East Ramp, in front of jump school (the author's pick of three, 2026-11-25):** the
+    grass behind and beside the hangar is cut up by service roads, and the ramp leaves room for
+    the tower.
+- **Built, the structure (2026-11-25; `make_mock_door.py`, `scripts/esp/esp_mock_door.py`):** a
+  16 x 10 m sawdust pit in a timber kerb, 17 m out from jump school's door wall and square to it
+  (heading 8.5). In it, toward the hangar, a mock fuselage on posts: an olive-drab plywood box
+  6 m long, the real cabin's 3.12 m wide, 2.45 m to its flat roof (room for power armor), its
+  floor 1 m above the sawdust (`--floor`), open at the aft end with timber steps up (a ramp
+  under them to walk on). One paratroop door, the real 36 x 72 in, in the side facing the open
+  pit, near the aft end. Plain walk-in so far: no slab, no instructor, no navmesh on the
+  sawdust yet. Next: the walk test, then Sergeant Airborne, the commands, and the door used as
+  on the bird (the slab: in power armor, "step out" sets Nate down on the sawdust).
 
 #### The bird is grounded
 

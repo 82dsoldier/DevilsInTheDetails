@@ -47,6 +47,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_ground_paint.py`**: all of Hanscom's ground painted with vanilla's landscape textures
   (`out/hanscom/ground_paint.npz`, from `make_hanscom_ground.py`), the streets' asphalt included;
   replaces the terrain's layers, so it supersedes `esp_road_paint.py`'s. Safe to run again.
+- **`esp_mock_door.py`**: jump school's mock door (a sawdust pit with a mock fuselage on posts,
+  `MockDoor.nif` from `make_mock_door.py`) on the East Ramp in front of jump school, from
+  `out/hanscom/mockdoor.json`. Run once (it refuses a plugin that has it).
 
 The libraries:
 
