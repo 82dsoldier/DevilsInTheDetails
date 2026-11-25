@@ -908,7 +908,8 @@ practise standing in the door and stepping out, as at jump school.
   floor 1 m above the sawdust (`--floor`), open at the aft end with timber steps up (a ramp
   under them to walk on). One paratroop door, the real 36 x 72 in, in the side facing the open
   pit, near the aft end. Plain walk-in so far: no slab, no instructor, no navmesh on the
-  sawdust yet. Next: the walk test, then Sergeant Airborne, the commands, and the door used as
+  sawdust yet. **No jump lights** at the mock door (the author, 2026-11-25): the instructor's
+  commands are the signal. Next: the walk test, then Sergeant Airborne, the commands, and the door used as
   on the bird (the slab: in power armor, "step out" sets Nate down on the sawdust).
 
 #### The bird is grounded
