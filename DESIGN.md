@@ -891,6 +891,13 @@ practise standing in the door and stepping out, as at jump school.
 - **It teaches the jump.** The real jump only works if the player knows to step out of the door
   himself (the author's condition, 2026-11-19); by then he's done it once.
 - Short and funny, with the right sergeant's voice.
+- **Decided (the author, 2026-11-25):**
+  - **Both, in order:** the low mock door first (stand in the door, step out, land), then the
+    34-foot tower (exit in a harness and ride the cable down). Details of the tower to ask the
+    author when it's built.
+  - **Outside, in a sawdust pit** beside jump school, not inside the shell.
+  - **The instructor is "Sergeant Airborne":** a black-hat instructor with no name given (every
+    instructor answers to it). Loud and deadpan; the comedy comes from him.
 
 #### The bird is grounded
 
