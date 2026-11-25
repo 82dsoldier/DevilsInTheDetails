@@ -690,7 +690,9 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     Fallout4.esm's large-reference table (7,111 RNAM entries). The winning override's table is
     the one the game uses, so the whole Commonwealth lost it, and vanilla interior-to-exterior
     loads got slow (the author). `esp_largerefs.py` copies the table back; run it after every
-    CK save, like `esp_restore_npcs.py`.
+    CK save, like `esp_restore_npcs.py`. (The slow loads themselves weren't the plugin: vsync
+    slows Fallout 4's loading screens, and F4SE with High FPS Physics Fix cured them. The table
+    still belongs in the override.)
   - **The Hanscom end is a Devils checkpoint (the author, 2026-11-24; `esp_edge_gate.py`):**
     the junk walls looked nothing like a gate from inside. Now a chain-link fence across Langley
     Road and four panels past each side, its gate the load door (`DevilsHanscomGate`, vanilla's
@@ -818,7 +820,8 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     - **Tested 2026-11-24:** the line's script runs (OnBegin and OnEnd, traced), stage 10 is
       done, the objective is displayed (`sqo`), and his greeting turns to "Back again... sir?".
       The quest's pop-up and Pip-Boy entry not seen yet: the test save has no Pip-Boy or HUD
-      (it skipped the opening). **To check on a proper playthrough.**
+      (it skipped the opening). **2026-11-25:** in a proper playthrough, talking to him gave
+      the quest and its "Report to jump school" objective (the author).
 - **The DRMO (the tech gathering station).** A Defense Reutilization and Marketing Office, the
   military's name for a salvage yard. Scavengers bring in scrap and supplies, and the Devils pay
   in caps, or in "protection": the racket, the mod's heart, shows up in the Commonwealth before
@@ -1584,6 +1587,13 @@ The player arrives in power armor (the jump requires it), but the mod shouldn't 
 4. The underground, joining the two.
 5. Bragg Boulevard: the street, the market, the checkpoint, and the storm drain into the underground.
 6. Factions, then quests.
+
+**Dressing (2026-11-25, the author):** everything built so far is a block-out to be dressed:
+Hanscom's buildings (`make_hanscom_buildings.py`: footprints and heights, no detail), the parked
+C-130 and its cabin (`make_c130_blockout.py`, a stand-in for a real model), the barracks shells.
+Vanilla kit, clutter and textures where they fit (the author prefers them to our own meshes);
+our own models only where vanilla has nothing (the C-130: a job for help from the public repo).
+Each area gets its dressing pass once its gameplay works, so the layout doesn't move under it.
 
 ## Building it
 
