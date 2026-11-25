@@ -10,6 +10,10 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_restore_npcs.py in.esp known_good.esp out.esp`**: run after **every** Creation Kit
   save. The CK rewrites the two paratrooper bases (their race becomes SynthGen2RaceValentine,
   among other recalculations); this puts their whole records back from a plugin from before.
+- **`esp_largerefs.py in.esp out.esp`**: also after every CK save. The plugin overrides the
+  Commonwealth's worldspace record (for the barricade door north of Lexington), and the CK writes
+  it without Fallout4.esm's large-reference table (RNAM), which wipes the table for the whole
+  Commonwealth and made vanilla interior-to-exterior loads slow. This copies it back.
 - **`esp_navflat.py in.esp out.esp NAVM_FID FLOOR_Z`**: lays a navmesh's vertices on a floor.
 - **`esp_navwrite.py`**: writes the C-130 cabin's navmesh (a flat grid over the whole floor).
 - **`esp_paving.py`**: Hanscom's graded terrain, paving and buildings into the plugin, from

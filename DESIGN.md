@@ -685,6 +685,12 @@ bus stop isn't worth it, so Hanscom gets the mod's first act: good gameplay, not
     open. The first try, a vanilla junk-wall gate, swung open before the load and showed the
     broken highway past the border (the author, 2026-11-23). Placeholders for a proper
     checkpoint.
+  - **The Commonwealth's large references (2026-11-25):** the door in the Commonwealth means
+    the plugin overrides its worldspace record, and the CK wrote that override without
+    Fallout4.esm's large-reference table (7,111 RNAM entries). The winning override's table is
+    the one the game uses, so the whole Commonwealth lost it, and vanilla interior-to-exterior
+    loads got slow (the author). `esp_largerefs.py` copies the table back; run it after every
+    CK save, like `esp_restore_npcs.py`.
   - **The Hanscom end is a Devils checkpoint (the author, 2026-11-24; `esp_edge_gate.py`):**
     the junk walls looked nothing like a gate from inside. Now a chain-link fence across Langley
     Road and four panels past each side, its gate the load door (`DevilsHanscomGate`, vanilla's
