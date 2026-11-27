@@ -316,6 +316,20 @@ def main():
     files.append(nif)
     allv = np.array([v for _, _, m in built.values() for v in m.verts]) * s
     bounds = [int(math.floor(v)) for v in allv.min(axis=0)] + [int(math.ceil(v)) for v in allv.max(axis=0)]
+    # The doorway's activator (DevilsMockDoorExit, its script DevilsMockDoor): an invisible slab
+    # across the doorway, just inside the wall, in the same frame, so it's placed where the
+    # mock door is. Collision only: the crosshair finds it, and it keeps a man without a rig
+    # from walking out (the doorway's the real size; power armor won't fit through anyway).
+    da, db = door_span()
+    _, _, _, fy1, dz = fuselage_frame(args.floor)
+    slab = c130.Mesh()
+    slab.box(da, fy1 - PLY - 0.12, dz, db, fy1 - PLY - 0.02, dz + DOOR_H, "tbnsew")
+    exit_nif = mesh_dir / "MockDoorExit.nif"
+    c130.write_nif(exit_nif, "MockDoorExit", {"activation": (None, True, slab)}, s, tex, pyn,
+                   prefix="mock", materials=MATERIALS)
+    files.append(exit_nif)
+    sv = np.array(slab.verts) * s
+    exit_bounds = [int(math.floor(v)) for v in sv.min(axis=0)] + [int(math.ceil(v)) for v in sv.max(axis=0)]
 
     x, y, heading, wall = placement(args.out)
     h = math.radians(heading)
@@ -328,6 +342,7 @@ def main():
                     "and their height above the model's origin",
             "nif": f"{MOD_PATH}/MockDoor.nif".replace("/", "\\"), "position": [round(x, 1), round(y, 1)],
             "heading": round(heading, 2), "bounds": bounds,
+            "exit_nif": f"{MOD_PATH}/MockDoorExit.nif".replace("/", "\\"), "exit_bounds": exit_bounds,
             "spots": {"door_sill": [*map(lambda v: round(v, 1), world(*spots["door"])), round(spots["deck_z"] * s, 1)],
                       "landing": [*map(lambda v: round(v, 1), world(*spots["landing"])), round(FILL * s, 1)],
                       "steps_foot": [*map(lambda v: round(v, 1), world(*spots["steps_foot"])), round(FILL * s, 1)]}}

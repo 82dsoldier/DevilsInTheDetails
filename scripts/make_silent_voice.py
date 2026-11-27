@@ -1,5 +1,5 @@
-"""Silent stand-in voice files for the plugin's dialogue (out/voice/lines.json, from
-scripts/esp/esp_recruit_dialogue.py): Fallout 4 wants a voice file behind every line, or its
+"""Silent stand-in voice files for the plugin's dialogue (out/voice/lines*.json, from
+scripts/esp/esp_recruit_dialogue.py and esp_jumpschool.py): Fallout 4 wants a voice file behind every line, or its
 subtitle flashes past. Each is near-silence as long as the line takes to read, WORDS_PER_SEC,
 never under MIN_SEC, in the game's own format (.fuz: the audio as xWMA, no lip sync).
 
@@ -50,7 +50,12 @@ def main():
     ap.add_argument("--install", help="the game's Data folder, to copy the files into")
     args = ap.parse_args()
     out = out_dir("voice")
-    spec = json.loads((out / "lines.json").read_text())
+    # lines.json (Brannock's, esp_recruit_dialogue.py) and any lines_*.json (esp_jumpschool.py, ...)
+    spec = {"voice_types": {}, "lines": []}
+    for f in sorted(out.glob("lines*.json")):
+        part = json.loads(f.read_text())
+        spec["voice_types"].update(part["voice_types"])
+        spec["lines"] += part["lines"]
     mod = out / "mod"
     tmp = out / "tmp"
     tmp.mkdir(parents=True, exist_ok=True)

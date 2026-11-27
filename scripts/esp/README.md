@@ -53,6 +53,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_airborne.py`**: Sergeant Airborne at the mock door, his black hat (`BlackHat.nif`
   from `make_black_hat.py`) and outfit. Run once, after `esp_mock_door.py`. His base is in
   `esp_restore_npcs.py`'s list.
+- **`esp_jumpschool.py`**: the mock door working: its doorway activator and landing marker,
+  "All the Way"'s stages 15 and 20 (objectives, Sergeant Airborne as alias 2), his greetings.
+  Run once, after `esp_airborne.py`; then `make_silent_voice.py` for his lines.
 
 The libraries:
 

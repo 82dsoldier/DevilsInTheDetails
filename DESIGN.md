@@ -927,9 +927,21 @@ practise standing in the door and stepping out, as at jump school.
     raised 30% (the vintage cap's is low, and two pins need a tall front), dyed black from
     vanilla's own texture, with a polished silver parachutist badge (the wings' drawing, cut
     out) over an SSG pin (three chevrons, one rocker).
-  - Next: his lines ("Stand in the door!", "GO!", the critique), the quest's objective moving
-    to him, and the door used as on the bird (in power armor, "step out" sets Nate down on the
-    sawdust).
+  - **Built, the run (2026-11-27; `scripts/esp/esp_jumpschool.py`, `DevilsMockDoor.psc`,
+    `DevilsTopicStage.psc`):** the doorway is used as the plane's is: an invisible "Mock Door"
+    activator across it (prompt "Step Out"; it also keeps a man from walking out). The quest
+    goes on: stage 15 "Reported to jump school" (objective "Go out the mock door", marker on
+    Sergeant Airborne, alias 2), stage 20 "Out the mock door" (objective "Report to the 34-foot
+    tower", no marker until the tower's built). His greetings follow the stages: not one of
+    his before Nate signs; then "You're Brannock's latest?... into my door" (stage 15); then
+    "That door's not going to jump itself"; then "Tower's next". At the door, in power armor:
+    "Stand in the door!", 2.5 s, "GO!"; Step Out again and Nate is on the sawdust 1.5 m out
+    (`DevilsMockDoorLanding`), facing out; then one of four critiques (the count, chin on chest,
+    hands on the reserve, a hard exit) and, the first time, "...Good enough. Tower's next."
+    Stall after "GO!" and he hurries Nate ("That's a door, recruit, not a window"), then gives
+    up and the door resets. Without a rig, or before reporting, he says so. His commands are
+    notifications, as the jumpmaster's are, so they show with subtitles off; his greetings are
+    dialogue with silent voice files. Not tested yet.
 
 #### The bird is grounded
 
