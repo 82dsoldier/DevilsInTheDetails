@@ -909,7 +909,13 @@ practise standing in the door and stepping out, as at jump school.
   under them to walk on). One paratroop door, the real 36 x 72 in, in the side facing the open
   pit, near the aft end. Plain walk-in so far: no slab, no instructor, no navmesh on the
   sawdust yet. **No jump lights** at the mock door (the author, 2026-11-25): the instructor's
-  commands are the signal. Next: the walk test, then Sergeant Airborne, the commands, and the door used as
+  commands are the signal.
+  - **Walk test passed (the author, 2026-11-27):** up the steps and round inside, in power
+    armor. The floor stays at 1 m: Benning's mock doors are lower, but this is fine for the
+    game. The pit's size is fine for now (Benning is all but one big sawdust pit, so there's
+    nothing to measure it against). The textures needed two passes: wood grain toned right
+    down, and the normal maps scaled to a few degrees of tilt.
+  - Next: then Sergeant Airborne, the commands, and the door used as
   on the bird (the slab: in power armor, "step out" sets Nate down on the sawdust).
 
 #### The bird is grounded
