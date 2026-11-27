@@ -949,6 +949,7 @@ practise standing in the door and stepping out, as at jump school.
     start a conversation as Brannock's do: "I'm ready" / "What do I do?" / "Why a mock
     door?" / "Later", in its own start-game quest (`DevilsJumpSchoolTalk`, him as alias 0),
     since an alias added to "All the Way" after it started stays empty in older saves.
+    Retested: the conversation works (the author, 2026-11-27).
 
 #### The bird is grounded
 
