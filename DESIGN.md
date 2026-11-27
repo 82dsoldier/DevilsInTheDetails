@@ -941,7 +941,14 @@ practise standing in the door and stepping out, as at jump school.
     Stall after "GO!" and he hurries Nate ("That's a door, recruit, not a window"), then gives
     up and the door resets. Without a rig, or before reporting, he says so. His commands are
     notifications, as the jumpmaster's are, so they show with subtitles off; his greetings are
-    dialogue with silent voice files. Not tested yet.
+    dialogue with silent voice files.
+  - **Tested 2026-11-27: "never could talk to him", but the quest moved on anyway.** His
+    greetings were bare lines with no scene: the game shows those only with general
+    subtitles on (the author keeps them off), and the voice files are silent, so nothing
+    showed, while the first line's end still set stage 15. Now (`esp_airborne_talk.py`) they
+    start a conversation as Brannock's do: "I'm ready" / "What do I do?" / "Why a mock
+    door?" / "Later", in its own start-game quest (`DevilsJumpSchoolTalk`, him as alias 0),
+    since an alias added to "All the Way" after it started stays empty in older saves.
 
 #### The bird is grounded
 

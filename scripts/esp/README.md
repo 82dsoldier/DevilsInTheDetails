@@ -56,6 +56,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_jumpschool.py`**: the mock door working: its doorway activator and landing marker,
   "All the Way"'s stages 15 and 20 (objectives, Sergeant Airborne as alias 2), his greetings.
   Run once, after `esp_airborne.py`; then `make_silent_voice.py` for his lines.
+- **`esp_airborne_talk.py`**: Sergeant Airborne's greetings moved into their own quest
+  (`DevilsJumpSchoolTalk`) and given a conversation scene, so they show in dialogue. Run once,
+  after `esp_jumpschool.py`; then `make_silent_voice.py` (it also installs the SEQ file).
 
 The libraries:
 
