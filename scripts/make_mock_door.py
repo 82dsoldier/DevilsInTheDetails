@@ -89,45 +89,63 @@ def tex_sawdust():
     return rgb, 0.4 * lumps + 0.3 * chips + 0.1 * fine
 
 
+def _soft(seed, size):
+    """Smooth noise with features about `size` pixels across, tiling, scaled to about 1."""
+    rng = np.random.default_rng(seed)
+    f = np.fft.fft2(rng.normal(0, 1, (TEX, TEX)))
+    k = np.fft.fftfreq(TEX)
+    r2 = k[:, None] ** 2 + k[None, :] ** 2
+    a = np.real(np.fft.ifft2(f * np.exp(-r2 * (size / 2.5) ** 2 * 2 * np.pi ** 2)))
+    return a / a.std()
+
+
+def _streaks(seed, axis):
+    """Faint, uneven wood grain: noise smeared a long way along the grain (axis 1: lines run
+    along u; axis 0: along v) and a little across it, scaled to about 1. Tiles. Not regular
+    stripes: the first texture's sine-wave grain was too strong and too even (the author,
+    2026-11-27)."""
+    rng = np.random.default_rng(seed)
+    a = rng.normal(0, 1, (TEX, TEX))
+    for _ in range(3):                          # a box blur ~60 px long along the grain
+        a = sum(np.roll(a, k, axis) for k in range(-10, 11)) / 21
+    a = (a + np.roll(a, 1, 1 - axis) + np.roll(a, -1, 1 - axis)) / 3
+    return a / a.std()
+
+
 def tex_timber():
-    """Weathered timber: grey-brown, grain along u, checks (splits) and knots."""
+    """Weathered timber: grey-brown, a faint grain along u, a few fine checks (splits)."""
     u, v = _uv()
     rng = np.random.default_rng(1504)
-    grain = np.sin((v * 40 + 2.0 * np.sin(u * 6 + v * 3)) * math.pi)
+    grain = _streaks(1505, 1)
     checks = np.zeros((TEX, TEX))
-    for _ in range(6):
-        y0, x0, ln = rng.uniform(0, 1), rng.uniform(0, 1), rng.uniform(0.15, 0.5)
-        checks += (np.abs(v - y0) < 0.004) * (((u - x0) % 1) < ln)
-    knot = np.zeros((TEX, TEX))
-    for _ in range(2):
-        kx, ky = rng.uniform(0, 1), rng.uniform(0, 1)
-        knot += np.exp(-(((u - kx) / 0.03) ** 2 + ((v - ky) / 0.05) ** 2))
-    shade = 0.85 + 0.06 * grain + 0.04 * rng.normal(0, 1, (TEX, TEX)) - 0.35 * np.clip(checks, 0, 1) - 0.25 * knot
+    for _ in range(3):
+        y0, x0, ln = rng.uniform(0, 1), rng.uniform(0, 1), rng.uniform(0.1, 0.35)
+        checks += (np.abs(v - y0) < 0.003) * (((u - x0) % 1) < ln)
+    blotch = _soft(1506, 50)
+    shade = 0.86 + 0.02 * grain + 0.03 * blotch + 0.015 * rng.normal(0, 1, (TEX, TEX)) - 0.08 * np.clip(checks, 0, 1)
     rgb = np.array([128, 112, 92])[None, None, :] * shade[..., None]
-    return rgb, 0.3 * grain - 0.8 * np.clip(checks, 0, 1)
+    return rgb, 0.03 * grain - 0.3 * np.clip(checks, 0, 1)
 
 
 def tex_plywood():
-    """Plywood painted olive drab, worn: the grain shows faintly through, scuffs to bare wood."""
-    u, v = _uv()
+    """Plywood painted olive drab, the paint a little uneven; the grain barely shows."""
     rng = np.random.default_rng(82)
-    grain = np.sin((v * 22 + 1.5 * np.sin(u * 4 + v * 7)) * math.pi)
-    wear = np.clip(_blur(rng.normal(0, 1, (TEX, TEX)), 5) * 5 - 1.2, 0, 1)
-    paint = np.array([86, 90, 62], float)[None, None, :] * (0.95 + 0.03 * grain + 0.02 * rng.normal(0, 1, (TEX, TEX)))[..., None]
-    wood = np.array([170, 140, 100], float)[None, None, :] * (0.9 + 0.08 * grain)[..., None]
+    grain = _streaks(83, 1)
+    wear = np.zeros((TEX, TEX))       # no worn spots: one tile's spots repeat in a grid down a wall
+    paint = np.array([86, 90, 62], float)[None, None, :] * (0.95 + 0.008 * grain + 0.02 * _soft(85, 50) + 0.008 * rng.normal(0, 1, (TEX, TEX)))[..., None]
+    wood = np.array([160, 134, 98], float)[None, None, :] * (0.92 + 0.025 * grain)[..., None]
     rgb = paint * (1 - wear[..., None]) + wood * wear[..., None]
-    return rgb, 0.1 * grain - 0.3 * wear
+    return rgb, 0.01 * grain - 0.2 * wear
 
 
 def tex_deck():
     """The fuselage's floor: plywood painted dark grey, scuffed pale by boots."""
-    u, v = _uv()
     rng = np.random.default_rng(130)
-    grain = np.sin((u * 22 + 1.5 * np.sin(v * 4 + u * 7)) * math.pi)
-    scuff = np.clip(_blur(rng.normal(0, 1, (TEX, TEX)), 4) * 4 - 0.5, 0, 1)
-    shade = 0.9 + 0.03 * grain + 0.25 * scuff
+    grain = _streaks(131, 0)
+    scuff = np.clip((_soft(132, 60) - 0.3) * 0.5, 0, 1)          # broad, soft
+    shade = 0.9 + 0.008 * grain + 0.15 * scuff
     rgb = np.array([74, 74, 70])[None, None, :] * shade[..., None]
-    return rgb, 0.1 * grain
+    return rgb, 0.01 * grain
 
 
 MATERIALS = {"sawdust": (tex_sawdust, {}), "timber": (tex_timber, {}),
