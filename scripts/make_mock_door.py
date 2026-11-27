@@ -153,6 +153,24 @@ MATERIALS = {"sawdust": (tex_sawdust, {}), "timber": (tex_timber, {}),
 SPECULAR = {"sawdust": (0.02, 0.05), "timber": (0.03, 0.1), "plywood": (0.06, 0.2), "deck": (0.05, 0.2)}
 
 
+# How far the normal maps tilt the surface: the 95th percentile, degrees. Unscaled, the height
+# maps tilted it 55 to 89 degrees, light catching on ridges everywhere (the walls and the steps'
+# fronts looked "gnarly", the author, 2026-11-27).
+BUMP_DEG = {"sawdust": 15.0, "timber": 6.0, "plywood": 2.5, "deck": 3.0}
+
+
+def gentle(h, deg):
+    """The height map scaled so its normal map tilts the surface `deg` (95th percentile)."""
+    def tilt(k):
+        nm = c130.normal_map(h * k) / 255 * 2 - 1
+        return np.percentile(np.degrees(np.arccos(np.clip(nm[..., 2], -1, 1))), 95)
+    lo, hi = 0.0, 1.0
+    for _ in range(30):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if tilt(mid) < deg else (lo, mid)
+    return h * lo
+
+
 def write_textures(tex_dir):
     files = []
     for name, (make, _) in MATERIALS.items():
@@ -160,7 +178,7 @@ def write_textures(tex_dir):
         f = tex_dir / f"mock_{name}.dds"
         save_dds(Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB"), f)
         fn = tex_dir / f"mock_{name}_n.dds"
-        save_dds(Image.fromarray(np.clip(c130.normal_map(h), 0, 255).astype(np.uint8), "RGB"), fn)
+        save_dds(Image.fromarray(np.clip(c130.normal_map(gentle(h, BUMP_DEG[name])), 0, 255).astype(np.uint8), "RGB"), fn)
         shine, smooth = SPECULAR[name]
         fs = tex_dir / f"mock_{name}_s.dds"
         Image.new("RGB", (64, 64), (round(shine * 255), round(smooth * 255), 0)).save(fs, pixel_format="DXT1")
