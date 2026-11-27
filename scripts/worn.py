@@ -119,6 +119,11 @@ def write_worn(path, name, shapes, tex, pyn, materials, prefix="c130_"):
         shape.set_texture("Normal", f"{tex}\\{prefix}{mat}_n.dds")
         shape.set_texture("Specular", f"{tex}\\{prefix}{mat}_s.dds")
         shape.save_shader_attributes()
+        if materials[mat][1].get("alpha"):          # cut out by the diffuse's alpha (a pin's shape)
+            shape.has_alpha_property = True
+            shape.alpha_property.properties.flags = 4844          # alpha test
+            shape.alpha_property.properties.threshold = 128
+            shape.save_alpha_property()
     nif.save()
 
 

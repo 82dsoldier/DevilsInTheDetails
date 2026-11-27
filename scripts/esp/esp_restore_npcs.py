@@ -4,7 +4,7 @@ good plugin."""
 import sys, struct
 from esplib import *
 src, good, dst = sys.argv[1:4]
-BASES = (0x010073D7, 0x010073EB, 0x01012D15)      # the two paratroopers, SSG Brannock
+BASES = (0x010073D7, 0x010073EB, 0x01012D15, 0x01012D5B)   # the two paratroopers, SSG Brannock, Sergeant Airborne
 top = parse(open(src, "rb").read())
 old = {n.fid: n for n, *_ in walk(parse(open(good, "rb").read())) if isinstance(n, Rec)}
 for n, *_ in walk(top):

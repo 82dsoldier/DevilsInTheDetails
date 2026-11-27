@@ -50,6 +50,9 @@ record of how it was made (DESIGN.md names several). The ones to know:
 - **`esp_mock_door.py`**: jump school's mock door (a sawdust pit with a mock fuselage on posts,
   `MockDoor.nif` from `make_mock_door.py`) on the East Ramp in front of jump school, from
   `out/hanscom/mockdoor.json`. Run once (it refuses a plugin that has it).
+- **`esp_airborne.py`**: Sergeant Airborne at the mock door, his black hat (`BlackHat.nif`
+  from `make_black_hat.py`) and outfit. Run once, after `esp_mock_door.py`. His base is in
+  `esp_restore_npcs.py`'s list.
 
 The libraries:
 

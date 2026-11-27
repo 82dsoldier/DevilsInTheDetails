@@ -338,33 +338,35 @@ def _bilinear(x, z):
                  + (gy[j + 1, i] * (1 - tx) + gy[j + 1, i + 1] * tx) * tz)
 
 
-def tex_wings():
+def tex_wings(cloth=OD, thread=THREAD, size=WINGS_TEX):
     """The parachutist badge, black thread on olive drab (the author's reference: the badge's
     own shape, data/reference/5-5-Inch-Army-Jump-Wings...avif, subdued). The canopy in the
     middle, its gores in thread with the cloth between, its lines narrowing to a point below;
     each side, a wing that rises from the canopy's skirt in a round loop, open in the middle,
-    and fans its feathers out and down, flaring sideways (not curling up at the tips)."""
-    W, H = WINGS_TEX
+    and fans its feathers out and down, flaring sideways (not curling up at the tips).
+    Other colours (white on black) give the badge's shape as a mask, for the metal pin
+    (make_black_hat.py)."""
+    W, H = size
     S = 4
     w, h = W * S, H * S
-    img = Image.new("RGB", (w, h), OD)
+    img = Image.new("RGB", (w, h), cloth)
     d = ImageDraw.Draw(img)
     X = lambda f: f * w                       # the badge's span, 0 to 1 across
     Y = lambda f: f * h                       # 0 to 1 down
     line = max(2, S * 2)
     # The canopy: a dome, its skirt, and gores.
-    d.chord([X(0.315), Y(0.0), X(0.685), Y(0.46)], 180, 360, fill=THREAD)
-    d.polygon([(X(0.315), Y(0.23)), (X(0.685), Y(0.23)), (X(0.5), Y(1.0))], fill=THREAD)
+    d.chord([X(0.315), Y(0.0), X(0.685), Y(0.46)], 180, 360, fill=thread)
+    d.polygon([(X(0.315), Y(0.23)), (X(0.685), Y(0.23)), (X(0.5), Y(1.0))], fill=thread)
     for k in range(1, 12):
         f = k / 12
-        d.line([(X(0.315 + 0.37 * f), Y(0.235)), (X(0.5), Y(0.97))], fill=OD, width=line)
+        d.line([(X(0.315 + 0.37 * f), Y(0.235)), (X(0.5), Y(0.97))], fill=cloth, width=line)
     for k in range(1, 8):
         f = k / 8
         d.arc([X(0.5 - 0.185 * (1 - f) - 0.0), Y(0.0), X(0.5 + 0.185 * (1 - f)), Y(0.46)], 200, 340,
-              fill=OD, width=line) if False else None
+              fill=cloth, width=line) if False else None
         d.line([(X(0.5 + (f - 0.5) * 0.30), Y(0.03 + 0.18 * abs(f - 0.5) ** 1.5)), (X(0.5 + (f - 0.5) * 0.36), Y(0.225))],
-               fill=OD, width=line)
-    d.line([(X(0.315), Y(0.235)), (X(0.685), Y(0.235))], fill=OD, width=line)
+               fill=cloth, width=line)
+    d.line([(X(0.315), Y(0.235)), (X(0.685), Y(0.235))], fill=cloth, width=line)
     FC, FRX, FRY = (0.26, 0.40), 0.22, 0.45                # the feathers' fan: its middle, reach
     fan = lambda phi, r=1.0: (FC[0] + FRX * r * math.cos(math.radians(phi)),
                               FC[1] - FRY * r * math.sin(math.radians(phi)))
@@ -382,14 +384,14 @@ def tex_wings():
             if k < n_f:
                 tips.append(fan(phi + 45 / n_f, 0.86))         # the notch between two feathers
         root = [(0.37, 0.74), (0.375, 0.42)]
-        d.polygon([(sx(fx), Y(fy)) for fx, fy in loop + tips + root], fill=THREAD)
+        d.polygon([(sx(fx), Y(fy)) for fx, fy in loop + tips + root], fill=thread)
         # The loop's open middle.
-        d.ellipse([min(sx(0.12), sx(0.29)), Y(0.10), max(sx(0.12), sx(0.29)), Y(0.36)], fill=OD)
+        d.ellipse([min(sx(0.12), sx(0.29)), Y(0.10), max(sx(0.12), sx(0.29)), Y(0.36)], fill=cloth)
         # The cloth between the feathers, fanning out from under the loop.
         for k in range(1, n_f):
             phi = 175 + 90 * (k + 0.5) / n_f
             (x0, y0), (x1, y1) = fan(phi, 0.45), fan(phi, 0.84)
-            d.line([(sx(x0), Y(y0)), (sx(x1), Y(y1))], fill=OD, width=line)
+            d.line([(sx(x0), Y(y0)), (sx(x1), Y(y1))], fill=cloth, width=line)
     img = img.resize((W, H), Image.LANCZOS)
     a = np.asarray(img, np.float32) / 255
     rng = np.random.default_rng(55)

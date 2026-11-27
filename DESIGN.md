@@ -915,8 +915,21 @@ practise standing in the door and stepping out, as at jump school.
     game. The pit's size is fine for now (Benning is all but one big sawdust pit, so there's
     nothing to measure it against). The textures needed two passes: wood grain toned right
     down, and the normal maps scaled to a few degrees of tilt.
-  - Next: then Sergeant Airborne, the commands, and the door used as
-  on the bird (the slab: in power armor, "step out" sets Nate down on the sawdust).
+  - **Sergeant Airborne's run (the author, 2026-11-27):** at the mock door only "Stand in the
+    door!" and "GO!", not the full set of commands. On the exit he wants what the black hats
+    wanted: a hard exit, chin on chest, hands on the reserve, and the count. He wears the
+    black hat (a black ball cap) with **silver jump wings and his rank** on it.
+  - **Built, Sergeant Airborne himself (2026-11-27; `make_black_hat.py`,
+    `scripts/esp/esp_airborne.py`):** Brannock's base copied with another vanilla Minutemen
+    face (EncMinutemenFaceM06, MaleRough), standing on the sawdust 4 m out from the doorway and
+    a little forward of it, facing it. His outfit: post-war fatigues, Brannock's subdued
+    chest wings, and the black hat: vanilla's baseball cap (the baseball uniform's), its crown
+    raised 30% (the vintage cap's is low, and two pins need a tall front), dyed black from
+    vanilla's own texture, with a polished silver parachutist badge (the wings' drawing, cut
+    out) over an SSG pin (three chevrons, one rocker).
+  - Next: his lines ("Stand in the door!", "GO!", the critique), the quest's objective moving
+    to him, and the door used as on the bird (in power armor, "step out" sets Nate down on the
+    sawdust).
 
 #### The bird is grounded
 
